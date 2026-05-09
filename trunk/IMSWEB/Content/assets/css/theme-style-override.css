@@ -1,0 +1,21 @@
+﻿.page-title-box {
+    padding: 4px 12px 44px 12px;
+}
+
+.page-item.active {
+    z-index: 3;
+    color: #fff;
+    background-color: #3051d3;
+    border-color: #3051d3;
+}
+
+.page-item {
+    position: relative;
+    display: block;
+    padding: 0.5rem 0.75rem;
+    margin-left: -1px;
+    line-height: 1.25;
+    color: #7c8a96;
+    background-color: #fff;
+    border: 1px solid #d7dce1;
+}

@@ -28,7 +28,7 @@
 .fixed-table-container {
     position: relative;
     clear: both;
-    border: 1px solid #41b53f;
+    border: 1px solid #619f14;
     border-radius: 4px;
     -webkit-border-radius: 4px;
     -moz-border-radius: 4px;
@@ -248,10 +248,9 @@
     padding: 0;
     margin: 0;
     /* background-color: #228ba2; */
-    /*background-color: #41b53f;*/
-    background-color: #01ae6e;
-    background-image: linear-gradient(to bottom, #41b53f0%,#41b53f100%);
-    color: white;
+    background-color: #FFC523;
+    background-image: #FFC523;
+    color: black;
 }
 
 .bootstrap-table .fixed-table-footer tbody > tr > td {

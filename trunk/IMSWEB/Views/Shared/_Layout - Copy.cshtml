@@ -1,0 +1,266 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title - IMS</title>
+    @Styles.Render("~/IMSStyles")
+    <link href="~/Content/jquery-ui.css" rel="stylesheet" />
+    <link href="~/Content/sweetalert2/sweetalert2.min.css" rel="stylesheet" />
+
+</head>
+@Scripts.Render("~/IMSPreDOMScripts")
+<body>
+    <div class="wrapper">
+        @if (User.Identity.IsAuthenticated)
+        {
+            <!-- Sidebar  -->
+            <nav id="sidebar">
+                <div class="sidebar-header">
+                    <h3 id="BrandName1">
+                        @if (TempData.ContainsKey("ConcernName"))
+                        {
+                            <text>@TempData.Peek("ConcernName").ToString()</text>
+                        }
+                    </h3>
+                    <strong id="BrandName2">
+                        @if (TempData.ContainsKey("ConcernName"))
+                        {
+                            <text>@TempData.Peek("ConcernName").ToString()</text>
+                        }
+                    </strong>
+
+                </div>
+                <ul class="list-unstyled components">
+                    @*<li class="active">
+                            <a href="#homeSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">
+                                <i class="fa fa-home"></i>
+                                Home
+                            </a>
+                            <ul class="collapse list-unstyled" id="homeSubmenu">
+                                <li>
+                                    <a href="#">Home 1</a>
+                                </li>
+                                <li>
+                                    <a href="#">Home 2</a>
+                                </li>
+                                <li>
+                                    <a href="#">Home 3</a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <a href="#">
+                                <i class="fa fa-briefcase"></i>
+                                About
+                            </a>
+                            <a href="#pageSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">
+                                <i class="fa fa-copy"></i>
+                                Pages
+                            </a>
+                            <ul class="collapse list-unstyled" id="pageSubmenu">
+                                <li>
+                                    <a href="#">Page 1</a>
+                                </li>
+                                <li>
+                                    <a href="#">Page 2</a>
+                                </li>
+                                <li>
+                                    <a href="#">Page 3</a>
+                                </li>
+                            </ul>
+                        </li>*@
+                    @*<li class="divider"></li>*@
+
+                    @Html.Raw(Html.BuildMenuNavigation())
+                </ul>
+                @Html.Partial("_LoginPartial")
+            </nav>
+        }
+        <!-- Page Content  -->
+        <div id="content">
+            <div class="container-fluid">
+                @if (User.Identity.IsAuthenticated)
+                {
+                    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+                        <div class="container-fluid">
+                            <div class="row">
+                                <div class="col-md-1">
+                                    <button type="button" id="sidebarCollapse" class="btn btn-primary btn-sm">
+                                        <i class="fa fa-align-left" aria-hidden="true"></i>
+                                    </button>
+                                </div>
+                                <div class="col-md-5">
+                                    <!-- #region Breadcrumb -->
+                                    @Html.Raw(Html.BuildBreadcrumbNavigation())
+                                    <!-- #endregion -->
+                                </div>
+                                <div class="col-md-6 text-left text-danger" style="font-weight: bold" id="expMsg">
+                                    @if (TempData.ContainsKey("ExpireMessage"))
+                                    {
+                                        <div>
+                                            @TempData.Peek("ExpireMessage")
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </nav>
+                }
+
+                @Html.Partial("~/Views/ToastrBuilder/_Toastr.cshtml")
+            </div>
+            <div class="container-fluid" style="min-height: 65vh;">
+                <div id="report"></div>
+                @RenderBody()
+            </div>
+        </div>
+
+    </div>
+    <footer>
+        <div class="footer-bottom" id="footer">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-md-5">
+                        <p class="pull-left">Distributor @DateTime.Today.Year All rights reserved</p>
+                    </div>
+                    <div class="col-md-3">
+                        <p>
+                            Copyright © Object Canvas Technology
+                        </p>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="pull-right">
+                            <ul class="nav nav-pills payments">
+                                <li><i class="fa fa-cc-visa"></i></li>
+                                <li><i class="fa fa-cc-mastercard"></i></li>
+                                <li><i class="fa fa-cc-amex"></i></li>
+                                <li><i class="fa fa-cc-paypal"></i></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+
+    <div class="modal fade bs-example-modal-sm" id="RemarksModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div id="modalheader" class="modal-header">
+                    Remarks
+                </div>
+                <div id="divRemarks" class="modal-body" style="overflow-x:auto">
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-sm btn-primary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @Scripts.Render("~/IMSPostDOMScripts")
+    @RenderSection("scripts", required: false)
+    <script src="~/Scripts/sweetalert2/sweetalert2.all.min.js"></script>
+</body>
+</html>
+
+<script>
+    $(document).on('click', '.btn-remarks', function () {
+        var remarks = $(this).data("remarks");
+        var header = $(this).data("header");
+        ShowRemarks(remarks, header);
+    });
+
+    function ShowRemarks(Remarks, header) {
+        var message = "";
+        if (typeof (Remarks) === "object") {
+            Remarks.forEach(function (data, row) {
+                message += (row + 1) + ": Mobile: " + data.MobileNumber + " " + data.SmsText + "\n";
+            });
+        }
+        else
+            message = Remarks;
+        //alert(message);
+        $("#divRemarks").text(message);
+        $("#modalheader").text(header);
+        $("#RemarksModal").modal("show");
+    }
+    $(document).ready(function () {
+        GetClientDateTime();
+
+        //init select2 containing class
+        $(".ddl2").select2();
+
+    });
+
+
+    function GetClientDateTime() {
+        var ClientDateTime = moment().format('DD MMM YYYY hh:mm:ss a');
+        $.ajax({
+            url: "/Report/GetClientDateTime/",
+            type: "POST",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            data: JSON.stringify({ "ClientDateTime": ClientDateTime }),
+            success: function (data) {
+                console.log(data);
+            },
+            error: function (data) {
+                console.log(data);
+            }
+        });
+    }
+
+    $(document).ready(function () {
+       @if (!TempData.ContainsKey("ConcernName") || !TempData.ContainsKey("ExpireMessage"))
+       {
+           @:GetConcernName();
+       }
+    });
+
+
+    function GetConcernName() {
+        $.ajax({
+            url: "/Report/GetConcernName/",
+            type: "POST",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            data: JSON.stringify({ "ClientDateTime": new Date() }),
+            success: function (data) {
+                $("#BrandName1").text(data.ConcernName);
+                $("#BrandName2").text(data.ConcernName);
+                $("#expMsg").text(data.expiremsg);
+                console.log(data);
+            },
+            error: function (data) {
+                console.log(data);
+            }
+        });
+    }
+
+ $(document).ready(function () {
+        window.setInterval(function () {
+            UpdateSMSStatus();
+        }, 600000);
+    });
+
+    function UpdateSMSStatus() {
+        $.ajax({
+            url: "@Url.Action("UpdateSMSStaus", "SMSService")",
+            type: "GET",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (data) {
+                console.log(data);
+                SetCounter(data.length);
+                PopulateNotificationContent(data);
+            },
+            error: function (data) {
+                console.log(data);
+            }
+        });
+    }
+</script>

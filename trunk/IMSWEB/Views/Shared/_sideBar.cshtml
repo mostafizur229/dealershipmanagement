@@ -1,0 +1,153 @@
+﻿<div class="vertical-menu">
+
+    <div data-simplebar class="h-100">
+
+        <!--- Sidemenu -->
+        <div id="sidebar-menu">
+            <!-- Left Menu Start -->
+            <ul class="metismenu list-unstyled" id="side-menu">
+                <li class="menu-title">Menu</li>
+
+                <li>
+                    <a href="@Url.Action("Index","Dashboard")" class="waves-effect">
+                        <div class="d-inline-block icons-sm mr-1"><i class="uim uim-airplay"></i></div>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+
+                <li>
+                    <a href="javascript: void(0);" class="has-arrow waves-effect">
+                        <div class="d-inline-block icons-sm mr-1"><i class="uim uim-key-skeleton-alt"></i></div>
+                        <span>Settings</span>
+                    </a>
+                    <ul class="sub-menu" aria-expanded="false">
+                        <li><a href="@Url.Action("Index", "User")">Users</a></li>
+                    </ul>
+                    <ul class="sub-menu" aria-expanded="false">
+                        <li><a href="@Url.Action("Index", "Role")">Roles</a></li>
+                    </ul>
+                    <ul class="sub-menu" aria-expanded="false">
+                        <li><a href="@Url.Action("Index", "Menu")">Menus</a></li>
+                    </ul>
+                    <ul class="sub-menu" aria-expanded="false">
+                        <li><a href="@Url.Action("Index", "SisterConcern")">Sister Concerns</a></li>
+                    </ul>
+                </li>
+
+                <li>
+                    <a href="javascript: void(0);" class="has-arrow waves-effect">
+                        <div class="d-inline-block icons-sm mr-1"><i class="uim uim-vector-square"></i></div>
+                        <span>Basics</span>
+                    </a>
+                    <ul class="sub-menu" aria-expanded="false">
+                        <li><a href="@Url.Action("Index", "Company")">Companies</a></li>
+                    </ul>
+                    <ul class="sub-menu" aria-expanded="false">
+                        <li><a href="@Url.Action("Index", "Category")">Categories</a></li>
+                    </ul>
+                    <ul class="sub-menu" aria-expanded="false">
+                        <li><a href="@Url.Action("Index", "Color")">Colors</a></li>
+                    </ul>
+                    <ul class="sub-menu" aria-expanded="false">
+                        <li><a href="@Url.Action("Index", "Godown")">Godowns</a></li>
+                    </ul>
+                    <ul class="sub-menu" aria-expanded="false">
+                        <li><a href="@Url.Action("Index", "Zone")">Zones</a></li>
+                    </ul>
+                    <ul class="sub-menu" aria-expanded="false">
+                        <li><a href="@Url.Action("Index", "Product")">Products</a></li>
+                    </ul>
+                    <ul class="sub-menu" aria-expanded="false">
+                        <li><a href="@Url.Action("Index", "Dryer")">Dryers</a></li>
+                    </ul>
+                    <ul class="sub-menu" aria-expanded="false">
+                        <li><a href="@Url.Action("Index", "Bank")">Banks</a></li>
+                    </ul>
+                    <ul class="sub-menu" aria-expanded="false">
+                        <li><a href="@Url.Action("Index", "Department")">Departments</a></li>
+                    </ul>
+                </li>
+
+                <li>
+                    <a href="javascript: void(0);" class="has-arrow waves-effect">
+                        <div class="d-inline-block icons-sm mr-1"><i class="uim uim-bag"></i></div>
+                        <span>Staff</span>
+                    </a>
+                    <ul class="sub-menu" aria-expanded="false">
+                        <li><a href="@Url.Action("Index", "Designation")">Designations</a></li>
+                    </ul>
+                    <ul class="sub-menu" aria-expanded="false">
+                        <li><a href="@Url.Action("Index", "Employee")">Employees</a></li>
+                    </ul>
+                </li>
+
+                <li>
+                    <a href="javascript: void(0);" class="has-arrow waves-effect">
+                        <div class="d-inline-block icons-sm mr-1"><i class="uim uim-repeat"></i></div>
+                        <span>Customer & Supplier</span>
+                    </a>
+                    <ul class="sub-menu" aria-expanded="false">
+                        <li><a href="@Url.Action("Index", "Customer")">Customers</a></li>
+                    </ul>
+                    <ul class="sub-menu" aria-expanded="false">
+                        <li><a href="@Url.Action("Index", "Supplier")">Suppliers</a></li>
+                    </ul>
+                </li>
+
+                <li>
+                    <a href="javascript: void(0);" class="has-arrow waves-effect">
+                        <div class="d-inline-block icons-sm mr-1"><i class="uim uim-signal-alt-3"></i></div>
+                        <span>Production</span>
+                    </a>
+                    <ul class="sub-menu" aria-expanded="false">
+                        <li><a href="@Url.Action("Index", "ProductionOrder")">Production Order</a></li>
+                    </ul>
+                    <ul class="sub-menu" aria-expanded="false">
+                        <li><a href="@Url.Action("Index", "ProductionStockOrder")">Production to Stock</a></li>
+                    </ul>
+                </li>
+
+                <li>
+                    <a href="javascript: void(0);" class="has-arrow waves-effect">
+                        <div class="d-inline-block icons-sm mr-1"><i class="uim uim-chart-pie"></i></div>
+                        <span>Inventory</span>
+                    </a>
+                    <ul class="sub-menu" aria-expanded="false">
+                        <li><a href="@Url.Action("Index", "PurchaseOrder")">Purchase</a></li>
+                    </ul>
+                    <ul class="sub-menu" aria-expanded="false">
+                        <li><a href="@Url.Action("Index", "SalesOrder")">Sales</a></li>
+                    </ul>
+                    <ul class="sub-menu" aria-expanded="false">
+                        <li><a href="@Url.Action("Index", "Stock")">Stocks</a></li>
+                    </ul>
+                </li>
+
+                <li>
+                    <a href="javascript: void(0);" class="has-arrow waves-effect">
+                        <div class="d-inline-block icons-sm mr-1"><i class="uim uim-airplay"></i></div>
+                        <span>Account Management</span>
+                    </a>
+                    <ul class="sub-menu" aria-expanded="false">
+                        <li><a href="@Url.Action("Index", "ExpenseItem")">Expense/Income Head</a></li>
+                    </ul>
+                    <ul class="sub-menu" aria-expanded="false">
+                        <li><a href="@Url.Action("Index", "Income")">Income</a></li>
+                    </ul>
+                    <ul class="sub-menu" aria-expanded="false">
+                        <li><a href="@Url.Action("Index", "Expenditure")">Expense</a></li>
+                    </ul>
+                    <ul class="sub-menu" aria-expanded="false">
+                        <li><a href="@Url.Action("Index", "CashCollection")">Cash Collection</a></li>
+                    </ul>
+                    <ul class="sub-menu" aria-expanded="false">
+                        <li><a href="@Url.Action("Index", "CashDelivery")">Cash Delivery</a></li>
+                    </ul>
+                </li>
+
+            </ul>
+
+        </div>
+        <!-- Sidebar -->
+    </div>
+</div>

@@ -41,7 +41,7 @@ function openNav(id) {
 
 
 if (typeof (Storage) !== "undefined") {
-
+  
     // If we need to open the bar
     var ID = localStorage.getItem("sidebar");
     if (ID != undefined) {

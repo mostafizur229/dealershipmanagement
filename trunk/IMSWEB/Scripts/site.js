@@ -48,8 +48,8 @@ $(function () {
     }
     if (window.location.pathname.toLowerCase().indexOf("/creditsalesorder/create") != -1 ||
         window.location.pathname.toLowerCase().indexOf("/creditsalesorder/edit") != -1 ||
-        window.location.pathname.toLowerCase().indexOf("/salesorder/create") != -1 ||
-        window.location.pathname.toLowerCase().indexOf("/salesorder/edit") != -1 ||
+        //window.location.pathname.toLowerCase().indexOf("/salesorder/create") != -1 ||
+        //window.location.pathname.toLowerCase().indexOf("/salesorder/edit") != -1 ||
         window.location.pathname.toLowerCase().indexOf("/purchaseorder/create") != -1 ||
         window.location.pathname.toLowerCase().indexOf("/purchaseorder/edit") != -1) {
         $(".col-md-6").css("padding-left", "14px");
@@ -85,8 +85,36 @@ $(document).on('click', 'input[type="number"]', function () {
     $(this).select();
 })
 
+$('input[type="number"]').addClass('text-right');
+
 $('.Expense').addClass('label label-danger');
 $('.Income').addClass('label label-info');
 
 $(".Success").addClass("label label-info");
 $(".Fail").addClass("label label-danger");
+
+
+var ihelper = (function () {
+    var get = function (url, data, callback) {
+        $.ajax({
+            method: "Get",
+            url: url,
+            async: true,
+            contentType: "application/json, UTF-8",
+            data: data,
+            success: function (response) {
+                console.log(response);
+                if (callback != undefined) {
+                    callback(response);
+                }
+            },
+            error: function (err) {
+                toastr.error(JSON.stringify(err));
+            }
+        });
+    }
+
+    return {
+        get: get
+    }
+})();
