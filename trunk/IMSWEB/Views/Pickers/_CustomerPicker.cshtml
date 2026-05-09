@@ -1,0 +1,220 @@
+﻿<style>
+    .dropdown-wrapper {
+        position: relative;
+        width: 95%;
+        margin: 0 auto; /* Center horizontally */
+        font-family: 'Segoe UI', sans-serif;
+    }
+
+    .custom-dropdown {
+        padding: 8px 6px;
+        border: 1px solid #ccc;
+        background: white;
+        cursor: pointer;
+        border-radius: 6px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: border 0.2s;
+    }
+
+        .custom-dropdown:hover {
+            border-color: #999;
+        }
+
+        .custom-dropdown i {
+            font-size: 16px;
+            color: #666;
+            margin-left: 10px;
+        }
+
+    .dropdown-list {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        background: white;
+        border: 1px solid #ccc;
+        border-top: none;
+        border-radius: 0 0 6px 6px;
+        max-height: 300px;
+        z-index: 999;
+        display: none;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .search-box {
+        padding: 10px;
+        border-bottom: 1px solid #eee;
+    }
+
+        .search-box input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+    #dropdownItems {
+        max-height: 200px;
+        overflow-y: auto;
+    }
+
+    .dropdown-item {
+        padding: 12px 14px;
+        border-bottom: 1px solid #f0f0f0;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+
+        .dropdown-item:hover {
+            background: #f9f9f9;
+        }
+
+    .customer-name-code {
+        font-weight: 600;
+    }
+
+    .customer-details {
+        font-size: 0.95rem;
+        color: #666;
+        margin-top: 2px;
+    }
+</style>
+
+<div class="form-group">
+    <div class="dropdown-wrapper">
+        <div id="dropdownTrigger" class="custom-dropdown">
+            <span id="dropdownLabel">Click to select customer</span>
+            <i class="fas fa-chevron-down"></i>
+        </div>
+        <div id="dropdownList" class="dropdown-list">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Search by name, code, contact..." />
+            </div>
+            <div id="dropdownItems"></div>
+        </div>
+    </div>
+</div>
+
+<input type="hidden" id="CustomerId" name="CustomerId" />
+<input type="hidden" id="CustomersCode" name="CustomersCode" />
+<input type="hidden" id="CustomersName" name="CustomersName" />
+
+<script>
+    const selectedCustomerId = '@ViewBag.CustomerId';
+    const dropdownTrigger = document.getElementById('dropdownTrigger');
+    const dropdownList = document.getElementById('dropdownList');
+    const dropdownItems = document.getElementById('dropdownItems');
+    const dropdownLabel = document.getElementById('dropdownLabel');
+    const searchInput = document.getElementById('searchInput');
+
+
+
+    let currentPage = 1;
+    const pageSize = 6;
+    let loading = false;
+    let hasMore = true;
+    let currentSearch = '';
+
+    dropdownTrigger.addEventListener('click', () => {
+        dropdownList.style.display = 'block';
+        searchInput.focus();
+        if (dropdownItems.children.length === 0) {
+            loadCustomers(true);
+        }
+    });
+
+    dropdownItems.addEventListener('scroll', () => {
+        if (dropdownItems.scrollTop + dropdownItems.clientHeight >= dropdownItems.scrollHeight - 20) {
+            if (!loading && hasMore) {
+                currentPage++;
+                loadCustomers();
+            }
+        }
+    });
+
+    searchInput.addEventListener('input', () => {
+        currentSearch = searchInput.value.trim();
+        currentPage = 1;
+        hasMore = true;
+        dropdownItems.innerHTML = '';
+        loadCustomers(true);
+    });
+
+    async function loadCustomers(reset = false) {
+        loading = true;
+        const response = await fetch(`/Customer/GetCustomers?search=${encodeURIComponent(currentSearch)}&page=${currentPage}&pageSize=${pageSize}`);
+        const data = await response.json();
+
+        if (reset) {
+            dropdownItems.innerHTML = '';
+        }
+
+        (data.data || []).forEach(customer => {
+            const div = document.createElement('div');
+            div.className = 'dropdown-item';
+            div.innerHTML = `
+                <div class="customer-name-code">${customer.Name} (${customer.Code})</div>
+                <div class="customer-details">${customer.Address || 'N/A'} | ${customer.ContactNo || 'N/A'}</div>
+            `;
+
+            if (customer.Id == selectedCustomerId) {
+                div.style.backgroundColor = '#e9ecef';
+                dropdownLabel.textContent = `${customer.Name} (${customer.Code})`;
+                $('#CustomerId').val(customer.Id);
+                $('#CustomersCode').val(customer.Code);
+                $('#CustomersName').val(customer.Name);
+                $('#txtCustomerId').val(customer.Id);
+                $('[id*="_CurrentDue"]').val(customer.TotalDue);
+                $('[id*="CurrentDue"]').val(customer.TotalDue);
+            }
+
+            div.addEventListener('click', () => {
+                $('#CustomerId').val($.trim(customer.Id));
+                $('#CustomersCode').val($.trim(customer.Code));
+                $('#CustomersName').val($.trim(customer.Name));
+                $('#txtCustomerId').val($.trim(customer.Id));
+                $('[id*="_CurrentDue"]').val($.trim(customer.TotalDue));
+                $('[id*="CurrentDue"]').val($.trim(customer.TotalDue));
+                dropdownLabel.textContent = `${customer.Name} (${customer.Code})`;
+                dropdownList.style.display = 'none';
+            });
+            
+
+            dropdownItems.appendChild(div);
+        });
+
+        hasMore = (currentPage * pageSize) < (data.recordsTotal || 0);
+        loading = false;
+    }
+
+    document.addEventListener('click', e => {
+        if (!e.target.closest('.dropdown-wrapper')) {
+            dropdownList.style.display = 'none';
+        }
+    });
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        if (selectedCustomerId && selectedCustomerId !== '') {
+            const response = await fetch(`/Customer/GetCustomerById?id=${selectedCustomerId}`);
+            const customer = await response.json();
+
+            if (customer) {
+                dropdownLabel.textContent = `${customer.Name} (${customer.Code})`;
+                $('#CustomerId').val(customer.Id);
+                $('#CustomersCode').val(customer.Code);
+                $('#CustomersName').val(customer.Name);
+                $('#txtCustomerId').val(customer.Id);
+                $('[id*="_CurrentDue"]').val(customer.TotalDue);
+                $('[id*="CurrentDue"]').val(customer.TotalDue);
+            }
+        }
+    });
+
+
+</script>
+
+<!-- Font Awesome (for the icon) -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />

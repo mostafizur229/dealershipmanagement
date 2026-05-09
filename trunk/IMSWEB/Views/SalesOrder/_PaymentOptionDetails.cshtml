@@ -1,0 +1,177 @@
+﻿@using HtmlHelpers.BeginCollectionItem;
+@model IMSWEB.Model.TO.PaymentOptionDetailsTO
+
+@{
+    Layout = null;
+}
+
+<tr class="taxSlotRowDirect">
+    @using (Html.BeginCollectionItem("PaymentOptionDetails"))
+    {
+        <td class="text-center" style="width: 50px; display: none;">
+            @Html.DisplayFor(m => m.Id)
+        </td>
+        <td class="text-center" style="max-width: 80px; min-width: 80px">
+            @*@Html.DropDownListFor(model => model.PaymentOptionId, new SelectList(ViewBag.PaymentOptionIds, "Id", "Name", Model.PaymentOptionId), "--Select--", new { @class = "form-control ddl2", @id = "ddlPaymentOptionId" + Model.Id, @onchange = "getValue(this)" })*@
+            @{
+                var paymentOptions = ViewBag.PaymentOptionIds as IEnumerable<IMSWEB.Model.TO.IdNameDDLTO> ?? new List<IMSWEB.Model.TO.IdNameDDLTO>();
+
+                if (Model.PaymentOptionId == 0)
+                {
+                    var cashOption = paymentOptions.FirstOrDefault(po => po.Name == "Cash");
+                    if (cashOption != null)
+                    {
+                        Model.PaymentOptionId = cashOption.Id;
+                    }
+                }
+
+            }
+
+            @*<p>Selected PaymentOptionId: @selectedPaymentId</p>*@
+
+
+            @Html.DropDownListFor(model => model.PaymentOptionId,
+    new SelectList(paymentOptions, "Id", "Name"),
+    "--Select--",
+    new { @class = "form-control ddl2", @id = "ddlPaymentOptionId" + Model.Id, @onchange = "getValue(this)" })
+
+
+
+
+        </td>
+
+        <td style="min-width: 180px; max-width: 180px; display: none">
+            @Html.TextBoxFor(m => m.Name, new { @class = "form-control input-sm text-right", @type = "text", @step = "0.01", @id = "txtName" + Model.Id })
+        </td>
+
+        <td style="min-width: 50px; max-width: 50px">
+            @Html.TextBoxFor(m => m.PaidAmount, new { @class = "form-control input-sm text-right", @type = "number", @step = "0.01", @oninput = "calcPaidAmount(this)" })
+            @Html.HiddenFor(m => m.Charge)
+
+        </td>
+        
+
+        <td class="text-center" style="width: 20px">
+            <small class="fa fa-trash btn btn-sm btn-danger btnDirectMinus" style="margin-top: 0px; margin-left: 0px; background-color: red"></small><br>
+        </td>
+    }
+</tr>
+
+
+
+<script type="text/javascript">
+
+
+    var CurrentDue;
+    $(document).ajaxComplete(function () {
+        CurrentDue = getDefaultIntIfEmpty($("#CurrentDue").val());
+    });
+
+
+
+    $(".btnDirectMinus").click(function () {
+        var row = $(this).parents('tr.taxSlotRowDirect');
+        var paidAmount = parseFloat(row.find('input[name$=".PaidAmount"]').val());
+        row.remove();
+        checkReceivedAmount();
+
+        return false;
+    });
+
+    function updateRecieveAmount() {
+        alert('ff');
+        var totalRecieveAmount = 0;
+        $('#tblDirectFlow tr.taxSlotRowDirect').each(function () {
+            var paidAmount = parseFloat($(this).find('input[name$=".PaidAmount"]').val());
+            if (!isNaN(paidAmount)) {
+                totalRecieveAmount += paidAmount;
+            }
+        });
+
+        $('#SalesOrder_RecieveAmount').val(totalRecieveAmount.toFixed(2));
+        $('#Amount').val(totalRecieveAmount.toFixed(2));
+
+
+        var totalPaymentDue = parseFloat($('#SalesOrder_TotalAmount').val()) - totalRecieveAmount;
+        $('#SalesOrder_PaymentDue').val(totalPaymentDue.toFixed(2));
+        var CurrentDue = $('#BalanceDue').val();
+        var PaymentDue = CurrentDue - totalRecieveAmount;
+        $('#BalanceDue').val(PaymentDue).trigger("input").toFixed(2);
+        alert(PaymentDue);
+    }
+
+
+    function checkReceivedAmount() {
+        var receivedAmount = parseFloat($('#Amount').val());
+        if (receivedAmount === 0) {
+            $("#submitButton").prop("disabled", true);
+        } else {
+            $("#submitButton").prop("disabled", false);
+        }
+    }
+</script>
+
+
+
+
+<script type="text/javascript">
+    $(".btnDirectMinus").click(function () {
+        $(this).parents('tr.taxSlotRowDirect').remove();
+        var rowCount = $('#tblDirectFlow tr').length;
+        UpdatePaidAmount();
+        return false;
+    });
+
+
+    function checkDuplicateBank(e) {
+        var encounteredBankIds = {};
+        $("#tblDirectFlow tr.taxSlotRowDirect").each(function () {
+            var bankId = $(this).find("select[id^='ddlbankId']").val();
+            if (bankId != null && bankId.trim() !== '') {
+                if (encounteredBankIds[bankId]) {
+                    toastr.error("Same bank can't be selected multiple times.");
+                    $(e).val([]).trigger('change');
+                    return false;
+                }
+            }
+
+            encounteredBankIds[bankId] = true;
+        });
+    }
+
+
+    function getValue(e) {
+
+        var selectedOptionText = $(e).find('option:selected').text();
+
+        var row = $(e).closest('tr');
+
+        var bankIdColumn = row.find('#showHideBank select');
+        var bankCheck = row.find('#showHide input');
+
+        if (selectedOptionText != 'Bank') {
+            bankIdColumn.prop('disabled', true);
+            bankCheck.prop('disabled', true);
+        } else {
+            bankIdColumn.prop('disabled', false);
+            bankCheck.prop('disabled', false);
+            bankCheck.prop('readonly', false);
+        }
+
+        var nameInput = row.find('input[id^="txtName"]');
+        nameInput.val(selectedOptionText);
+    }
+
+
+
+
+
+    $(document).ready(function () {
+
+        $(".ddl2").select2({
+            placeholder: "--- Select ---"
+        });
+
+        updateFieldsBasedOnPaymentOption();
+    });
+</script>

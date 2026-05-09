@@ -1,0 +1,35 @@
+﻿@using HtmlHelpers.BeginCollectionItem;
+@model IMSWEB.Model.TO.PaymentOptionDetailsTO
+
+@{
+    Layout = null;
+}
+
+<tr>
+    @using (Html.BeginCollectionItem("PaymentOptionDetails"))
+    {
+
+
+        @Html.DropDownListFor(model => model.PaymentOptionId, new SelectList(ViewBag.PaymentOptionIds, "Id", "Name", Model.PaymentOptionId), "--Select--", new { @class = "form-control ddl2", @id = "ddlPaymentOptionId" + Model.Id })   
+    
+}
+    </tr>
+
+    <script>
+    $(document).ready(function () {
+        // Use the 'change' event for dropdown lists
+        $("#ddlPaymentOptionId" + @Model.Id).change(function () {
+            var selectedValue = $(this).val();
+            console.log(selectedValue);
+            $("#PaymentOptionId").val(getDefaultFloatIfEmpty(selectedValue));
+            var check = $("#PaymentOptionId").val();
+            alert(check);
+            // Add your logic here based on the selected value
+        });
+    });
+    </script>
+
+
+
+
+

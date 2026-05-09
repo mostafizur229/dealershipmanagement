@@ -1,0 +1,96 @@
+﻿@using HtmlHelpers.BeginCollectionItem;
+@model IMSWEB.Model.TO.PaymentOptionDetailsTO
+
+@{
+    Layout = null;
+}
+
+<tr class="taxSlotRowDirect">
+    @using (Html.BeginCollectionItem("PaymentOptionDetails"))
+    {
+        <td style="width: 50px">
+            @Html.DisplayFor(m => m.Id)
+        </td>
+
+        <td style="width: 100px">
+            @Html.DropDownListFor(model => model.PaymentOptionId, new SelectList(ViewBag.PaymentOptionIds ?? new List<SelectListItem>(), "Id", "Name", Model.PaymentOptionId), "--Select--", new { @class = "form-control ddl2", @id = "ddlPaymentOptionId" + Model.Id })
+        </td>
+
+        <td>
+            @Html.TextBoxFor(m => m.PaidAmount, new { @class = "form-control input-sm text-right", @type = "number", @step = "0.01", @oninput = "calcPaidAmount(this)", @value = Model.PaidAmount })
+            @Html.HiddenFor(m => m.Charge)        
+        </td>
+
+        <td style="width: 50px">
+            <small class="fa fa-trash btn btn-sm btn-danger btnDirectMinus" style="margin-top: 0px;margin-left: 0px; background-color: red"></small><br>
+        </td>
+    }
+</tr>
+
+
+
+<script type="text/javascript">
+
+
+    var CurrentDue;
+    $(document).ajaxComplete(function () {
+
+        CurrentDue = getDefaultIntIfEmpty($("#CurrentDue").val());
+        /*       alert(CurrentDue);*/
+    });
+
+
+
+
+    $(".btnDirectMinus").click(function () {
+        var row = $(this).parents('tr.taxSlotRowDirect');
+        var paidAmount = parseFloat(row.find('input[name$=".PaidAmount"]').val());
+        row.remove();
+        // Recalculate total RecieveAmount and update PaymentDue
+
+        checkReceivedAmount();
+
+        return false;
+    });
+
+    function updateRecieveAmount() {
+        var totalRecieveAmount = 0;
+
+        // Iterate through each row and sum the PaidAmount values
+        $('#tblDirectFlow tr.taxSlotRowDirect').each(function () {
+            var paidAmount = parseFloat($(this).find('input[name$=".PaidAmount"]').val());
+            if (!isNaN(paidAmount)) {
+                totalRecieveAmount += paidAmount;
+            }
+        });
+
+        // Update the total RecieveAmount element in the HTML
+        $('#SalesOrder_RecieveAmount').val(totalRecieveAmount.toFixed(2));
+        $('#Amount').val(totalRecieveAmount.toFixed(2));
+        // Update PaymentDue based on RecieveAmount
+        var totalPaymentDue = parseFloat($('#SalesOrder_TotalAmount').val()) - totalRecieveAmount;
+        $('#SalesOrder_PaymentDue').val(totalPaymentDue.toFixed(2));
+
+
+        //var receivedAmount = $('#Amount').val(totalRecieveAmount.toFixed(2));
+        var PaymentDue = CurrentDue - totalRecieveAmount;
+        //alert(PaymentDue);
+        //alert(CurrentDue);
+        $('#BalanceDue').val(PaymentDue.toFixed(2));
+    }
+
+
+    function checkReceivedAmount() {
+
+        var receivedAmount = parseFloat($('#Amount').val());
+        if (receivedAmount === 0) {
+            $("#submitButton").prop("disabled", true);
+        } else {
+            $("#submitButton").prop("disabled", false);
+        }
+    }
+</script>
+
+
+
+

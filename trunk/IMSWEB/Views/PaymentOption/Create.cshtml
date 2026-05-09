@@ -1,0 +1,88 @@
+﻿@model IMSWEB.PaymentOptionVM
+
+@{
+    string actionName = ViewContext.RouteData.Values["action"].ToString();
+    ViewBag.Title = actionName + " Payment Option";
+}
+
+<h4>@(ViewBag.Title + ".")</h4>
+<hr />
+
+@using (Html.BeginForm(actionName, "PaymentOption", new { ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.Id);
+<div class="col-md-offset-3 col-md-5">
+    <div class="form-group">
+        @Html.LabelFor(model => model.Code, htmlAttributes: new { @class = "control-label col-md-3" })
+        <div class="col-md-9">
+            @Html.EditorFor(model => model.Code, new { htmlAttributes = new { @class = "form-control input-sm", @readonly = "readonly" } })
+            @Html.ValidationMessageFor(model => model.Code, "", new { @class = "text-danger" })
+        </div>
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(model => model.Name, htmlAttributes: new { @class = "control-label col-md-3" })
+        <div class="col-md-9">
+            @Html.EditorFor(model => model.Name, new { htmlAttributes = new { @class = "form-control input-sm", autofocus = "autofocus" } })
+            @Html.ValidationMessageFor(model => model.Name, "", new { @class = "text-danger" })
+        </div>
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(model => model.Charge, htmlAttributes: new { @class = "control-label col-md-3" })
+        <div class="col-md-9">
+            @Html.EditorFor(model => model.Charge, new { htmlAttributes = new { @class = "form-control input-sm", @type = "number", @step = "0.01" } })
+            @Html.ValidationMessageFor(model => model.Charge, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+
+    <div class="form-group">
+        @Html.LabelFor(m => m.PaymentBankID, new { @class = "control-label col-md-3" })
+        <div class="col-md-8" style="padding-right:0px !important">
+            @Html.HiddenFor(m => m.PaymentBankID, new { htmlAttributes = new { @class = "form-control input-sm", autofocus = "autofocus", @readonly = "readonly" } })
+            @Html.EditorFor(m => m.BankName, new { htmlAttributes = new { @class = "form-control input-sm", autofocus = "autofocus", } })
+
+            @Html.ValidationMessageFor(m => m.PaymentBankID, "", new { @class = "text-danger" })
+        </div>       
+
+    </div>
+
+    <div class="form-group">
+        <div class="col-sm-offset-3 col-sm-9">
+            <input type="submit" value="Add Payment Option" class="btn btn-sm btn-primary" />
+        </div>
+    </div>
+</div>
+}
+
+
+<script>
+
+    $('input[id="BankName"]').autocomplete({
+        source: function (request, response) {
+            $('#PaymentBankID').val("");
+            $.ajax({
+                url: "/Bank/GetBankByName/",
+                type: "POST",
+                dataType: "json",
+                data: { prefix: request.term },
+                success: function (data) {
+                    if (data.result == false) {
+                        toastr.error("DO not found");
+                        return;
+                    }
+                    response($.map(data, function (item) {
+                        return { label: item.Name, value: item.Name, ID: item.ID };
+                    }))
+                }
+            });
+        },
+        minLength: 0,
+        select: function (event, ui) {
+            $("#PaymentBankID").val(ui.item.ID);
+        },
+        maxShowItems: 5
+    }).focus(function () {
+        $(this).autocomplete("search")
+    });
+</script>

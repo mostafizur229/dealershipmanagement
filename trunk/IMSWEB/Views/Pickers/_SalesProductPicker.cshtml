@@ -1,0 +1,215 @@
+﻿<style>
+    .dropdown-wrapper {
+        position: relative;
+        width: 95%;
+        margin: 0 auto;
+        font-family: 'Segoe UI', sans-serif;
+    }
+
+    .custom-dropdown {
+        padding: 8px 6px;
+        border: 1px solid #ccc;
+        background: white;
+        cursor: pointer;
+        border-radius: 6px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: border 0.2s;
+    }
+
+        .custom-dropdown:hover {
+            border-color: #999;
+        }
+
+        .custom-dropdown i {
+            font-size: 16px;
+            color: #666;
+            margin-left: 10px;
+        }
+
+    .dropdown-list {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        background: white;
+        border: 1px solid #ccc;
+        border-top: none;
+        border-radius: 0 0 6px 6px;
+        max-height: 300px;
+        z-index: 999;
+        display: none;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .search-box {
+        padding: 10px;
+        border-bottom: 1px solid #eee;
+    }
+
+        .search-box input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+    #productDropdownItems {
+        max-height: 200px;
+        overflow-y: auto;
+    }
+
+    .dropdown-item {
+        padding: 12px 14px;
+        border-bottom: 1px solid #f0f0f0;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+
+        .dropdown-item:hover {
+            background: #f9f9f9;
+        }
+
+    .product-name-code {
+        font-weight: 600;
+    }
+
+    .product-details {
+        font-size: 1.20rem;
+        color: #666;
+        margin-top: 2px;
+    }
+</style>
+
+<!-- Hidden Fields -->
+<input type="hidden" id="ProductsId" name="ProductsId" />
+<input type="hidden" id="ProductsCode" name="ProductsCode" />
+<input type="hidden" id="ProductsName" name="ProductsName" />
+<input type="hidden" id="ProductsType" name="ProductsType" />
+<input type="hidden" id="CategoryName" name="CategoryName" />
+
+
+<div class="form-group">
+    <div class="dropdown-wrapper">
+        <div id="productDropdownTrigger" class="custom-dropdown">
+            <span id="productDropdownLabel">Click to select product</span>
+            <i class="fas fa-chevron-down"></i>
+        </div>
+        <div id="productDropdownList" class="dropdown-list">
+            <div class="search-box">
+                <input type="text" id="productSearchInput" placeholder="Search by name, code..." />
+            </div>
+            <div id="productDropdownItems"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const selectedProductId = '@ViewBag.ProductsId';
+    const productDropdownTrigger = document.getElementById('productDropdownTrigger');
+    const productDropdownList = document.getElementById('productDropdownList');
+    const productDropdownItems = document.getElementById('productDropdownItems');
+    const productDropdownLabel = document.getElementById('productDropdownLabel');
+    const productSearchInput = document.getElementById('productSearchInput');
+
+    let productPage = 1;
+    const productPageSize = 6;
+    let productLoading = false;
+    let productHasMore = true;
+    let productSearch = '';
+
+    productDropdownTrigger.addEventListener('click', () => {
+        productDropdownList.style.display = 'block';
+        productSearchInput.focus();
+        if (productDropdownItems.children.length === 0) {
+            loadProducts(true);
+        }
+    });
+
+    productDropdownItems.addEventListener('scroll', () => {
+        if (productDropdownItems.scrollTop + productDropdownItems.clientHeight >= productDropdownItems.scrollHeight - 20) {
+            if (!productLoading && productHasMore) {
+                productPage++;
+                loadProducts();
+            }
+        }
+    });
+
+    productSearchInput.addEventListener('input', () => {
+        productSearch = productSearchInput.value.trim();
+        productPage = 1;
+        productHasMore = true;
+        productDropdownItems.innerHTML = '';
+        loadProducts(true);
+    });
+
+    async function loadProducts(reset = false) {
+        productLoading = true;
+        const res = await fetch(`/Product/GetProducts?search=${encodeURIComponent(productSearch)}&page=${productPage}&pageSize=${productPageSize}`);
+        const result = await res.json();
+
+        if (reset) productDropdownItems.innerHTML = '';
+
+        (result.data || []).forEach(p => {
+            const div = document.createElement('div');
+            div.className = 'dropdown-item';
+            div.innerHTML = `
+                <div class="product-name-code">${p.ProductName} (${p.ProductCode})</div>
+                <div class="product-details">${p.ParentQuantity}.${p.ChildQuantity} ${p.ParentUnitName} | ${p.CategoryName} | ${p.SizeName} | MRP: ${p.MRP} | Company: ${p.CompanyName}</div>
+            `;
+
+            div.addEventListener('click', () => {
+                $('#ProductsId').val($.trim(p.ProductID));
+                $('#ProductsCode').val($.trim(p.ProductCode));
+                $('#ProductsName').val($.trim(p.ProductName));
+                $('#ProductsType').val($.trim(p.ProductType));
+                $('#CategoryName').val($.trim(p.CategoryName));
+
+                productDropdownLabel.textContent = `${p.ProductName} (${p.ProductCode})`;
+                productDropdownList.style.display = 'none';
+
+
+                loadProductInfo(p.ProductID, p.GodownID);
+            });
+
+            productDropdownItems.appendChild(div);
+        });
+
+        productHasMore = (productPage * productPageSize) < (result.recordsTotal || 0);
+        productLoading = false;
+    }
+
+    document.addEventListener('click', e => {
+        if (!e.target.closest('.dropdown-wrapper')) {
+            productDropdownList.style.display = 'none';
+        }
+    });
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        if (selectedProductId && selectedProductId !== '') {
+            const res = await fetch(`/Product/GetProductById?id=${selectedProductId}`);
+            const p = await res.json();
+            if (p) {
+                productDropdownLabel.textContent = `${p.ProductName} (${p.ProductCode})`;
+                $('#ProductsId').val(p.ProductID);
+                $('#ProductsCode').val(p.ProductCode);
+                $('#ProductsName').val(p.ProductName);
+                $('#ProductsType').val(p.ProductType);
+                $('#CategoryName').val(p.CategoryName);
+                // (set other fields if needed)
+            }
+        }
+    });
+
+    function ToggleUnitPriceField(UnitType) {
+        if (UnitType.toLowerCase() === "pcs") {
+            $("#divUnitPrice").hide();
+            $("#divChildQuantity").hide();
+        } else {
+            $("#divUnitPrice").show();
+            $("#divChildQuantity").show();
+        }
+    }
+</script>

@@ -1,0 +1,1443 @@
+﻿<style>
+    /* Reset and Base Styles */
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        background-color: #f8f9fa;
+        color: #212529;
+        line-height: 1.5;
+        overflow-x: hidden;
+    }
+
+    /* Page Container */
+    .page-container {
+        min-height: 100vh;
+        max-width: 100%;
+        overflow-x: hidden;
+    }
+
+    /* Header */
+    .header {
+        background: white;
+        color: black;
+        border-radius: 10px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+
+    .header-content {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .header-left {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .header-text h1 {
+        margin-top: 0px; font-size: 1.25rem;
+        font-weight: 700;
+        margin-bottom: 0.25rem;
+    }
+
+    .header-text p {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: black;
+        opacity: 0.9;
+        margin: 0px;
+    }
+
+    .header-right {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.8rem;
+        opacity: 0.9;
+    }
+
+    /* Icon Containers */
+    .icon-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+
+        .icon-container.primary {
+            background-color: rgba(255, 255, 255, 0.2);
+            width: 28px;
+            height: 28px;
+        }
+
+        .icon-container.primary-light {
+            background-color: rgba(13, 110, 253, 0.1);
+            color: #0d6efd;
+            width: 25px;
+            height: 25px;
+        }
+
+        .icon-container.success-light {
+            background-color: rgba(25, 135, 84, 0.1);
+            color: #198754;
+            width: 25px;
+            height: 25px;
+        }
+
+        .icon-container.danger-light {
+            background-color: rgba(220, 53, 69, 0.1);
+            color: #dc3545;
+            width: 25px;
+            height: 25px;
+        }
+
+        .icon-container.emerald-light {
+            background-color: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+            width: 25px;
+            height: 25px;
+        }
+
+    /* Main Content */
+    .main-content {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 1rem;
+    }
+
+    /* Summary Section */
+    .summary-section {
+        margin-bottom: 1rem;
+    }
+
+    .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1rem;
+    }
+
+    .summary-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        border: 1px solid #e9ecef;
+    }
+
+        .summary-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+    .summary-content {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .summary-info {
+        flex: 1;
+    }
+
+
+    .summary-label {
+        font-size: 1rem;
+        color: #6c757d;
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+    }
+
+    .summary-value {
+        font-size: 1.25rem;
+        font-weight: 700;
+        margin-bottom: 0;
+    }
+
+        .summary-value.success {
+            color: #198754;
+        }
+
+        .summary-value.danger {
+            color: #dc3545;
+        }
+
+        .summary-value.primary {
+            color: #0d6efd;
+        }
+
+    /* Details Section */
+    .details-section {
+        margin-bottom: 1rem;
+    }
+
+    .details-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+
+    .section-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        border: 1px solid #e9ecef;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+
+        .section-card:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.12);
+        }
+
+    /* Section Headers */
+    .section-header {
+        padding: 0.75rem 1rem;
+        font-weight: 600;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+        .section-header h3 {
+            font-size: 1rem;
+            margin: 0;
+            color: white;
+        }
+
+        .section-header.emerald {
+            background: linear-gradient(135deg, #10b981, #059669);
+        }
+
+        .section-header.danger {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+        }
+
+        .section-header.primary {
+            background: linear-gradient(135deg, #0d6efd, #0b5ed7);
+        }
+
+        .section-header.success {
+            background: linear-gradient(135deg, #198754, #157347);
+        }
+
+    /* Trends */
+    .trend {
+        display: flex;
+        align-items: center;
+        gap: 0.0625rem;
+        font-size: 0.65rem;
+        font-weight: 600;
+    }
+
+    .trend-up {
+        color: #198754;
+    }
+
+    .trend-down {
+        color: #dc3545;
+    }
+
+    /* Financial Items */
+    .financial-items {
+        display: flex;
+        flex-direction: column;
+        gap: 0.375rem;
+    }
+
+    .financial-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.375rem 0.5rem;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        overflow-x: hidden;
+    }
+
+        .financial-item:hover {
+            transform: translateY(-1px);
+            background-color: #e9ecef;
+        }
+
+    .item-left {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .item-info {
+        display: flex;
+        flex-direction: column;
+        gap: 0.0625rem;
+    }
+
+    .item-name {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 0;
+    }
+
+    .item-value {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #212529;
+    }
+
+    /* Section Body */
+    .section-body {
+        padding: 0.75rem 1rem;
+    }
+
+    /* Section Total */
+    .section-total {
+        margin-top: 0.5rem;
+        padding: 0.5rem;
+        border-radius: 8px;
+    }
+
+        .section-total.emerald {
+            background-color: rgba(16, 185, 129, 0.1);
+        }
+
+        .section-total.danger {
+            background-color: rgba(220, 53, 69, 0.1);
+        }
+
+        .section-total.primary {
+            background-color: rgba(13, 110, 253, 0.1);
+        }
+
+    .total-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .total-label {
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: 0;
+    }
+
+    .total-value {
+        font-size: 1rem;
+        font-weight: 700;
+    }
+
+        .total-label.emerald,
+        .total-value.emerald {
+            color: #10b981;
+        }
+
+        .total-label.danger,
+        .total-value.danger {
+            color: #dc3545;
+        }
+
+        .total-label.primary,
+        .total-value.primary {
+            color: #0d6efd;
+        }
+
+    /* Profit Summary */
+    .profit-summary {
+        display: flex;
+        flex-direction: column;
+        gap: 0.375rem;
+    }
+
+    .profit-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.375rem 0.5rem;
+        border-radius: 6px;
+    }
+
+        .profit-item.primary {
+            background-color: rgba(13, 110, 253, 0.1);
+        }
+
+        .profit-item.danger {
+            background-color: rgba(220, 53, 69, 0.1);
+        }
+
+        .profit-item.success {
+            background-color: rgba(25, 135, 84, 0.1);
+        }
+
+    .profit-label {
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .profit-value {
+        font-size: 0.8rem;
+        font-weight: 700;
+    }
+
+    .profit-item.primary .profit-label,
+    .profit-item.primary .profit-value {
+        color: #0d6efd;
+    }
+
+    .profit-item.danger .profit-label,
+    .profit-item.danger .profit-value {
+        color: #dc3545;
+    }
+
+    .profit-item.success .profit-label,
+    .profit-item.success .profit-value {
+        color: #198754;
+    }
+
+    .profit-divider {
+        height: 1px;
+        background-color: #dee2e6;
+        margin: 0.5rem 0;
+    }
+
+    /* Net Profit */
+    .net-profit {
+        margin-top: 0.5rem;
+        padding: 0.5rem;
+        border-radius: 8px;
+        background-color: rgba(25, 135, 84, 0.1);
+    }
+
+    .net-profit-content {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .net-profit-left {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .net-profit-label {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #198754;
+    }
+
+    .net-profit-value {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #198754;
+    }
+
+    /* Print Section */
+    .print-section {
+        display: flex;
+        justify-content: center;
+        margin-top: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .print-button {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        background-color: #0d6efd;
+        color: white;
+        border: none;
+        border-radius: 12px;
+        padding: 0.75rem 1.5rem;
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+        .print-button:hover {
+            background-color: #0b5ed7;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(13, 110, 253, 0.3);
+        }
+
+    
+    @@media (max-width: 768px) {
+        .header-content {
+            padding: 0.75rem;
+            flex-direction: column;
+            gap: 0.75rem;
+            text-align: center;
+        }
+
+        .main-content {
+            padding: 0.75rem;
+        }
+
+        .summary-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+        }
+
+        .details-grid {
+            grid-template-columns: 1fr;
+            gap: 0.75rem;
+        }
+
+        .summary-card,
+        .section-card {
+            padding: 0.75rem;
+        }
+
+        .section-body {
+            padding: 0.75rem;
+        }
+        /* Mobile specific adjustments */
+        .summary-content {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.375rem;
+        }
+
+            .summary-content .icon-container {
+                align-self: flex-end;
+            }
+
+        .financial-item {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.375rem;
+        }
+
+        .item-value {
+            align-self: flex-end;
+            font-size: 1rem;
+        }
+
+        .total-content {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.125rem;
+        }
+
+        .profit-item {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.125rem;
+        }
+
+        .net-profit-content {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.375rem;
+        }
+    }
+
+    @@media (max-width: 480px) {
+        .summary-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .header-text h1 {
+            font-size: 1.1rem;
+        }
+
+        .summary-value {
+            font-size: 1.1rem;
+        }
+
+        .item-value {
+            font-size: 0.9rem;
+        }
+
+        .main-content {
+            padding: 0.5rem;
+        }
+
+        .summary-card {
+            padding: 0.75rem;
+        }
+
+        .section-body {
+            padding: 0.5rem;
+        }
+    }
+
+    
+    @@media print {
+        
+        * {
+            visibility: hidden;
+        }
+        
+        .page-container,
+        .page-container * {
+            visibility: visible;
+        }
+
+        .page-container {
+            
+            position: relative !important;
+            left: auto !important;
+            top: auto !important;
+            width: 100% !important;
+            height: auto !important;
+            overflow: visible !important;
+            min-height: 0 !important;
+            max-height: none !important;
+            page-break-before: avoid !important;
+            page-break-after: avoid !important;
+            page-break-inside: avoid !important;
+        }
+
+        @@page {
+            size: A4;
+            margin: 5mm;
+        }
+
+
+        * {
+            -webkit-print-color-adjust: exact !important;
+            color-adjust: exact !important;
+            print-color-adjust: exact !important;
+            box-shadow: none !important;
+            text-shadow: none !important;
+        }
+
+        body {
+            font-size: 9pt !important;
+            line-height: 1.2 !important;
+            background: white !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            height: auto !important;
+            /*overflow: hidden !important;*/
+        }
+
+       
+        .page-container {
+            min-height: auto !important;
+            max-height: none !important;
+            
+        }
+
+        .row,
+        .form-inline,
+        .date-range,
+        .form-group {
+            display: flex !important;
+            flex-wrap: nowrap !important;
+            align-items: center !important;
+            gap: 8pt !important;
+            margin-bottom: 6pt !important;
+        }
+
+        .form-control {
+            font-size: 8pt !important;
+            padding: 2pt 4pt !important;
+            width: auto !important;
+            min-width: 100px !important;
+        }
+
+        label {
+            font-size: 8pt !important;
+            margin-right: 4pt !important;
+        }
+
+        button,
+        .btn {
+            display: none !important;
+        }
+
+        .print-button, .print-section {
+            display: none !important;
+        }
+
+        
+
+        .main-content {
+            max-width: 100% !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            height: auto !important;
+            overflow: visible !important;
+        }
+        /* Compact header */
+        .header {
+            background: white !important;
+            box-shadow: none !important;
+            border-bottom: 1px solid #dee2e6 !important;
+            margin-bottom: 6pt !important;
+            /*page-break-after: avoid !important;*/
+        }
+
+        .underline {
+            border-bottom: 1px solid #ccc;
+            width: 700px;
+        }
+        .print-hide h1 {
+            font-size: 2px;
+        }
+
+        .print-hide p {
+            display: none;
+        }
+
+        .header-content {
+            padding: 4pt 0 !important;
+            max-width: 100% !important;
+        }
+
+        .header-text h1 {
+            font-size: 14pt !important;
+            margin-bottom: 1pt !important;
+        }
+
+        .header-text p {
+            font-size: 7pt !important;
+        }
+
+        .header-right {
+            font-size: 7pt !important;
+        }
+
+        .icon-container {
+            width: 18pt !important;
+            height: 18pt !important;
+        }
+        /* Ultra compact summary cards */
+        .summary-section {
+            margin-bottom: 6pt !important;
+            /*page-break-after: avoid !important;
+            page-break-inside: avoid !important;*/
+        }
+
+        .summary-grid {
+            display: grid !important;
+            grid-template-columns: repeat(4, 1fr) !important;
+            gap: 4pt !important;
+        }
+
+        .summary-card {
+            border: 1px solid #dee2e6 !important;
+            border-radius: 2pt !important;
+            box-shadow: none !important;
+            padding: 4pt 6pt !important;
+            margin: 0 !important;
+            page-break-inside: avoid !important;
+        }
+
+        .summary-value {
+            font-size: 9pt !important;
+        }
+
+        .summary-label {
+            font-size: 10pt !important;
+            margin-bottom: 1pt !important;
+        }
+
+        .summary-content .icon-container {
+            width: 16pt !important;
+            height: 16pt !important;
+        }
+        /* Ultra compact section cards */
+        .details-section {
+            margin-bottom: 6pt !important;
+            page-break-after: avoid !important;
+            page-break-inside: avoid !important;
+        }
+
+        .details-grid {
+            display: grid !important;
+            grid-template-columns: 1fr 1fr !important;
+            gap: 4pt !important;
+        }
+
+        .section-card {
+            border: 1px solid #dee2e6 !important;
+            border-radius: 2pt !important;
+            box-shadow: none !important;
+            break-inside: avoid !important;
+            page-break-inside: avoid !important;
+            margin: 0 !important;
+            page-break-after: avoid !important;
+        }
+
+        .section-header {
+            padding: 3pt 6pt !important;
+            background-color: #f8f9fa !important;
+            border-bottom: 1px solid #dee2e6 !important;
+        }
+
+            .section-header h3 {
+                font-size: 9pt !important;
+                margin: 0 !important;
+            }    
+
+        .section-body {
+            padding: 6pt !important;
+        }
+        /* Ultra compact financial items */
+        .financial-items {
+            gap: 2pt !important;
+        }
+
+        .financial-item {
+            background-color: #f8f9fa !important;
+            border-radius: 2pt !important;
+            padding: 3pt !important;
+            page-break-inside: avoid !important;
+        }
+
+            .financial-item .icon-container {
+                width: 14pt !important;
+                height: 14pt !important;
+            }
+
+        .item-name {
+            font-size: 7pt !important;
+            margin-bottom: 1pt !important;
+        }
+
+        .item-value {
+            font-size: 8pt !important;
+        }
+
+        .trend {
+            font-size: 6pt !important;
+        }
+        /* Section totals */
+        .section-total {
+            margin-top: 4pt !important;
+            padding: 3pt !important;
+            page-break-inside: avoid !important;
+        }
+
+        .total-label {
+            font-size: 8pt !important;
+        }
+
+        .total-value {
+            font-size: 9pt !important;
+        }
+        /* Profit summary */
+        .profit-summary {
+            gap: 2pt !important;
+        }
+
+        .profit-item {
+            padding: 3pt !important;
+            page-break-inside: avoid !important;
+        }
+
+        .profit-label {
+            font-size: 7pt !important;
+        }
+
+        .profit-value {
+            font-size: 8pt !important;
+        }
+
+        .net-profit {
+            padding: 4pt !important;
+            page-break-inside: avoid !important;
+        }
+
+        .net-profit-label {
+            font-size: 8pt !important;
+        }
+
+        .net-profit-value {
+            font-size: 9pt !important;
+        }
+
+        .net-profit-left .icon-container {
+            width: 14pt !important;
+            height: 14pt !important;
+        }
+        /* Color backgrounds for print */
+        .section-header.emerald,
+        .section-total.emerald {
+            background-color: #f0f9f4 !important;
+        }
+
+        .section-header.danger,
+        .section-total.danger {
+            background-color: #fef2f2 !important;
+        }
+
+        .section-header.primary,
+        .section-total.primary {
+            background-color: #eff6ff !important;
+        }
+
+        .section-header.success,
+        .net-profit.success {
+            background-color: #f0f9f4 !important;
+        }
+
+        .profit-item.primary {
+            background-color: #eff6ff !important;
+        }
+
+        .profit-item.danger {
+            background-color: #fef2f2 !important;
+        }
+        /* Remove hover effects */
+        .summary-card:hover,
+        .section-card:hover,
+        .financial-item:hover {
+            transform: none !important;
+            box-shadow: none !important;
+            background-color: #f8f9fa !important;
+        }
+        /* Prevent extra blank pages */
+        .page-container::after {
+            content: "";
+            display: block;
+            page-break-after: avoid !important;
+        }
+        /* Remove any potential margin/padding that could cause extra pages */
+        .main-content > *:last-child {
+            margin-bottom: 0 !important;
+            padding-bottom: 0 !important;
+        }
+
+        .main-content > *:last-child {
+            margin-bottom: 0 !important;
+            padding-bottom: 0 !important;
+        }
+
+
+    }
+</style>
+
+@{
+    var fromDateVal = Request["fromDate"];
+    var toDateVal = Request["toDate"];
+
+    string fromDate = !string.IsNullOrEmpty(fromDateVal)
+        ? fromDateVal
+        : DateTime.Now.ToString("yyyy-MM-dd"); // default
+
+    string toDate = !string.IsNullOrEmpty(toDateVal)
+        ? toDateVal
+        : DateTime.Now.ToString("yyyy-MM-dd"); // default to today
+}
+
+@model IMSWEB.Model.SPModel.BalanceSheetSpModel
+
+<body>
+    <div class="page-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="header-left">
+
+                    <div class="header-text underline">
+                        <h1>@Model.CompanyDetails.CompanyName</h1>
+                        <p>@Model.CompanyDetails.TelephoneNo</p>
+                        <p>Address: @Model.CompanyDetails.Address</p>
+                    </div>     
+                  
+                </div>
+
+                <div>
+                    @*<div class="icon-container primary print-hide">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                            <polyline points="14,2 14,8 20,8" />
+                            <line x1="16" y1="13" x2="8" y2="13" />
+                            <line x1="16" y1="17" x2="8" y2="17" />
+                            <polyline points="10,9 9,9 8,9" />
+                        </svg>
+                    </div>*@
+
+                    <div class="header-text print-hide">
+                        <h1>Financial Report</h1>
+                        <p>Comprehensive Business Overview</p>
+                    </div>
+                </div>
+
+                @using (Html.BeginForm("Index", "BalanceSheet", FormMethod.Get))
+                {
+                    <div class="d-flex align-items-end flex-wrap gap-2 mb-3">
+                        <div>
+                            <label for="fromDate" class="form-label">From:</label>
+                            <input type="date" name="fromDate" id="fromDate" class="form-control" value="@fromDate" />
+                        </div>
+
+                        <div class="ml-1">
+                            <label for="toDate" class="form-label">To:</label>
+                            <input type="date" name="toDate" id="toDate" class="form-control" value="@toDate" />
+                        </div>
+
+                        <div style="margin-top: 7px;">
+                            <button type="submit" class="btn btn-primary ml-2 mt-4">Filter</button>
+                        </div>
+                    </div>
+                }
+
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Summary Cards -->
+            <section class="summary-section">
+                <div class="summary-grid">
+                    <div class="summary-card">
+                        <div class="summary-content">
+                            <div class="summary-info">
+                                <p class="summary-label">Total Assets</p>
+                                <p class="summary-value success">৳ @Model.TotalAssets.ToString("N2")</p>
+                            </div>
+                            <div class="icon-container success-light">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
+                                    <polyline points="17 6 23 6 23 12" />
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="summary-card">
+                        <div class="summary-content">
+                            <div class="summary-info">
+                                <p class="summary-label">Total Outflow</p>
+                                <p class="summary-value danger">৳ @Model.TotalLiabilitiesExpenses.ToString("N2")</p>
+                            </div>
+                            <div class="icon-container danger-light">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="23 18 13.5 8.5 8.5 13.5 1 6" />
+                                    <polyline points="17 18 23 18 23 12" />
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="summary-card">
+                        <div class="summary-content">
+                            <div class="summary-info">
+                                <p class="summary-label">Total Gross</p>
+                                <p class="summary-value primary">৳ @Model.TotalGrossProfit.ToString("N2")</p>
+                            </div>
+                            <div class="icon-container primary-light">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="12" y1="2" x2="12" y2="22" />
+                                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="summary-card">
+                        <div class="summary-content">
+                            <div class="summary-info">
+                                <p class="summary-label">Net Profit/Loss</p>
+                                <p class="summary-value success">৳ @Model.NetProfit.ToString("N2")</p>
+                            </div>
+                            <div class="icon-container success-light">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
+                                    <polyline points="17 6 23 6 23 12" />
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Detailed Sections -->
+            <section class="details-section">
+                <div class="details-grid">
+                    <!-- Assets Section -->
+                    <div class="section-card">
+                        <div class="section-header emerald">
+                            <h3>Assets</h3>
+                        </div>
+                        <div class="section-body">
+                            <div class="financial-items">
+                                <div class="financial-item">
+                                    <div class="item-left">
+                                        <div class="icon-container emerald-light">
+                                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <circle cx="9" cy="21" r="1" />
+                                                <circle cx="20" cy="21" r="1" />
+                                                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+                                            </svg>
+                                        </div>
+                                        <div class="item-info">
+                                            <p class="item-name">Stock Value</p>
+                                        </div>
+                                    </div>
+                                    <div class="item-value">৳ @Model.StockValue.ToString("N2")</div>
+                                </div>
+
+                                <div class="financial-item">
+                                    <div class="item-left">
+                                        <div class="icon-container emerald-light">
+                                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                                                <circle cx="9" cy="7" r="4" />
+                                                <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                                                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                                            </svg>
+                                        </div>
+                                        <div class="item-info">
+                                            <p class="item-name">Customer Due</p>
+
+                                        </div>
+                                    </div>
+                                    <div class="item-value"> ৳ @Model.CustomerDue.ToString("N2") </div>
+                                </div>
+
+                                <div class="financial-item">
+                                    <div class="item-left">
+                                        <div class="icon-container emerald-light">
+                                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
+                                                <line x1="1" y1="10" x2="23" y2="10" />
+                                            </svg>
+                                        </div>
+                                        <div class="item-info">
+                                            <p class="item-name">Supplier Advance Payment</p>
+
+                                        </div>
+                                    </div>
+                                    <div class="item-value"> ৳ @Model.SupplierAdvancePayment.ToString("N2") </div>
+                                </div>
+
+                                <div class="financial-item">
+                                    <div class="item-left">
+                                        <div class="icon-container emerald-light">
+                                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M3 21h18" />
+                                                <path d="M5 21V7l8-4v18" />
+                                                <path d="M19 21V11l-6-4" />
+                                            </svg>
+                                        </div>
+                                        <div class="item-info">
+                                            <p class="item-name">Bank Balance</p>
+
+                                        </div>
+                                    </div>
+                                    <div class="item-value">৳ @Model.BankBalance.ToString("N2")</div>
+                                </div>
+
+                                <div class="financial-item">
+                                    <div class="item-left">
+                                        <div class="icon-container emerald-light">
+                                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M19 7V4a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v3" />
+                                                <path d="M13 20H7a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v1" />
+                                                <path d="M22 12v8a2 2 0 0 1-2 2h-2.5" />
+                                            </svg>
+                                        </div>
+                                        <div class="item-info">
+                                            <p class="item-name">Cash in Hand</p>
+
+                                        </div>
+                                    </div>
+                                    <div class="item-value">৳ @Model.CashInHand.ToString("N2")</div>
+                                </div>
+                            </div>
+                            <div class="section-total emerald">
+                                <div class="total-content">
+                                    <p class="total-label">Total Assets</p>
+                                    <p class="total-value">৳ @Model.TotalAssets.ToString("N2")</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Liabilities Section -->
+                    <div class="section-card">
+                        <div class="section-header danger">
+                            <h3>Liabilities & Expenses</h3>
+                        </div>
+                        <div class="section-body">
+                            <div class="financial-items">
+                                @*<div class="financial-item">
+                                    <div class="item-left">
+                                        <div class="icon-container danger-light">
+                                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <circle cx="9" cy="21" r="1" />
+                                                <circle cx="20" cy="21" r="1" />
+                                                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+                                            </svg>
+                                        </div>
+                                        <div class="item-info">
+                                            <p class="item-name">Cost of Goods Sold</p>
+                                        </div>
+                                    </div>
+                                    <div class="item-value">৳ @Model.PurchaseCost.ToString("N2")</div>
+                                </div>*@
+                                <div class="financial-item">
+                                    <div class="item-left">
+                                        <div class="icon-container danger-light">
+                                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
+                                                <polyline points="17 6 23 6 23 12" />
+                                            </svg>
+                                        </div>
+                                        <div class="item-info">
+                                            <p class="item-name">Total Investment</p>
+                                        </div>
+                                    </div>
+                                    <div class="item-value">৳ @Model.TotalInvestment.ToString("N2")</div>
+                                </div>
+
+                                <div class="financial-item">
+                                    <div class="item-left">
+                                        <div class="icon-container danger-light">
+                                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M5 12V7a1 1 0 0 1 1-1h4l2 3h4a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1Z" />
+                                                <path d="M3 7v10a1 1 0 0 0 1 1h14" />
+                                            </svg>
+                                        </div>
+                                        <div class="item-info">
+                                            <p class="item-name">Total Expense</p>
+
+                                        </div>
+                                    </div>
+                                    <div class="item-value">৳ @Model.TotalExpense.ToString("N2")</div>
+                                </div>
+
+                                <div class="financial-item">
+                                    <div class="item-left">
+                                        <div class="icon-container danger-light">
+                                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                                                <circle cx="9" cy="7" r="4" />
+                                                <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                                                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                                            </svg>
+                                        </div>
+                                        <div class="item-info">
+                                            <p class="item-name">Supplier Due</p>
+
+                                        </div>
+                                    </div>
+                                    <div class="item-value">৳ @Model.SupplierDue.ToString("N2")</div>
+                                </div>
+
+                                <div class="financial-item">
+                                    <div class="item-left">
+                                        <div class="icon-container danger-light">
+                                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
+                                                <line x1="1" y1="10" x2="23" y2="10" />
+                                            </svg>
+                                        </div>
+                                        <div class="item-info">
+                                            <p class="item-name">Loans/Other Liabilities</p>
+                                        </div>
+                                    </div>
+                                    <div class="item-value">৳ @Model.LoansOtherLiabilities.ToString("N2")</div>
+                                </div>
+
+                                <div class="financial-item">
+                                    <div class="item-left">
+                                        <div class="icon-container danger-light">
+                                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
+                                                <line x1="8" y1="21" x2="16" y2="21" />
+                                                <line x1="12" y1="17" x2="12" y2="21" />
+                                            </svg>
+                                        </div>
+                                        <div class="item-info">
+                                            <p class="item-name">Owner's Drawings</p>
+                                        </div>
+                                    </div>
+                                    <div class="item-value">৳ @Model.OwnersDrawings.ToString("N2")</div>
+                                </div>
+                            </div>
+                            <div class="section-total danger">
+                                <div class="total-content">
+                                    <p class="total-label">Total Liabilities & Expenses</p>
+                                    <p class="total-value">৳ @Model.TotalLiabilitiesExpenses.ToString("N2")</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="details-section">
+                <div class="details-grid">
+                    <!-- Income Section -->
+                    <div class="section-card">
+                        <div class="section-header primary">
+                            <h3>Gross Profit = ( Sales Revenue - Cost of Goods Sold )</h3>
+                        </div>
+                        <div class="section-body">
+                            <div class="financial-items">
+                                <div class="financial-item">
+                                    <div class="item-left">
+                                        <div class="icon-container primary-light">
+                                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <line x1="12" y1="2" x2="12" y2="22" />
+                                                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                                            </svg>
+                                        </div>
+                                        <div class="item-info">
+                                            <p class="item-name">Sales Revenue</p>
+
+                                        </div>
+                                    </div>
+                                    <div class="item-value">৳ @Model.SalesRevenue.ToString("N2")</div>
+                                </div>
+
+                                <div class="financial-item">
+                                    <div class="item-left">
+                                        <div class="icon-container danger-light">
+                                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <circle cx="9" cy="21" r="1" />
+                                                <circle cx="20" cy="21" r="1" />
+                                                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+                                            </svg>
+                                        </div>
+                                        <div class="item-info">
+                                            <p class="item-name">Cost of Goods Sold</p>
+                                        </div>
+                                    </div>
+                                    <div class="item-value">৳ @Model.PurchaseCost.ToString("N2")</div>
+                                </div>
+
+                            </div>
+                            <div class="profit-divider"></div>
+                            <div class="">
+                                <div class="net-profit success">
+                                    <div class="net-profit-content">
+                                        <div class="net-profit-left">
+                                            <div class="icon-container success-light">
+                                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                    <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
+                                                    <polyline points="17 6 23 6 23 12" />
+                                                </svg>
+                                            </div>
+                                            <span class="net-profit-label">Total Gross Profit</span>
+                                        </div>
+                                        <span class="net-profit-value">৳ @Model.TotalGrossProfit.ToString("N2")</span>
+                                    </div>
+                                </div>
+                                @*<div class="total-content">
+                                    <p class="total-label">Total Gross Profit</p>
+                                    <p class="total-value">৳ @Model.TotalIncome.ToString("N2")</p>
+                                </div>*@
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Net Profit/Loss Summary -->
+                    <div class="section-card">
+                        <div class="section-header success">
+                            <h3>Net Profit = (Gross Profit + Other Income) - Total Expense</h3>
+                        </div>
+                        <div class="section-body">
+                            <div class="profit-summary">
+                                <div class="financial-items">
+                                    <div class="financial-item">
+                                        <div class="item-left">
+                                            <div class="icon-container primary-light">
+                                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                    <line x1="12" y1="2" x2="12" y2="22" />
+                                                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                                                </svg>
+                                            </div>
+                                            <div class="item-info">
+                                                <p class="item-name">Total Gross Profit</p>
+
+                                            </div>
+                                        </div>
+                                        <div class="item-value">৳ @Model.TotalGrossProfit.ToString("N2")</div>
+                                    </div>
+
+                                    <div class="financial-item">
+                                        <div class="item-left">
+                                            <div class="icon-container primary-light">
+                                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                    <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
+                                                    <polyline points="17 6 23 6 23 12" />
+                                                </svg>
+                                            </div>
+                                            <div class="item-info">
+                                                <p class="item-name">Other Income</p>
+
+                                            </div>
+                                        </div>
+                                        <div class="item-value">৳ @Model.OtherIncome.ToString("N2")</div>
+                                    </div>
+
+                                    <div class="financial-item">
+                                        <div class="item-left">
+                                            <div class="icon-container danger-light">
+                                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                    <path d="M5 12V7a1 1 0 0 1 1-1h4l2 3h4a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1Z" />
+                                                    <path d="M3 7v10a1 1 0 0 0 1 1h14" />
+                                                </svg>
+                                            </div>
+                                            <div class="item-info">
+                                                <p class="item-name">Total Expense</p>
+
+                                            </div>
+                                        </div>
+                                        <div class="item-value">৳ @Model.TotalExpense.ToString("N2")</div>
+                                    </div>
+                                </div>
+                                <div class="profit-divider"></div>
+                                <div class="net-profit success">
+                                    <div class="net-profit-content">
+                                        <div class="net-profit-left">
+                                            <div class="icon-container success-light">
+                                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                    <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
+                                                    <polyline points="17 6 23 6 23 12" />
+                                                </svg>
+                                            </div>
+                                            <span class="net-profit-label">Total Net Profit</span>
+                                        </div>
+                                        <span class="net-profit-value">৳ @Model.NetProfit.ToString("N2")</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Print Button -->
+            <section class="print-section">
+                <button onclick="window.print()" class="print-button">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="6,9 6,2 18,2 18,9" />
+                        <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+                        <rect x="6" y="14" width="12" height="8" />
+                    </svg>
+                    Print Report
+                </button>
+            </section>
+        </main>
+    </div>
+</body>
+
+<script>
+    // Set current date
+    document.getElementById('report-date').textContent = new Date().toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    });
+</script>

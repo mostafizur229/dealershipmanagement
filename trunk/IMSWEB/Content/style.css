@@ -1,0 +1,138 @@
+.salesRate {
+    display: none;
+}
+.clearButton {
+    display: none;
+}
+.previewDue{
+    display: none;
+}
+.totalDiscountPercentage {
+    display: none;
+}
+.remarks {
+    display: none;
+}
+.adjAmount {
+    display: none;
+}
+.netDiscount {
+    display: none;
+}
+.PaymentDue {
+    display: block;
+}
+.LabourCost {
+    display: block;
+}
+.preview {
+    display: none;
+}
+.saveOrder_1{
+    display: none;
+}
+.saveOrder_2 {
+    display: block !important;
+}
+
+.salesorder--currentdue {
+    display: block;
+}
+
+.desktop--view {
+    display: none !important;
+}
+
+.mobile--view {
+    display: block !important;
+}
+
+.g--mobileview {
+    display: block !important;
+}
+
+.g--desktopview {
+    display: none !important;
+}
+
+.reminddate{
+    display: none !important;
+}
+.remainddate--panel {
+    display: none !important;
+}
+
+@media only screen and (min-width: 768px) {
+    .salesRate {
+        display: block !important;
+    }
+
+    .clearButton {
+        display: block !important;
+    }
+    .previewDue {
+        display: block !important;
+    }
+    .totalDiscountPercentage {
+        display: block !important;
+    }
+    .remarks {
+        display: block !important;
+    }
+    .adjAmount {
+        display: block !important;
+    }
+    .netDiscount {
+        display: block !important;
+    }
+    .labourCost {
+        display: none;
+    }
+    .preview {
+        display: block !important;
+    }
+    .saveOrder_1 {
+        display: block !important;
+    }
+    .saveOrder_2 {
+        display: none !important;
+    }
+
+    .desktop--view {
+        display: block !important;
+    }
+    .mobile--view {
+        display: none !important;
+    }
+    .g--mobileview {
+        display: none !important;
+    }
+
+    .g--desktopview {
+        display: block !important;
+    }
+    .reminddate {
+        display: block !important;
+    }
+    .remainddate--panel {
+        display: block !important;
+    }
+}
+
+
+@media only screen and (max-width: 576px){
+    .saveOrder_1 {
+        display: block !important;
+    }
+    .LabourCost {
+        display: none;
+    }
+    .PaymentDue {
+        display: none;
+    }
+    .salesorder--currentdue {
+        display: none;
+    }
+    
+    
+}
