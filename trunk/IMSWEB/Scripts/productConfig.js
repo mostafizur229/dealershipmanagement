@@ -28,6 +28,68 @@ $('input[id="CompanyName"]').autocomplete({
 });
 
 
+
+
+$('input[id="SizeName"]').autocomplete({
+    source: function (request, response) {
+        $('#SizeID').val("");
+        $.ajax({
+            url: "/Size/GetSizeByName/",
+            type: "POST",
+            dataType: "json",
+            data: { prefix: request.term },
+            success: function (data) {
+                if (data.result == false) {
+                    toastr.error("DO not found");
+                    return;
+                }
+                response($.map(data, function (item) {
+                    return { label: item.Name, value: item.Name, ID: item.ID };
+                }))
+            }
+        });
+    },
+    minLength: 0,
+    select: function (event, ui) {
+        $("#SizeID").val(ui.item.ID);
+    },
+    maxShowItems: 5
+}).focus(function () {
+    $(this).autocomplete("search")
+});
+
+//$('input[id="Sizes"]').autocomplete({
+//    source: function (request, response) {
+//        $('#SizeID').val("");
+//        $.ajax({
+//            url: "/Size/GetSizeByName/",
+//            type: "POST",
+//            dataType: "json",
+//            data: { prefix: request.term },
+//            success: function (data) {
+//                if (data.result == false) {
+//                    toastr.error("DO not found");
+//                    return;
+//                }
+//                response($.map(data, function (item) {
+//                    return { label: item.Name, value: item.Name, ID: item.ID };
+//                }))
+//            }
+//        });
+//    },
+//    minLength: 0,
+//    select: function (event, ui) {
+//        $("#SizeID").val(ui.item.ID);
+//    },
+//    maxShowItems: 5
+//}).focus(function () {
+//    $(this).autocomplete("search")
+//});
+
+
+
+
+
 $('input[id="CategoryName"]').autocomplete({
     source: function (request, response) {
         $('#CategoryId').val("");
@@ -55,6 +117,35 @@ $('input[id="CategoryName"]').autocomplete({
 }).focus(function () {
     $(this).autocomplete("search")
 });
+
+
+//$('input[id="SizeID"]').autocomplete({
+//    source: function (request, response) {
+//        $('#SizeId').val("");
+//        $.ajax({
+//            url: "/Size/GetSizeByName/",
+//            type: "POST",
+//            dataType: "json",
+//            data: { prefix: request.term },
+//            success: function (data) {
+//                if (data.result == false) {
+//                    toastr.error("DO not found");
+//                    return;
+//                }
+//                response($.map(data, function (item) {
+//                    return { label: item.SizeID, value: item.Code, ID: item.Description };
+//                }))
+//            }
+//        });
+//    },
+//    minLength: 0,
+//    select: function (event, ui) {
+//        $("#CategoryId").val(ui.item.ID);
+//    },
+//    maxShowItems: 5
+//}).focus(function () {
+//    $(this).autocomplete("search")
+//});
 
 $('input[id*="_ColorName"]').autocomplete({
     source: function (request, response) {
@@ -112,35 +203,6 @@ $('input[id*="_GodownName"]').autocomplete({
     $(this).autocomplete("search")
 });
 
-$('input[id="PCategoryName"]').autocomplete({
-    source: function (request, response) {
-        $('#PCategoryID').val("");
-        $.ajax({
-            url: "/ParentCategory/GetPCategoryByName/",
-            type: "POST",
-            dataType: "json",
-            data: { prefix: request.term },
-            success: function (data) {
-                if (data.result == false) {
-                    toastr.error("DO not found");
-                    return;
-                }
-                response($.map(data, function (item) {
-                    return { label: item.Name, value: item.Name, ID: item.ID };
-                }))
-            }
-        });
-    },
-    minLength: 0,
-    select: function (event, ui) {
-        $("#PCategoryID").val(ui.item.ID);
-    },
-    maxShowItems: 5
-}).focus(function () {
-    $(this).autocomplete("search")
-});
-
-
 //Add New Product modal show
 $(document).on('click', '#btnAddProduct', function () {
     $('#newProductAddModal').modal('show');
@@ -174,6 +236,22 @@ $(document).on('click', '#btnSaveProduct', function (e) {
             $('#CompanyName').prop('style', 'border:1px solid #c4daf1  !important');
         }
     }
+
+
+    if (IsValid) {
+        var SizeID = $("#SizeID").val();
+        if (SizeID == "") {
+            e.preventDefault();
+            toastr.error("Please select Size");
+            IsValid = false;
+            $("#Size").focus()
+            $('#Size').attr('style', 'border:1px solid red !important');
+            return false;
+        } else {
+            $('#Size').prop('style', 'border:1px solid #c4daf1  !important');
+        }
+    }
+
 
 
     if (IsValid) {
@@ -231,19 +309,17 @@ $(document).on('click', '#btnSaveProduct', function (e) {
 function SaveProduct() {
     var ProductName = $("#ProductName").val();
     var companyID = $("#CompanyId").val();
+    var SizeID = $("#SizeID").val();
     var CategoryId = $("#CategoryId").val();
     var ProductType = $("#ProductType").val();
     var UnitType = $("#UnitType").val();
-    var DP = getDefaultFloatIfEmpty($("#DP").val());
-    var RP = getDefaultFloatIfEmpty($("#RP").val());
     var MRP = getDefaultFloatIfEmpty($("#MRP").val());
     var model = {
         ProductName: ProductName,
         CategoryId: CategoryId,
         CompanyId: companyID,
+        SizeID: SizeID,
         UnitType: UnitType,
-        DP: DP,
-        RP: RP,
         MRP: MRP,
         ProductType: ProductType,
         Code: "0000"
@@ -264,8 +340,6 @@ function SaveProduct() {
                 $('#ProductsName').val(data.data.ProductName);
                 $('#ProductsCode').val(data.data.Code);
                 $('#ProductsType').val(data.data.ProductType);
-                $('#PODetail_DPRate').val(data.data.DP).trigger('input');
-                $('#PODetail_RPRate').val(data.data.RP).trigger('input');
                 $('#PODetail_MRPRate').val(data.data.MRP).trigger('input');
                 $('#newProductAddModal').modal('hide');
                 ClearProductField();
@@ -286,8 +360,6 @@ function ClearProductField() {
     $("#CategoryId").val("");
     $("#ProductType").val("");
     $("#UnitType").val("");
-    $("#DP").val("");
-    $("#RP").val("");
     $("#MRP").val("");
 }
 
@@ -296,11 +368,20 @@ $(document).on('click', '#btnAddCompany', function () {
     ShowNewEntryModal("Add New Company", "Company Name", "company");
 });
 
+
+
+
 //Add New Category
 $(document).on('click', '#btnAddCategory', function () {
     ShowNewEntryModal("Add New Category", "Category Name", "category");
 });
 
+
+
+//Add New Size
+$(document).on('click', '#btnAddSize', function () {
+    ShowNewEntryModal("Add New Size", "Size Name", "Sizes");
+});
 //Add New Godown
 $(document).on('click', '#btnAddGodown', function () {
     ShowNewEntryModal("Add New Godown", "Godown Name", "godown");
@@ -317,12 +398,6 @@ function ShowNewEntryModal(HeaderName, LabelName, EntryType) {
     $('#entryType').val(EntryType);
     $('#newName').attr('style', 'border:1px solid #c4daf1  !important');
     $('#newEntryModal').modal('show');
-    if (EntryType === "category") {
-        $('#divPCategory').show();
-    }
-    else {
-        $('#divPCategory').hide();
-    }
 }
 
 
@@ -340,18 +415,32 @@ $(document).on('click', '#btnAddCompanyCategory', function (e) {
     }
 });
 
+$(document).on('click', '#btnAddSize', function (e) {
+    var newName = $('#newName').val();
+    if (newName == "") {
+        toastr.error("Please enter name");
+        $('#newName').attr('style', 'border:1px solid red !important');
+        e.preventDefault();
+        return false;
+    }
+    else {
+        $('#newName').attr('style', 'border:1px solid #c4daf1  !important');
+        AddNewEntity(newName);
+    }
+});
+
 function AddNewEntity(newName) {
     $('#btnAddCompanyCategory').attr('disabled', true);
     var type = $('#entryType').val();
     var _URL = "";
-    var ObjModel = { "Name": newName };
     if (type == "company") {
         _URL = "/Company/AddCompany/";
     }
     else if (type == "category") {
         _URL = "/Category/AddCategory/";
-        var PCategoryID = $('#PCategoryID').val();
-        ObjModel = { "Name": newName, "PCategoryID": PCategoryID };
+    }
+    else if (type == "Sizes") {
+        _URL = "/size/AddSize/";
     }
     else if (type == "godown") {
         _URL = "/Godown/AddGodown/";
@@ -363,7 +452,7 @@ function AddNewEntity(newName) {
         url: _URL,
         type: "POST",
         dataType: "json",
-        data: ObjModel,
+        data: { "Name": newName },
         success: function (data) {
             if (data.result == false) {
                 toastr.error(data.msg);
@@ -394,6 +483,12 @@ function SetupFieldValue(type, data) {
         $('#CategoryId').val(data.data.CategoryID);
         $('#CategoryName').val(data.data.Description);
     }
+
+    else if (type == "Sizes") {
+        $('#SizeID').val(data.data.SizeID);
+        $('#SizeName').val(data.data.Description);
+    }
+
     else if (type == "godown") {
         $('input[id*="_GodownID"]').val(data.data.GodownID);
         $('input[id*="_GodownName"]').val(data.data.Name);

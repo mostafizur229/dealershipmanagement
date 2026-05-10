@@ -1,109 +1,144 @@
 ﻿@model IMSWEB.CreateBankViewModel
-
 @{
     string actionName = ViewContext.RouteData.Values["action"].ToString();
     ViewBag.Title = actionName + " Bank";
 }
 
-<h4>@(ViewBag.Title + ".")</h4>
-<hr />
-
-@using (Html.BeginForm(actionName, "Bank", new { ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
-{
-    @Html.AntiForgeryToken()
-    @Html.HiddenFor(m => m.Id);
-    <div class="col-md-offset-3 col-md-5">
-        <div class="form-group">
-            @Html.LabelFor(model => model.Code, htmlAttributes: new { @class = "control-label col-md-3" })
-            <div class="col-md-9">
-                @Html.EditorFor(model => model.Code, new { htmlAttributes = new { @class = "form-control input-sm" } })
-                @Html.ValidationMessageFor(model => model.Code, "", new { @class = "text-danger" })
-            </div>
-        </div>
-        <div class="form-group">
-            @Html.LabelFor(model => model.BankName, htmlAttributes: new { @class = "control-label col-md-3" })
-            <div class="col-md-9">
-                @Html.EditorFor(model => model.BankName, new { htmlAttributes = new { @class = "form-control input-sm", autofocus = "autofocus" } })
-                @Html.ValidationMessageFor(model => model.BankName, "", new { @class = "text-danger" })
-            </div>
-        </div>
-        <div class="form-group">
-            @Html.LabelFor(model => model.AccountNo, htmlAttributes: new { @class = "control-label col-md-3" })
-            <div class="col-md-9">
-                @Html.EditorFor(model => model.AccountNo, new { htmlAttributes = new { @class = "form-control input-sm", autofocus = "autofocus" } })
-                @Html.ValidationMessageFor(model => model.AccountNo, "", new { @class = "text-danger" })
-            </div>
-        </div>
-        <div class="form-group">
-            @Html.LabelFor(model => model.BranchName, htmlAttributes: new { @class = "control-label col-md-3" })
-            <div class="col-md-9">
-                @Html.EditorFor(model => model.BranchName, new { htmlAttributes = new { @class = "form-control input-sm", autofocus = "autofocus" } })
-                @Html.ValidationMessageFor(model => model.BranchName, "", new { @class = "text-danger" })
-            </div>
-        </div>
-        <div class="form-group">
-            @Html.LabelFor(model => model.AccountName, htmlAttributes: new { @class = "control-label col-md-3" })
-            <div class="col-md-9">
-                @Html.EditorFor(model => model.AccountName, new { htmlAttributes = new { @class = "form-control input-sm", autofocus = "autofocus" } })
-                @Html.ValidationMessageFor(model => model.AccountName, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-
-
-        <div class="form-group">
-            @Html.LabelFor(model => model.OpeningBalance, htmlAttributes: new { @class = "control-label col-md-3" })
-            <div class="col-md-9">
-
-                @if (actionName.ToLower().Equals("create"))
-                {
-                    @Html.EditorFor(model => model.OpeningBalance, new { htmlAttributes = new { @class = "form-control input-sm", autofocus = "autofocus", type = "number" } })
-                    @Html.ValidationMessageFor(model => model.OpeningBalance, "", new { @class = "text-danger" })
-
-                }
-                else
-                {
-                    @Html.EditorFor(model => model.OpeningBalance, new { htmlAttributes = new { @class = "form-control input-sm", autofocus = "autofocus", type = "number", @readonly = "readonly" } })
-                    @Html.ValidationMessageFor(model => model.OpeningBalance, "", new { @class = "text-danger" })
-
-                }
-            </div>
-        </div>
-
-        <div class="form-group">
-            @Html.LabelFor(model => model.TotalAmount, htmlAttributes: new { @class = "control-label col-md-3" })
-            <div class="col-md-9">
-                @Html.EditorFor(model => model.TotalAmount, new { htmlAttributes = new { @class = "form-control input-sm", autofocus = "autofocus", type = "number", @readonly = "readonly" } })
-                @Html.ValidationMessageFor(model => model.TotalAmount, "", new { @class = "text-danger" })
-            </div>
-        </div>
-        <div class="form-check ">
-            @Html.EditorFor(model => model.IsAdvancedDueLimitApplicable, new { htmlAttributes = new { @class = "form-check-input" } })
-            @Html.LabelFor(model => model.IsAdvancedDueLimitApplicable, htmlAttributes: new { @class = "form-check-label" })
-            @Html.ValidationMessageFor(model => model.IsAdvancedDueLimitApplicable, "", new { @class = "text-danger" })
-        </div>
-
-        <div class="form-group">
-            @Html.LabelFor(model => model.AdvancedAmountLimit, htmlAttributes: new { @class = "control-label col-md-3" })
-            <div class="col-md-9">
-                @Html.EditorFor(model => model.AdvancedAmountLimit, new { htmlAttributes = new { @class = "form-control input-sm", autofocus = "autofocus", type = "number" } })
-                @Html.ValidationMessageFor(model => model.AdvancedAmountLimit, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-        <div class="form-group">
-            <div class="col-sm-offset-3 col-sm-9">
-                <input type="submit" value="Add Bank" class="btn btn-sm btn-primary" />
+<div class="page-title-box">
+    <div class="container-fluid">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h4 class="page-title mb-1">@ViewBag.Title</h4>
+                <ol class="breadcrumb m-0">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index", "Bank")">Bank List</a></li>
+                    <li class="breadcrumb-item active">@actionName</li>
+                </ol>
             </div>
         </div>
     </div>
-}
+</div>
 
+<div class="page-content-wrapper">
+    <div class="container-fluid">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="header-title mb-4">Bank Account Information</h5>
+
+                        @using (Html.BeginForm(actionName, "Bank", new { ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, new { role = "form" }))
+                        {
+                            @Html.AntiForgeryToken()
+                            @Html.HiddenFor(m => m.Id)
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group row mb-3">
+                                        @Html.LabelFor(model => model.Code, new { @class = "col-md-4 col-form-label-sm" })
+                                        <div class="col-md-8">
+                                            @Html.EditorFor(model => model.Code, new { htmlAttributes = new { @class = "form-control form-control-sm" } })
+                                            @Html.ValidationMessageFor(model => model.Code, "", new { @class = "text-danger small" })
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row mb-3">
+                                        @Html.LabelFor(model => model.BankName, new { @class = "col-md-4 col-form-label-sm" })
+                                        <div class="col-md-8">
+                                            @Html.EditorFor(model => model.BankName, new { htmlAttributes = new { @class = "form-control form-control-sm", autofocus = "autofocus" } })
+                                            @Html.ValidationMessageFor(model => model.BankName, "", new { @class = "text-danger small" })
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row mb-3">
+                                        @Html.LabelFor(model => model.AccountNo, new { @class = "col-md-4 col-form-label-sm" })
+                                        <div class="col-md-8">
+                                            @Html.EditorFor(model => model.AccountNo, new { htmlAttributes = new { @class = "form-control form-control-sm" } })
+                                            @Html.ValidationMessageFor(model => model.AccountNo, "", new { @class = "text-danger small" })
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row mb-3">
+                                        @Html.LabelFor(model => model.BranchName, new { @class = "col-md-4 col-form-label-sm" })
+                                        <div class="col-md-8">
+                                            @Html.EditorFor(model => model.BranchName, new { htmlAttributes = new { @class = "form-control form-control-sm" } })
+                                            @Html.ValidationMessageFor(model => model.BranchName, "", new { @class = "text-danger small" })
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="form-group row mb-3">
+                                        @Html.LabelFor(model => model.AccountName, new { @class = "col-md-4 col-form-label-sm" })
+                                        <div class="col-md-8">
+                                            @Html.EditorFor(model => model.AccountName, new { htmlAttributes = new { @class = "form-control form-control-sm" } })
+                                            @Html.ValidationMessageFor(model => model.AccountName, "", new { @class = "text-danger small" })
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row mb-3">
+                                        @Html.LabelFor(model => model.OpeningBalance, new { @class = "col-md-4 col-form-label-sm" })
+                                        <div class="col-md-8">
+                                            @{
+                                                var openingAttr = actionName.ToLower().Equals("create")
+                                                    ? (object)new { @class = "form-control form-control-sm", type = "number" }
+                                                    : (object)new { @class = "form-control form-control-sm", type = "number", @readonly = "readonly" };
+                                            }
+                                            @Html.EditorFor(model => model.OpeningBalance, new { htmlAttributes = openingAttr })
+                                            @Html.ValidationMessageFor(model => model.OpeningBalance, "", new { @class = "text-danger small" })
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row mb-3">
+                                        @Html.LabelFor(model => model.TotalAmount, new { @class = "col-md-4 col-form-label-sm" })
+                                        <div class="col-md-8">
+                                            @Html.EditorFor(model => model.TotalAmount, new { htmlAttributes = new { @class = "form-control form-control-sm", type = "number", @readonly = "readonly" } })
+                                            @Html.ValidationMessageFor(model => model.TotalAmount, "", new { @class = "text-danger small" })
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row mb-3">
+                                        <div class="col-md-8 offset-md-4">
+                                            <div class="custom-control custom-checkbox">
+                                                @Html.CheckBoxFor(m => m.IsAdvancedDueLimitApplicable, new { @class = "custom-control-input", id = "IsAdvancedDueLimitApplicable" })
+                                                <label class="custom-control-label" for="IsAdvancedDueLimitApplicable">Advanced Due Limit?</label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row mb-3">
+                                        @Html.LabelFor(model => model.AdvancedAmountLimit, new { @class = "col-md-4 col-form-label-sm" })
+                                        <div class="col-md-8">
+                                            @Html.EditorFor(model => model.AdvancedAmountLimit, new { htmlAttributes = new { @class = "form-control form-control-sm", type = "number" } })
+                                            @Html.ValidationMessageFor(model => model.AdvancedAmountLimit, "", new { @class = "text-danger small" })
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <hr />
+
+                            <div class="row">
+                                <div class="col-md-12 text-center">
+                                    <button type="submit" class="btn btn-primary btn-sm waves-effect waves-light" style="min-width: 100px;">
+                                        <i class="mdi mdi-check-circle mr-1"></i> @(actionName == "Create" ? "Add Bank" : "Update Bank")
+                                    </button>
+                                    <a href="@Url.Action("Index")" class="btn btn-outline-secondary btn-sm waves-effect ml-1">
+                                        Cancel
+                                    </a>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 <script>
-
     $("#OpeningBalance").on("input", function () {
-        var amount = getDefaultFloatIfEmpty($(this).val()).toFixed(2);
+        var val = $(this).val();
+        var amount = (val === "" ? 0 : parseFloat(val)).toFixed(2);
         $("#TotalAmount").val(amount);
     });
 </script>

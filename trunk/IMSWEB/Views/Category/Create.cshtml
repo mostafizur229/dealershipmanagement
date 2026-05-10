@@ -1,36 +1,70 @@
 ﻿@model IMSWEB.CreateCategoryViewModel
-
 @{
     string actionName = ViewContext.RouteData.Values["action"].ToString();
     ViewBag.Title = actionName + " Category";
 }
 
-<h4>@(ViewBag.Title + ".")</h4>
-<hr />
-
-@using (Html.BeginForm(actionName, "Category", new { ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
-{
-    @Html.AntiForgeryToken()
-    @Html.HiddenFor(m => m.Id);
-    <div class="col-md-offset-3 col-md-5">
-        <div class="form-group">
-            @Html.LabelFor(model => model.Code, htmlAttributes: new { @class = "control-label col-md-1" })
-            <div class="col-md-11">
-                @Html.EditorFor(model => model.Code, new { htmlAttributes = new { @class = "form-control input-sm"} })
-                @Html.ValidationMessageFor(model => model.Code, "", new { @class = "text-danger" })
-            </div>
-        </div>
-        <div class="form-group">
-            @Html.LabelFor(model => model.Name, htmlAttributes: new { @class = "control-label col-md-1" })
-            <div class="col-md-11">
-                @Html.EditorFor(model => model.Name, new { htmlAttributes = new { @class = "form-control input-sm", autofocus = "autofocus" } })
-                @Html.ValidationMessageFor(model => model.Name, "", new { @class = "text-danger" })
-            </div>
-        </div>
-        <div class="form-group">
-            <div class="col-sm-offset-1 col-sm-11">
-                <input type="submit" value="Add Category" class="btn btn-sm btn-primary" />
+<div class="page-title-box">
+    <div class="container-fluid">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h4 class="page-title mb-1">@ViewBag.Title</h4>
+                <ol class="breadcrumb m-0">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index", "Category")">Category List</a></li>
+                    <li class="breadcrumb-item active">@actionName</li>
+                </ol>
             </div>
         </div>
     </div>
-}
+</div>
+
+<div class="page-content-wrapper">
+    <div class="container-fluid">
+        <div class="row justify-content-center">
+            <div class="col-lg-7">
+             
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="header-title mb-4">Category Information</h5>
+
+                        @using (Html.BeginForm(actionName, "Category", new { ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, new { role = "form" }))
+                        {
+                            @Html.AntiForgeryToken()
+                            @Html.HiddenFor(m => m.Id)
+
+                            <div class="form-group row mb-3">
+                                @Html.LabelFor(model => model.Code, htmlAttributes: new { @class = "col-md-3 col-form-label-sm" })
+                                <div class="col-md-9">
+                                    @Html.EditorFor(model => model.Code, new { htmlAttributes = new { @class = "form-control form-control-sm", placeholder = "Enter category code" } })
+                                    @Html.ValidationMessageFor(model => model.Code, "", new { @class = "text-danger small" })
+                                </div>
+                            </div>
+
+                            <div class="form-group row mb-3">
+                                @Html.LabelFor(model => model.Name, htmlAttributes: new { @class = "col-md-3 col-form-label-sm" })
+                                <div class="col-md-9">
+                                    @Html.EditorFor(model => model.Name, new { htmlAttributes = new { @class = "form-control form-control-sm", autofocus = "autofocus", placeholder = "Enter category name" } })
+                                    @Html.ValidationMessageFor(model => model.Name, "", new { @class = "text-danger small" })
+                                </div>
+                            </div>
+
+                            <hr />
+
+                            <div class="form-group row mb-0">
+                                <div class="col-md-9 offset-md-3">
+                                  
+                                    <button type="submit" class="btn btn-primary btn-sm waves-effect waves-light" style="min-width: 80px;">
+                                        <i class="mdi mdi-check-circle mr-1"></i> @(actionName == "Create" ? "Save" : "Update")
+                                    </button>
+                                    <a href="@Url.Action("Index")" class="btn btn-outline-secondary btn-sm waves-effect ml-1">
+                                        Cancel
+                                    </a>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

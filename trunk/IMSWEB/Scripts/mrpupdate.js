@@ -1,16 +1,12 @@
 ﻿$(document).on("click", "#showmodalbtn", function () {
     var ProductID = $(this).data("productid");
     var colorid = $(this).data("colorid");
-    var RP = $(this).data("salesrate");//RP
-    var mrp = $(this).data("mrp");//MRP
-    var dp = $(this).data("dp");//dp
+    var cashsalesRate = $(this).data("salesrate");
     var creditsalesrate3 = $(this).data("creditsalesrate3");
     var creditsalesrate6 = $(this).data("creditsalesrate6");
     var creditsalesrate12 = $(this).data("creditsalesrate12");
     var productname = $(this).data("productname");
-    $("#CashSalesRate").val(RP);
-    $("#MRP").val(mrp);
-    $("#DP").val(dp);
+    $("#CashSalesRate").val(cashsalesRate);
     $("#CreditSalesRate3").val(creditsalesrate3);
     $("#CreditSalesRate6").val(creditsalesrate6);
     $("#CreditSalesRate12").val(creditsalesrate12);
@@ -24,9 +20,7 @@
 
 $(document).on("click", "#Submitbtn", function () {
 
-    var RP = $("#CashSalesRate").val(); //RP
-    var MRP = $("#MRP").val();
-    var DP = $("#DP").val();
+    var cashsalesRate = $("#CashSalesRate").val();
     var creditsalesrate3 = $("#CreditSalesRate3").val();
     var creditsalesrate6 = $("#CreditSalesRate6").val();
     var creditsalesrate12 = $("#CreditSalesRate12").val();
@@ -36,46 +30,35 @@ $(document).on("click", "#Submitbtn", function () {
     var ConcernID = $(this).data("concernid");
 
     //if (ConcernID == 1 || ConcernID == 5 || ConcernID == 6) {
-    //    if ((RP == "" || RP == 0) || (creditsalesrate3 == "" || creditsalesrate3 == 0) || (creditsalesrate6 == "" || creditsalesrate6 == 0) || (creditsalesrate12 == "" || creditsalesrate12 == 0)) {
+    //    if ((cashsalesRate == "" || cashsalesRate == 0) || (creditsalesrate3 == "" || creditsalesrate3 == 0) || (creditsalesrate6 == "" || creditsalesrate6 == 0) || (creditsalesrate12 == "" || creditsalesrate12 == 0)) {
     //        toastr.error("Please Enter Cash or Credit Sales Rate.");
     //        return;
     //    }
 
     //}
     //else {
-    if ((RP == "" || RP == 0)) {
-        toastr.error("Please Enter RP.");
-        return;
-    }
-    if ((MRP == "" || MRP == 0)) {
-        toastr.error("Please Enter MRP.");
-        return;
-    }
-    if ((DP == "" || DP == 0)) {
-        toastr.error("Please Enter DP.");
-        return;
-    }
-
-    if (creditsalesrate3 == "" || creditsalesrate3 == undefined) {
-        creditsalesrate3 = 0;
-    }
-    if (creditsalesrate6 == "" || creditsalesrate6 == undefined) {
-        creditsalesrate6 = 0;
-    }
-    if (creditsalesrate12 == "" || creditsalesrate12 == undefined) {
-        creditsalesrate12 = 0;
-    }
+    //    if ((cashsalesRate == "" || cashsalesRate == 0)) {
+    //        toastr.error("Please Enter Cash Sales Rate.");
+    //        return;
+    //    }
+        if (creditsalesrate3 == "" || creditsalesrate3 == undefined) {
+            creditsalesrate3 = 0;
+        }
+        if (creditsalesrate6 == "" || creditsalesrate6 == undefined) {
+            creditsalesrate6 = 0;
+        }
+        if (creditsalesrate12 == "" || creditsalesrate12 == undefined) {
+            creditsalesrate12 = 0;
+        }
     //}
 
     var SalesRateModel = {
         'ProductID': ProductID,
         'ColorID': ColorID,
-        'SalesRate': RP,
+        'SalesRate': cashsalesRate,
         'CreditSalesRate3': creditsalesrate3,
         'CreditSalesRate6': creditsalesrate6,
-        'CreditSalesRate12': creditsalesrate12,
-        'MRP': MRP,
-        'DP' : DP
+        'CreditSalesRate12': creditsalesrate12
     };
 
     $.ajax({
@@ -110,7 +93,7 @@ function ClearTextBox() {
     $("#ProductID").val("");
     $("#ColorID").val("");
     $("#ProductName").val("");
-    $("#RP").val("");
+    $("#CashSalesRate").val("");
     $("#CreditSalesRate3").val("");
     $("#CreditSalesRate6").val("");
     $("#CreditSalesRate12").val("");
