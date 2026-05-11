@@ -4,385 +4,271 @@
     string actionName = ViewContext.RouteData.Values["action"].ToString();
     ViewBag.Title = "System Information";
 }
-<h4 class="inline-header">Current System Information</h4>
-<div class="row">
-    <div class="col-md-12">
-        @using (Html.BeginForm("Edit", "SystemInformation", new { ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, new
-                {
-                    @class = "form-horizontal",
-                    role = "form",
-                    enctype = "multipart/form-data"
-                }))
+
+<div class="page-title-box">
+    <div class="container-fluid">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h4 class="page-title mb-1">System Configuration</h4>
+                <ol class="breadcrumb m-0">
+                    <li class="breadcrumb-item active">Manage global system settings and paths</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="page-content-wrapper">
+    <div class="container-fluid">
+        @using (Html.BeginForm("Edit", "SystemInformation", FormMethod.Post, new { enctype = "multipart/form-data", autocomplete = "off" }))
         {
             @Html.AntiForgeryToken()
-            @Html.HiddenFor(m => m.Id);
+            @Html.HiddenFor(m => m.Id)
 
             <div class="row">
-                <div class="col-md-6">
+                <!-- Left Column: Primary Info & Logo -->
+                <div class="col-lg-6">
+                    <!-- General Settings Card -->
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="header-title mb-4"><i class="mdi mdi-settings-outline mr-1"></i> General Settings</h5>
 
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="panel panel-default">
-                                <div class="panel-body">
-                                    <div class="form-group">
-                                        @Html.LabelFor(model => model.Name, htmlAttributes: new { @class = "control-label col-md-3" })
-                                        <div class="col-md-9">
-                                            @Html.EditorFor(model => model.Name, new { htmlAttributes = new { @class = "form-control input-sm" } })
-                                            @Html.ValidationMessageFor(model => model.Name, "", new { @class = "text-danger" })
-                                        </div>
+                            <div class="form-group row mb-3">
+                                @Html.LabelFor(m => m.Name, new { @class = "col-md-3 col-form-label" })
+                                <div class="col-md-9">
+                                    @Html.EditorFor(m => m.Name, new { htmlAttributes = new { @class = "form-control", placeholder = "Company Name" } })
+                                    @Html.ValidationMessageFor(m => m.Name, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+
+                            <div class="form-group row mb-3">
+                                @Html.LabelFor(m => m.Address, new { @class = "col-md-3 col-form-label" })
+                                <div class="col-md-9">
+                                    @Html.EditorFor(m => m.Address, new { htmlAttributes = new { @class = "form-control", placeholder = "Full Address" } })
+                                    @Html.ValidationMessageFor(m => m.Address, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label>Telephone</label>
+                                        @Html.EditorFor(m => m.TelephoneNo, new { htmlAttributes = new { @class = "form-control" } })
                                     </div>
-                                    <div class="form-group">
-                                        @Html.LabelFor(model => model.Address, htmlAttributes: new { @class = "control-label col-md-3" })
-                                        <div class="col-md-9">
-                                            @Html.EditorFor(model => model.Address, new { htmlAttributes = new { @class = "form-control input-sm" } })
-                                            @Html.ValidationMessageFor(model => model.Address, "", new { @class = "text-danger" })
-                                        </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label>Email Address</label>
+                                        @Html.EditorFor(m => m.EmailAddress, new { htmlAttributes = new { @class = "form-control", type = "email" } })
                                     </div>
-                                    <div class="form-group">
-                                        @Html.LabelFor(model => model.TelephoneNo, htmlAttributes: new { @class = "control-label col-md-3" })
-                                        <div class="col-md-9">
-                                            @Html.EditorFor(model => model.TelephoneNo, new { htmlAttributes = new { @class = "form-control input-sm" } })
-                                            @Html.ValidationMessageFor(model => model.TelephoneNo, "", new { @class = "text-danger" })
-                                        </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label>Device IP</label>
+                                        @Html.EditorFor(m => m.DeviceIP, new { htmlAttributes = new { @class = "form-control" } })
                                     </div>
-                                    <div class="form-group">
-                                        @Html.LabelFor(model => model.DeviceIP, htmlAttributes: new { @class = "control-label col-md-3" })
-                                        <div class="col-md-9">
-                                            @Html.EditorFor(model => model.DeviceIP, new { htmlAttributes = new { @class = "form-control input-sm" } })
-                                            @Html.ValidationMessageFor(model => model.DeviceIP, "", new { @class = "text-danger" })
-                                        </div>
-                                    </div>
-                                    <div class="form-group">
-                                        @Html.LabelFor(model => model.DeviceSerialNO, htmlAttributes: new { @class = "control-label col-md-3" })
-                                        <div class="col-md-9">
-                                            @Html.EditorFor(model => model.DeviceSerialNO, new { htmlAttributes = new { @class = "form-control input-sm" } })
-                                            @Html.ValidationMessageFor(model => model.DeviceSerialNO, "", new { @class = "text-danger" })
-                                        </div>
-                                    </div>
-                                    <div class="form-group">
-                                        @Html.LabelFor(model => model.EmailAddress, htmlAttributes: new { @class = "control-label col-md-3" })
-                                        <div class="col-md-9">
-                                            @Html.EditorFor(model => model.EmailAddress, new { htmlAttributes = new { @class = "form-control input-sm" } })
-                                            @Html.ValidationMessageFor(model => model.EmailAddress, "", new { @class = "text-danger" })
-                                        </div>
-                                    </div>
-                                    <div class="form-group">
-                                        @Html.LabelFor(model => model.WebAddress, htmlAttributes: new { @class = "control-label col-md-3" })
-                                        <div class="col-md-9">
-                                            @Html.EditorFor(model => model.WebAddress, new { htmlAttributes = new { @class = "form-control input-sm" } })
-                                            @Html.ValidationMessageFor(model => model.WebAddress, "", new { @class = "text-danger" })
-                                        </div>
-                                    </div>
-                                    <div class="form-group">
-                                        @Html.LabelFor(model => model.SystemStartDate, htmlAttributes: new { @class = "control-label col-md-3" })
-                                        <div class="col-md-9">
-                                            <div class='input-group date' id='SystemStartDate'>
-                                                <input type='text' class="input-sm form-control input-sm" name='SystemStartDate' />
-                                                <span class="input-group-addon">
-                                                    <i class="fa fa-calendar" aria-hidden="true"></i>
-                                                </span>
-                                                @Html.ValidationMessageFor(m => m.SystemStartDate, "", new { @class = "text-danger" })
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label>Start Date</label>
+                                        <div class="input-group" id="SystemStartDate">
+                                            <input type="text" class="form-control" name="SystemStartDate" />
+                                            <div class="input-group-append">
+                                                <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="form-check  col-md-offset-3">
-                                        @Html.EditorFor(model => model.CustomerDueLimitApply, new { htmlAttributes = new { @class = "form-check-input" } })
-                                        @Html.LabelFor(model => model.CustomerDueLimitApply, htmlAttributes: new { @class = "form-check-label" })
-                                        @Html.ValidationMessageFor(model => model.CustomerDueLimitApply, "", new { @class = "text-danger" })
-                                    </div>
-                                    <div class="form-check  col-md-offset-3">
-                                        @Html.EditorFor(model => model.EmployeeDueLimitApply, new { htmlAttributes = new { @class = "form-check-input" } })
-                                        @Html.LabelFor(model => model.EmployeeDueLimitApply, htmlAttributes: new { @class = "form-check-label" })
-                                        @Html.ValidationMessageFor(model => model.EmployeeDueLimitApply, "", new { @class = "text-danger" })
-                                    </div>
-                                    <div class="form-check  col-md-offset-3">
-                                        @Html.EditorFor(model => model.IsLabourCostDeduct, new { htmlAttributes = new { @class = "form-check-input" } })
-                                        @Html.LabelFor(model => model.IsLabourCostDeduct, htmlAttributes: new { @class = "form-check-label" })
-                                        @Html.ValidationMessageFor(model => model.IsLabourCostDeduct, "", new { @class = "text-danger" })
-                                    </div>
-                                    <div class="form-check  col-md-offset-3">
-                                        @Html.EditorFor(model => model.IsPosInvoiceShow, new { htmlAttributes = new { @class = "form-check-input" } })
-                                        @Html.LabelFor(model => model.IsPosInvoiceShow, htmlAttributes: new { @class = "form-check-label" })
-                                        @Html.ValidationMessageFor(model => model.IsPosInvoiceShow, "", new { @class = "text-danger" })
-                                    </div>
-
                                 </div>
                             </div>
-                        </div>
-                    </div>
 
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="panel panel-default">
-                                <div class="panel-body">
-                                    <div class="form-group">
-                                        @Html.LabelFor(model => model.CompanyLogo, htmlAttributes: new { @class = "control-label col-md-3" })
-                                        <div class="col-md-9">
-                                            @if (Model.CompanyLogo == null)
-                                            {
-                                                @:None
-                                    }
-                                            else
-                                            {
-                                                <img width="150" height="150" src="@Url.Action("GetImage", "SystemInformation", new { Model.Id })" />
-                                            }
-                                            <label>Upload new image: <input type="file" class="form-control" accept=".jpg,.jpeg,.png" name="Image" /></label>
-                                        </div>
+                            <hr />
+                            <h6 class="text-muted mb-3">System Features</h6>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="custom-control custom-checkbox mb-2">
+                                        @Html.CheckBoxFor(m => m.CustomerDueLimitApply, new { @class = "custom-control-input", id = "dueLimit" })
+                                        <label class="custom-control-label" for="dueLimit">Customer Due Limit</label>
+                                    </div>
+                                    <div class="custom-control custom-checkbox mb-2">
+                                        @Html.CheckBoxFor(m => m.EmployeeDueLimitApply, new { @class = "custom-control-input", id = "empDue" })
+                                        <label class="custom-control-label" for="empDue">Employee Due Limit</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="custom-control custom-checkbox mb-2">
+                                        @Html.CheckBoxFor(m => m.IsLabourCostDeduct, new { @class = "custom-control-input", id = "labourCost" })
+                                        <label class="custom-control-label" for="labourCost">Deduct Labour Cost</label>
+                                    </div>
+                                    <div class="custom-control custom-checkbox mb-2">
+                                        @Html.CheckBoxFor(m => m.IsPosInvoiceShow, new { @class = "custom-control-input", id = "posShow" })
+                                        <label class="custom-control-label" for="posShow">Show POS Invoice</label>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
+                    <!-- Logo Settings Card -->
+                    <div class="card">
+                        <div class="card-body text-center">
+                            <h5 class="header-title text-left mb-4"><i class="mdi mdi-image-outline mr-1"></i> Branding</h5>
+                            <div class="mb-3">
+                                @if (Model.CompanyLogo == null)
+                                {
+                                    <div class="bg-light p-4 rounded mb-2">No Logo Uploaded</div>
+                                }
+                                else
+                                {
+                                    <img width="120" class="img-thumbnail shadow-sm mb-2" src="@Url.Action("GetImage", "SystemInformation", new { Model.Id })" />
+                                }
+                            </div>
+                            <div class="custom-file">
+                                <input type="file" class="custom-file-input" id="customFile" name="Image" accept=".jpg,.jpeg,.png">
+                                <label class="custom-file-label text-left" for="customFile">Choose logo file...</label>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="col-md-6">
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="panel panel-default">
-                                <div class="panel-body">
-                                    <div class="form-group">
-                                        @Html.LabelFor(model => model.APIKey, htmlAttributes: new { @class = "control-label col-md-3" })
-                                        <div class="col-md-6">
-                                            @Html.EditorFor(model => model.APIKey, new { htmlAttributes = new { @class = "form-control input-sm" } })
-                                            @Html.ValidationMessageFor(model => model.APIKey, "", new { @class = "text-danger" })
-                                        </div>
-                                        <div class="col-md-2">
-                                            <input type="button" class="btn btn-success btn-xs" name="btnGetAPIKey" onclick="GenerateSHA256String()" value="Update key" />
-                                        </div>
-                                    </div>
-                                    <div class="form-group">
-                                        @Html.LabelFor(model => model.ProductPhotoPath, htmlAttributes: new { @class = "control-label col-md-3" })
-                                        <div class="col-md-9">
-                                            @Html.EditorFor(model => model.ProductPhotoPath, new { htmlAttributes = new { @class = "form-control input-sm" } })
-                                            @Html.ValidationMessageFor(model => model.ProductPhotoPath, "", new { @class = "text-danger" })
-                                        </div>
-                                    </div>
-                                    <div class="form-group">
-                                        @Html.LabelFor(model => model.SupplierPhotoPath, htmlAttributes: new { @class = "control-label col-md-3" })
-                                        <div class="col-md-9">
-                                            @Html.EditorFor(model => model.SupplierPhotoPath, new { htmlAttributes = new { @class = "form-control input-sm" } })
-                                            @Html.ValidationMessageFor(model => model.SupplierPhotoPath, "", new { @class = "text-danger" })
-                                        </div>
-                                    </div>
-                                    <div class="form-group">
-                                        @Html.LabelFor(model => model.CustomerPhotoPath, htmlAttributes: new { @class = "control-label col-md-3" })
-                                        <div class="col-md-9">
-                                            @Html.EditorFor(model => model.CustomerPhotoPath, new { htmlAttributes = new { @class = "form-control input-sm" } })
-                                            @Html.ValidationMessageFor(model => model.CustomerPhotoPath, "", new { @class = "text-danger" })
-                                        </div>
-                                    </div>
-                                    <div class="form-group">
-                                        @Html.LabelFor(model => model.CustomerNIDPatht, htmlAttributes: new { @class = "control-label col-md-3" })
-                                        <div class="col-md-9">
-                                            @Html.EditorFor(model => model.CustomerNIDPatht, new { htmlAttributes = new { @class = "form-control input-sm" } })
-                                            @Html.ValidationMessageFor(model => model.CustomerNIDPatht, "", new { @class = "text-danger" })
-                                        </div>
-                                    </div>
-                                    <div class="form-group">
-                                        @Html.LabelFor(model => model.SupplierDocPath, htmlAttributes: new { @class = "control-label col-md-3" })
-                                        <div class="col-md-9">
-                                            @Html.EditorFor(model => model.SupplierDocPath, new { htmlAttributes = new { @class = "form-control input-sm" } })
-                                            @Html.ValidationMessageFor(model => model.SupplierDocPath, "", new { @class = "text-danger" })
-                                        </div>
-                                    </div>
-                                    <div class="form-group">
-                                        @Html.LabelFor(model => model.EmployeePhotoPath, htmlAttributes: new { @class = "control-label col-md-3" })
-                                        <div class="col-md-9">
-                                            @Html.EditorFor(model => model.EmployeePhotoPath, new { htmlAttributes = new { @class = "form-control input-sm" } })
-                                            @Html.ValidationMessageFor(model => model.EmployeePhotoPath, "", new { @class = "text-danger" })
-                                        </div>
-                                    </div>
+                <!-- Right Column: API, Paths & SMS -->
+                <div class="col-lg-6">
+                    <!-- Security & Paths Card -->
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="header-title mb-4"><i class="mdi mdi-shield-key-outline mr-1"></i> Security & Paths</h5>
 
+                            <div class="form-group mb-4">
+                                <label>API Integration Key</label>
+                                <div class="input-group">
+                                    @Html.EditorFor(m => m.APIKey, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                    <div class="input-group-append">
+                                        <button class="btn btn-success" type="button" onclick="GenerateSHA256String()">Update Key</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label>Product Photo Path</label>
+                                    @Html.EditorFor(m => m.ProductPhotoPath, new { htmlAttributes = new { @class = "form-control" } })
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label>Employee Photo Path</label>
+                                    @Html.EditorFor(m => m.EmployeePhotoPath, new { htmlAttributes = new { @class = "form-control" } })
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label>Customer Photo Path</label>
+                                    @Html.EditorFor(m => m.CustomerPhotoPath, new { htmlAttributes = new { @class = "form-control" } })
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label>Supplier Doc Path</label>
+                                    @Html.EditorFor(m => m.SupplierDocPath, new { htmlAttributes = new { @class = "form-control" } })
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="panel">
-                                <div class="panel-body">
-                                    <div class="form-group">
-                                        @Html.LabelFor(model => model.SMSProviderID, htmlAttributes: new { @class = "control-label col-md-3" })
-                                        <div class="col-md-9">
-                                            @Html.EnumDropDownListFor(model => model.SMSProviderID, new { @class = "form-control input-sm" })
-                                            @Html.ValidationMessageFor(model => model.SMSProviderID, "", new { @class = "text-danger" })
-                                        </div>
-                                    </div>
-                                    <div class="form-check  col-md-offset-3">
-                                        @Html.EditorFor(model => model.SMSServiceEnable, new { htmlAttributes = new { @class = "form-check-input" } })
-                                        @Html.LabelFor(model => model.SMSServiceEnable, htmlAttributes: new { @class = "form-check-label" })
-                                        @Html.ValidationMessageFor(model => model.SMSServiceEnable, "", new { @class = "text-danger" })
-                                    </div>
+                    <!-- SMS & Alerts Card -->
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="header-title mb-4"><i class="mdi mdi-message-text-outline mr-1"></i> SMS & Alerts</h5>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label>SMS Provider</label>
+                                    @Html.EnumDropDownListFor(m => m.SMSProviderID, new { @class = "form-control" })
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label>Sender ID</label>
+                                    @Html.EditorFor(m => m.SenderId, new { htmlAttributes = new { @class = "form-control" } })
+                                </div>
+                            </div>
 
-                          
+                            <div class="custom-control custom-switch mb-3">
+                                @Html.CheckBoxFor(m => m.SMSServiceEnable, new { @class = "custom-control-input", id = "smsEnable" })
+                                <label class="custom-control-label" for="smsEnable">Enable SMS Service</label>
+                            </div>
 
-                                    <div class="form-check  col-md-offset-3">
-                                        @Html.EditorFor(model => model.IsVulcanizing, new { htmlAttributes = new { @class = "form-check-input" } })
-                                        @Html.LabelFor(model => model.IsVulcanizing, htmlAttributes: new { @class = "form-check-label" })
-                                        @Html.ValidationMessageFor(model => model.IsVulcanizing, "", new { @class = "text-danger" })
-                                    </div>
+                            <div class="form-group mb-3">
+                                <label>Expiry Message</label>
+                                @Html.TextAreaFor(m => m.ExpireMessage, new { @class = "form-control", rows = "2" })
+                            </div>
 
-
-                                    <div class="form-check  col-md-offset-3">
-                                        @Html.EditorFor(model => model.UnderPoRateSalesAllow, new { htmlAttributes = new { @class = "form-check-input" } })
-                                        @Html.LabelFor(model => model.UnderPoRateSalesAllow, htmlAttributes: new { @class = "form-check-label" })
-                                        @Html.ValidationMessageFor(model => model.UnderPoRateSalesAllow, "", new { @class = "text-danger" })
-                                    </div>
-                                    <div class="form-group">
-                                        @Html.LabelFor(model => model.DaysBeforeSendSMS, htmlAttributes: new { @class = "control-label col-md-3" })
-                                        <div class="col-md-9">
-                                            @Html.EditorFor(model => model.DaysBeforeSendSMS, new { htmlAttributes = new { @class = "form-control input-sm", @type = "number" } })
-                                            @Html.ValidationMessageFor(model => model.DaysBeforeSendSMS, "", new { @class = "text-danger" })
-                                        </div>
-                                    </div>
-                                    <div class="form-group">
-                                        @Html.LabelFor(model => model.SenderId, htmlAttributes: new { @class = "control-label col-md-3" })
-                                        <div class="col-md-9">
-                                            @Html.EditorFor(model => model.SenderId, new { htmlAttributes = new { @class = "form-control input-sm" } })
-                                            @Html.ValidationMessageFor(model => model.SenderId, "", new { @class = "text-danger" })
-                                        </div>
-                                    </div>
-                                    <div class="form-group">
-                                        @Html.LabelFor(model => model.CompanyURL, htmlAttributes: new { @class = "control-label col-md-3" })
-                                        <div class="col-md-9">
-                                            @Html.EditorFor(model => model.CompanyURL, new { htmlAttributes = new { @class = "form-control input-sm" } })
-                                            @Html.ValidationMessageFor(model => model.CompanyURL, "", new { @class = "text-danger" })
-                                        </div>
-                                    </div>
-
-
-
-                                    <div class="form-check  col-md-offset-3">
-                                        @Html.EditorFor(model => model.SMSSendToOwner, new { htmlAttributes = new { @class = "form-check-input" } })
-                                        @Html.LabelFor(model => model.SMSSendToOwner, htmlAttributes: new { @class = "form-check-label" })
-                                        @Html.ValidationMessageFor(model => model.SMSSendToOwner, "", new { @class = "text-danger" })
-                                    </div>
-
-                                    <div class="form-group">
-                                        @Html.LabelFor(model => model.InsuranceContactNo, htmlAttributes: new { @class = "control-label col-md-3" })
-                                        <div class="col-md-9">
-                                            @Html.EditorFor(model => model.InsuranceContactNo, new { htmlAttributes = new { @class = "form-control input-sm", @type = "number" } })
-                                            @Html.ValidationMessageFor(model => model.InsuranceContactNo, "", new { @class = "text-danger" })
-                                        </div>
-                                    </div>
-
-                                    <div class="form-group">
-                                        @Html.LabelFor(model => model.BackDateEntry, htmlAttributes: new { @class = "control-label col-md-3" })
-                                        <div class="col-md-9">
-                                            @Html.EditorFor(model => model.BackDateEntry, new { htmlAttributes = new { @class = "form-control input-sm", @type = "number" } })
-                                            @Html.ValidationMessageFor(model => model.BackDateEntry, "", new { @class = "text-danger" })
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label>Expiry Date</label>
+                                    <div class="input-group" id="ExpireDate">
+                                        <input type="text" class="form-control" name="ExpireDate" />
+                                        <div class="input-group-append">
+                                            <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="panel">
-                                <div class="panel-body">
-                                    <div class="form-group">
-                                        @Html.LabelFor(model => model.ExpireDate, htmlAttributes: new { @class = "control-label col-md-3" })
-                                        <div class="col-md-9">
-                                            <div class='input-group date' id='ExpireDate'>
-                                                <input type='text' class="input-sm form-control input-sm" name='ExpireDate' />
-                                                <span class="input-group-addon">
-                                                    <i class="fa fa-calendar" aria-hidden="true"></i>
-                                                </span>
-                                                @Html.ValidationMessageFor(m => m.ExpireDate, "", new { @class = "text-danger" })
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="form-group">
-                                        @Html.LabelFor(model => model.WarningMsg, htmlAttributes: new { @class = "control-label col-md-3" })
-                                        <div class="col-md-9">
-                                            @Html.TextAreaFor(model => model.WarningMsg, new { @class = "form-control input-sm", })
-                                            @Html.ValidationMessageFor(model => model.WarningMsg, "", new { @class = "text-danger" })
-                                        </div>
-                                    </div>
-                                    <div class="form-group">
-                                        @Html.LabelFor(model => model.ExpireMessage, htmlAttributes: new { @class = "control-label col-md-3" })
-                                        <div class="col-md-9">
-                                            @Html.TextAreaFor(model => model.ExpireMessage, new { @class = "form-control input-sm", })
-                                            @Html.ValidationMessageFor(model => model.ExpireMessage, "", new { @class = "text-danger" })
-                                        </div>
-                                    </div>
+                                <div class="col-md-6">
+                                    <label>Back Date Entry Limit (Days)</label>
+                                    @Html.EditorFor(m => m.BackDateEntry, new { htmlAttributes = new { @class = "form-control", type = "number" } })
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="panel">
-                                <div class="panel-body">
-                                    <div class="pull-right">
-                                        <input type="submit" value="Update Info" class="btn btn-sm btn-primary" />
-                                    </div>
-                                </div>
-                            </div>
+                    <div class="card">
+                        <div class="card-body text-right p-3">
+                            <button type="submit" class="btn btn-primary px-5 waves-effect waves-light">
+                                <i class="mdi mdi-check-all mr-1"></i> Update System Info
+                            </button>
                         </div>
                     </div>
                 </div>
             </div>
-
-
         }
     </div>
 </div>
 
 <script>
     $(function () {
-
-        $('#SystemStartDate').datetimepicker({
+        // Datetimepicker Initialization
+        $('#SystemStartDate, #ExpireDate').datetimepicker({
+            format: 'DD-MMM-YYYY',
+            icons: {
+                time: "mdi mdi-clock-outline",
+                date: "mdi mdi-calendar",
+                up: "mdi mdi-chevron-up",
+                down: "mdi mdi-chevron-down",
+                previous: 'mdi mdi-chevron-left',
+                next: 'mdi mdi-chevron-right'
+            },
             @{
-            if (Model == null || Model.SystemStartDate == null)
-            {
-                @:defaultDate: moment().endOf('month'),
+                if (Model != null) {
+                    if (Model.SystemStartDate != null) {
+                        @:defaultDate: '@(Convert.ToDateTime(Model.SystemStartDate).ToString("dd-MMM-yyyy"))',
+                    }
                 }
-                    else
-                    {
-                @:defaultDate: '@(Convert.ToDateTime(Model.SystemStartDate).ToString("dd-MMM-yyyy"))',
-                }
-                @:format: 'DD-MMM-YYYY'
             }
         });
 
-        $('#ExpireDate').datetimepicker({
-            @{
-            if (Model == null || Model.ExpireDate ==null)
-            {
-                @:defaultDate: moment(),
-                }
-                    else
-                    {
-                @:defaultDate: '@(Convert.ToDateTime(Model.ExpireDate).ToString("dd-MMM-yyyy"))',
-                }
-                @:format: 'DD-MMM-YYYY'
-            }
-            });
-    });
-
-
-    $(document).on('click', '#APIKey', function () {
-        $("#APIKey").select();
+        // Update custom file input label
+        $(".custom-file-input").on("change", function() {
+            var fileName = $(this).val().split("\\").pop();
+            $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
+        });
     });
 
     function GenerateSHA256String() {
-        $("#APIKey").val("");
         $.ajax({
             url: "/SystemInformation/GenerateSHA256String",
             type: "GET",
-            dataType: "json",
             success: function (data) {
                 $("#APIKey").val(data);
+                toastr.success("New API Key generated successfully.");
             },
-            error: function (err) {
-                toastr.error(err);
+            error: function () {
+                toastr.error("Error generating key.");
             }
         });
     }
-
 </script>

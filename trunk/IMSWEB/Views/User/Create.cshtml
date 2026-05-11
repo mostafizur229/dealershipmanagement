@@ -4,72 +4,503 @@
 @{
     string actionName = ViewContext.RouteData.Values["action"].ToString();
     ViewBag.Title = actionName + " User";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h4>@(ViewBag.Title + ".")</h4>
-<hr />
+<div class="page-title-box">
 
-@using (Html.BeginForm(actionName, "User", new { ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
-{
-    @Html.AntiForgeryToken()
-    <div class="col-md-6">
-        <div class="form-group">
-            @Html.LabelFor(model => model.UserName, htmlAttributes: new { @class = "control-label col-md-3" })
-            <div class="col-md-9">
-                @Html.EditorFor(model => model.UserName, new { htmlAttributes = new { @class = "form-control input-sm", autofocus = "true" } })
-                @Html.ValidationMessageFor(model => model.UserName, "", new { @class = "text-danger" })
+    <div class="container-fluid">
+
+        <div class="row align-items-center">
+
+            <div class="col-md-8">
+
+                <h4 class="page-title mb-1">
+                    @ViewBag.Title
+                </h4>
+
+                <ol class="breadcrumb m-0">
+
+                    <li class="breadcrumb-item">
+                        <a href="@Url.Action("Index", "User")">
+                            Users
+                        </a>
+                    </li>
+
+                    <li class="breadcrumb-item active">
+                        @actionName
+                    </li>
+
+                </ol>
+
             </div>
-        </div>
-        <div class="form-group">
-            @Html.LabelFor(model => model.ConcernId, htmlAttributes: new { @class = "control-label col-md-3" })
-            <div class="col-md-9">
-                @Html.DropDownListFor(model => model.ConcernId, Model.VMSisterConcerns, "--Select a sister concern--", new { @class = "form-control input-sm" ,tabindex=-9})
-                @Html.ValidationMessageFor(model => model.ConcernId, "", new { @class = "text-danger" })
+
+            <div class="col-md-4 text-right">
+
+                <a href="@Url.Action("Index", "User")"
+                   class="btn btn-sm btn-secondary waves-effect">
+
+                    <i class="mdi mdi-arrow-left mr-1"></i>
+                    Back to List
+
+                </a>
+
             </div>
+
         </div>
-        <div class="form-group">
-            @Html.LabelFor(model => model.PhoneNumber, htmlAttributes: new { @class = "control-label col-md-3" })
-            <div class="col-md-9">
-                @Html.EditorFor(model => model.PhoneNumber, new { htmlAttributes = new { @class = "form-control input-sm" } })
-                @Html.ValidationMessageFor(model => model.PhoneNumber, "", new { @class = "text-danger" })
-            </div>
-        </div>
+
     </div>
-    <div class="col-md-6">
-        <div class="form-group">
-            @Html.LabelFor(model => model.Email, htmlAttributes: new { @class = "control-label col-md-3" })
-            <div class="col-md-9">
-                @Html.EditorFor(model => model.Email, new { htmlAttributes = new { @class = "form-control input-sm" } })
-                @Html.ValidationMessageFor(model => model.Email, "", new { @class = "text-danger" })
+
+</div>
+
+
+
+
+
+<div class="page-content-wrapper">
+
+    <div class="container-fluid">
+
+        <div class="row">
+
+            <div class="col-lg-12">
+
+                <div class="card shadow-sm border-0">
+
+                    <div class="card-body">
+
+                        <h4 class="header-title mb-4">
+                            User Information
+                        </h4>
+
+
+
+
+
+                        @using (Html.BeginForm(
+                            actionName,
+                            "User",
+                            new { ReturnUrl = ViewBag.ReturnUrl },
+                            FormMethod.Post,
+                            new
+                            {
+                                role = "form",
+                                autocomplete = "off"
+                            }))
+                        {
+
+                            @Html.AntiForgeryToken()
+
+                            @Html.ValidationSummary(
+                                true,
+                                "",
+                                new { @class = "text-danger" }
+                            )
+
+
+
+
+
+                            <div class="row">
+
+                                <!-- ================================= -->
+                                <!-- LEFT SIDE -->
+                                <!-- ================================= -->
+
+                                <div class="col-md-6">
+
+                                    <!-- Username -->
+
+                                    <div class="form-group row mb-3">
+
+                                        @Html.LabelFor(
+                                            model => model.UserName,
+                                            "User Name",
+                                            htmlAttributes: new
+                                            {
+                                                @class = "col-md-3 col-form-label"
+                                            })
+
+                                        <div class="col-md-9">
+
+                                            @Html.EditorFor(
+                                                model => model.UserName,
+                                                new
+                                                {
+                                                    htmlAttributes = new
+                                                    {
+                                                        @class = "form-control form-control-sm",
+                                                        autofocus = "true",
+                                                        placeholder = "Enter username"
+                                                    }
+                                                })
+
+                                            @Html.ValidationMessageFor(
+                                                model => model.UserName,
+                                                "",
+                                                new
+                                                {
+                                                    @class = "text-danger font-size-12"
+                                                })
+
+                                        </div>
+
+                                    </div>
+
+
+
+
+
+                                    <!-- Concern -->
+
+                                    <div class="form-group row mb-3">
+
+                                        @Html.LabelFor(
+                                            model => model.ConcernId,
+                                            "Sister Concern",
+                                            htmlAttributes: new
+                                            {
+                                                @class = "col-md-3 col-form-label"
+                                            })
+
+                                        <div class="col-md-9">
+
+                                            @Html.DropDownListFor(
+                                                model => model.ConcernId,
+                                                Model.VMSisterConcerns,
+                                                "--Select Sister Concern--",
+                                                new
+                                                {
+                                                    @class = "form-control form-control-sm select2"
+                                                })
+
+                                            @Html.ValidationMessageFor(
+                                                model => model.ConcernId,
+                                                "",
+                                                new
+                                                {
+                                                    @class = "text-danger font-size-12"
+                                                })
+
+                                        </div>
+
+                                    </div>
+
+
+
+
+
+                                    <!-- Phone -->
+
+                                    <div class="form-group row mb-3">
+
+                                        @Html.LabelFor(
+                                            model => model.PhoneNumber,
+                                            "Phone Number",
+                                            htmlAttributes: new
+                                            {
+                                                @class = "col-md-3 col-form-label"
+                                            })
+
+                                        <div class="col-md-9">
+
+                                            @Html.EditorFor(
+                                                model => model.PhoneNumber,
+                                                new
+                                                {
+                                                    htmlAttributes = new
+                                                    {
+                                                        @class = "form-control form-control-sm",
+                                                        placeholder = "017XXXXXXXX"
+                                                    }
+                                                })
+
+                                            @Html.ValidationMessageFor(
+                                                model => model.PhoneNumber,
+                                                "",
+                                                new
+                                                {
+                                                    @class = "text-danger font-size-12"
+                                                })
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+
+
+
+
+                                <!-- ================================= -->
+                                <!-- RIGHT SIDE -->
+                                <!-- ================================= -->
+
+                                <div class="col-md-6">
+
+                                    <!-- Email -->
+
+                                    <div class="form-group row mb-3">
+
+                                        @Html.LabelFor(
+                                            model => model.Email,
+                                            "Email Address",
+                                            htmlAttributes: new
+                                            {
+                                                @class = "col-md-3 col-form-label"
+                                            })
+
+                                        <div class="col-md-9">
+
+                                            @Html.EditorFor(
+                                                model => model.Email,
+                                                new
+                                                {
+                                                    htmlAttributes = new
+                                                    {
+                                                        @class = "form-control form-control-sm",
+                                                        placeholder = "Enter email address"
+                                                    }
+                                                })
+
+                                            @Html.ValidationMessageFor(
+                                                model => model.Email,
+                                                "",
+                                                new
+                                                {
+                                                    @class = "text-danger font-size-12"
+                                                })
+
+                                        </div>
+
+                                    </div>
+
+
+
+
+
+                                    <!-- Roles -->
+
+                                    <div class="form-group row mb-3">
+
+                                        @Html.LabelFor(
+                                            model => model.RoleName,
+                                            "User Roles",
+                                            htmlAttributes: new
+                                            {
+                                                @class = "col-md-3 col-form-label"
+                                            })
+
+                                        <div class="col-md-9">
+
+                                            @Html.DropDownListFor(
+                                                model => model.RoleName,
+                                                Model.VMRoles,
+                                                new
+                                                {
+                                                    @class = "form-control form-control-sm select2",
+                                                    multiple = "multiple"
+                                                })
+
+                                            @Html.ValidationMessageFor(
+                                                model => model.RoleName,
+                                                "",
+                                                new
+                                                {
+                                                    @class = "text-danger font-size-12"
+                                                })
+
+                                        </div>
+
+                                    </div>
+
+
+
+
+
+                                    <!-- Employee Picker -->
+
+                                    <div class="form-group row mb-3">
+
+                                        <label class="col-md-3 col-form-label">
+                                            Employee
+                                        </label>
+
+                                        <div class="col-md-9">
+
+                                            <div class="picker-container">
+
+                                                @{
+                                                    Html.RenderAction(
+                                                        "RenderPicker",
+                                                        "Picker",
+                                                        new
+                                                        {
+                                                            pickerType = PickerType.Employee,
+                                                            id = (Model != null && Model.EmployeeId != null)
+                                                                    ? Model.EmployeeId
+                                                                    : "0"
+                                                        });
+                                                }
+
+                                            </div>
+
+                                            @Html.ValidationMessageFor(
+                                                model => model.EmployeeId,
+                                                "",
+                                                new
+                                                {
+                                                    @class = "text-danger font-size-12"
+                                                })
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+
+
+
+
+                            <hr />
+
+
+
+
+
+                            <!-- Buttons -->
+
+                            <div class="row">
+
+                                <div class="col-md-12 text-right">
+
+                                    <button type="submit"
+                                            class="btn btn-primary btn-sm px-4 waves-effect waves-light">
+
+                                        <i class="mdi mdi-check-all mr-1"></i>
+
+                                        @(actionName == "Create"
+                                            ? "Add User"
+                                            : "Update User")
+
+                                    </button>
+
+                                    <a href="@Url.Action("Index", "User")"
+                                       class="btn btn-light btn-sm px-4 waves-effect">
+
+                                        Cancel
+
+                                    </a>
+
+                                </div>
+
+                            </div>
+
+                        }
+
+                    </div>
+
+                </div>
+
             </div>
+
         </div>
-        <div class="form-group">
-            @Html.LabelFor(model => model.RoleName, htmlAttributes: new { @class = "control-label col-md-3" })
-            <div class="col-md-9">
-                @Html.DropDownListFor(model => model.RoleName, Model.VMRoles, new { @class = "form-control input-sm", multiple= "multiple" })
-                @Html.ValidationMessageFor(model => model.RoleName, "", new { @class = "text-danger" })
-            </div>
-        </div>
-        <div class="form-group">
-            <label class="control-label col-md-3">Employee Name</label>
-            <div class="col-md-9">
-                @{Html.RenderAction("RenderPicker", "Picker", new { pickerType = PickerType.Employee, id = (Model != null && Model.EmployeeId != null) ? Model.EmployeeId : "0" });}
-                @Html.ValidationMessageFor(model => model.EmployeeId, "", new { @class = "text-danger" })
-            </div>
-        </div>
-        <div class="form-group">
-            <div class="col-md-offset-3 col-md-9">
-                <input type="submit" value="Add User" class="btn btn-sm btn-primary" />
-            </div>
-        </div>
+
     </div>
-}
-<script>
-    $(function () {
-        $("#ConcernId").select2();
-        $("#RoleName").select2();
-        var selectedRoles = "@Model.RoleName";
-        var roles = selectedRoles.split(',');
-        $("#RoleName").val(roles).trigger("change");
+
+</div>
+
+
+
+
+
+@section Scripts {
+
+    <script>
+
+    // =========================================
+    // Page Ready
+    // =========================================
+
+    $(document).ready(function () {
+
+        // Select2 Init
+        $('.select2').select2({
+            width: '100%'
+        });
+
+
+
+
+
+        // Preselected Roles
+
+        var selectedRoles = "@(Model.RoleName ?? "")";
+
+        if (selectedRoles !== "") {
+
+            var roles = selectedRoles.split(',');
+
+            $("#RoleName").val(roles).trigger("change");
+
+        }
+
     });
-</script>
+
+
+
+
+
+    // =========================================
+    // Employee Picker Select
+    // =========================================
+
+    $(document).on('click', '.select-employee', function (e) {
+
+        e.preventDefault();
+
+        var id = $(this).attr('data-id');
+        var code = $(this).attr('data-code');
+        var name = $(this).attr('data-name');
+
+        // Set Values
+        $('#EmployeesId').val(id);
+        $('#EmployeesCode').val(code);
+        $('#EmployeesName').val(name);
+
+        // Close Modal
+        $('#EmployeesModal').modal('hide');
+
+    });
+
+
+
+
+
+    // =========================================
+    // Employee Search
+    // =========================================
+
+    $(document).on('keyup', '#employeeSearch', function () {
+
+        var value = $(this).val().toLowerCase();
+
+        $('#EmployeesTable tbody tr').filter(function () {
+
+            $(this).toggle(
+
+                $(this).text().toLowerCase().indexOf(value) > -1
+
+            );
+
+        });
+
+    });
+
+    </script>
+
+}

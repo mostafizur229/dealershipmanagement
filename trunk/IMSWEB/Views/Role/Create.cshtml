@@ -1,123 +1,115 @@
 ﻿@model IMSWEB.CreateRoleViewModel
-
 @{
     string actionName = ViewContext.RouteData.Values["action"].ToString();
     ViewBag.Title = actionName + " Role";
 }
 
-<h4>@(ViewBag.Title + ".")</h4>
-<hr />
+<div class="page-title-box">
+    <div class="container-fluid">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h4 class="page-title mb-1">@ViewBag.Title</h4>
+            </div>
+            <div class="col-md-4 text-right">
+                <a href="@Url.Action("Index", "Role")" class="btn btn-sm btn-secondary waves-effect">
+                    <i class="mdi mdi-arrow-left mr-1"></i> Back to List
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
 
-@using (Html.BeginForm(actionName, "Role", new { ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
-{
-    @Html.AntiForgeryToken()
-    @Html.Hidden("MenuId[]");
-    <div class="col-md-4">
-        <div class="form-group">
-            @Html.LabelFor(model => model.Name, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.Name, new { htmlAttributes = new { @class = "form-control input-sm" } })
-                @Html.ValidationMessageFor(model => model.Name, "", new { @class = "text-danger" })
+<div class="page-content-wrapper">
+    <div class="container-fluid">
+        @using (Html.BeginForm(actionName, "Role", FormMethod.Post, new { id = "roleForm" }))
+        {
+            @Html.AntiForgeryToken()
+            @* এই ফিল্ডে সব সিলেক্ট করা আইডি জমা হবে *@
+            <input type="hidden" id="SelectedMenuIds" name="MenuId" value="@Model.MenuId" />
+
+            <div class="row">
+                <div class="col-lg-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="header-title mb-4">Role Info</h5>
+                            <div class="form-group mb-4">
+                                @Html.LabelFor(model => model.Name)
+                                @Html.EditorFor(model => model.Name, new { htmlAttributes = new { @class = "form-control", placeholder = "Role Name" } })
+                                @Html.ValidationMessageFor(model => model.Name, "", new { @class = "text-danger" })
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-block">Save Role</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-8">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="header-title mb-4">Permissions</h5>
+                            <div class="table-responsive">
+                                <table id="menuTable" class="table table-bordered table-hover">
+                                    <thead class="thead-light">
+                                        <tr>
+                                            <th class="text-center" style="width: 50px;">
+                                                <input type="checkbox" id="selectAll" />
+                                            </th>
+                                            <th class="text-center" style="width: 50px;">Sl</th>
+                                            <th>Menu Title</th>
+                                            <th>Parent</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @{
+                                            int count = 1;
+                                            var selectedIds = !string.IsNullOrEmpty(Model.MenuId) ? Model.MenuId.Split(',').ToList() : new List<string>();
+
+                                            foreach (var item in Model.Menus)
+                                            {
+                                                bool isChecked = selectedIds.Contains(item.Id.ToString());
+                                                <tr>
+                                                    <td class="text-center">
+                                                        <input type="checkbox" class="menu-checkbox"
+                                                               value="@item.Id" @(isChecked ? "checked" : "") />
+                                                    </td>
+                                                    <td class="text-center">@count</td>
+                                                    <td><strong>@item.Title</strong></td>
+                                                    <td><span class="badge badge-soft-info">@(item.ParentId ?? "Main")</span></td>
+                                                </tr>
+                                                count++;
+                                            }
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </div>
-        <div class="form-group pull-right">
-            <div class="col-md-12">
-                <input type="submit" value="Add Role" class="btn btn-sm btn-primary" />
-            </div>
-        </div>
+        }
     </div>
-    <div class="col-md-8">
-        <table id="menuTable"
-               data-toggle="table"
-               data-query-params="queryParams"
-               data-click-to-select="true"
-               class="table table-responsive table-bordered table-striped" cellspacing="0" width="100%">
-            <thead>
-                <tr>
-                    <th data-field="id" class="hidden">
-                    </th>
-                    <th data-checkbox="true">
-                    </th>
-                    <th>
-                        Sl
-                    </th>
-                    <th data-field="title"
-                        data-sorter="sorter"
-                        data-sortable="true">
-                        Title
-                    </th>
-                    <th data-field="parent"
-                        data-sorter="sorter"
-                        data-sortable="true">
-                        Parent Menu
-                    </th>
-                    <th data-field="url"
-                        data-sorter="sorter"
-                        data-sortable="true">
-                        Url
-                    </th>
-                </tr>
-            </thead>
-            <tbody>
-                @{
-                    int count = 1;
-                    foreach (var item in Model.Menus)
-                    {
-                        <tr>
-                            <td class="hidden">
-                                @Html.DisplayFor(modelItem => item.Id)
-                            </td>
-                            <td></td>
-                            <td>
-                                @count
-                            </td>
-                            <td>
-                                @Html.DisplayFor(modelItem => item.Title)
-                            </td>
-                            <td>
-                                @Html.DisplayFor(modelItem => item.ParentId)
-                            </td>
-                            <td>
-                                @Html.DisplayFor(modelItem => item.Url)
-                            </td>
-                        </tr>
-                        count++;
-                    }
-                }
-            </tbody>
-        </table>
-    </div>
-                    }
-<script>
-    var $table = $('#menuTable');
-    var checkedIdArr = [];
-    $(document).ready(function () {
-        @{
-            if (!string.IsNullOrEmpty(Model.MenuId))
-            {
-                string[] menuIdArr = Model.MenuId.Split(',');
-                for (int i = 0; i < menuIdArr.Length; i++)
-                {
-                    @: var index = getRowById(@menuIdArr[i]).attr('data-index');
-                    @:$table.bootstrapTable('check', index);
-                }
+</div>
+
+@section scripts {
+    <script>
+        $(document).ready(function () {          
+            $(document).on('change', '.menu-checkbox', function () {
+                updateSelectedIds();
+            });
+        
+            $('#selectAll').on('change', function () {
+                $('.menu-checkbox').prop('checked', $(this).prop('checked'));
+                updateSelectedIds();
+            });
+                        
+            function updateSelectedIds() {
+                var ids = [];
+                $('.menu-checkbox:checked').each(function () {
+                    ids.push($(this).val());
+                });
+                $('#SelectedMenuIds').val(ids.join(','));
             }
-            }
-        $('input[name=btSelectAll]').hide();
-    });
-    $table.on('check.bs.table', function (e, row) {
-        checkedIdArr.push($.trim(row.id));
-        $('#MenuId__').val(checkedIdArr);
-    });
-    $table.on('uncheck.bs.table', function (e, row) {
-        var index = checkedIdArr.indexOf($.trim(row.id));
-        if (index > -1)
-            checkedIdArr.splice(index, 1);
-        $('#MenuId__').val(checkedIdArr);
-    });
-    function getRowById(id) {
-        return $("td").filter(function () {
-            return $(this).hasClass('hidden') && $.trim($(this).text()) == id;
-        }).closest("tr");
-    }
-</script>
+            
+            updateSelectedIds();
+        });
+    </script>
+}

@@ -1,795 +1,305 @@
-﻿@{
+﻿<!--@model IEnumerable<IMSWEB.Model.UpcommingScheduleReport>
+@{
     ViewBag.Title = "Home";
     int Counter = 0;
-
-    <style>
-        
-
-        .modal-body div {
-            max-height: 400px; 
-            overflow-y: auto; 
-        }
-
-
-        h1 {
-            text-align: center;
-        }
-
-        .container {
-            top: 30%;
-            left: 50%;
-            position: absolute;
-            text-align: center;
-            transform: translate(-50%, -50%);
-        }
-
-
-        .ui-widgets {
-            position: relative;
-            display: inline-block;
-            width: 12rem;
-            height: 12rem;
-            border-radius: 9rem;
-            margin: 1.5rem;
-            border: 1.2rem solid palegreen;
-            box-shadow: inset 0 0 7px grey;
-            border-left-color: palegreen;
-            border-top-color: chartreuse;
-            border-right-color: darkgreen;
-            border-bottom-color: white;
-            text-align: center;
-            box-sizing: border-box;
-        }
-
-
-            .ui-widgets:nth-child(2) {
-                border-top-color: chartreuse;
-                border-right-color: white;
-                border-left-color: palegreen;
-                border-bottom-color: white;
-            }
-
-            .ui-widgets .ui-values {
-                top: 40px;
-                position: absolute;
-                left: 10px;
-                right: 0;
-                font-weight: 700;
-                font-size: 2.0rem;
-            }
-
-            .ui-widgets .ui-labels {
-                left: 0;
-                bottom: -16px;
-                text-shadow: 0 0 4px grey;
-                color: black;
-                position: absolute;
-                width: 100%;
-                font-size: 16px;
-            }
-
-        .d-flex {
-            display: flex;
-            align-items: center;
-        }
-
-        .justify-content-btween {
-            justify-content: space-between;
-        }
-    </style>
 }
-@model IEnumerable<IMSWEB.Model.UpcommingScheduleReport>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
 
-<div class="row">
-    <div class="col-md-12">
-        <div class="panel round--shape">
-            <div class="panel-body">
-                <div class="d-flex justify-content-btween">
-                    <div>
-                        <h3 class="main--title">Todays data</h3>
-                    </div>
-                    <div class="low-stock-product">
-                        <button type="button" class="btn btn-sm btn-info" data-toggle="modal" onclick="loadLimitedStockProducts()" data-target="#CategoriesModal">Low Stock products</button>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/MaterialDesign-Webfont/7.4.47/css/materialdesignicons.min.css" />
 
-                        <div class="modal fade bs-example-modal-lg" id="CategoriesModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-                            <div class="modal-dialog modal-lg" role="document">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <span>Low Stock products</span>
-                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                                    </div>
-                                    <div class="modal-body">
-                                       
-                                        <input type="text" id="searchInput" class="form-control mb-3" placeholder="Search products..." onkeyup="filterTable()">
+<style>
+    /* Dashboard Cards Style */
+    .card-report {
+        border-radius: 10px;
+        padding: 25px 20px;
+        color: #fff;
+        margin-bottom: 24px;
+        position: relative;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        transition: transform 0.3s;
+    }
 
-                                        
-                                        <div >
-                                            <table id="productTable" class="table table-bordered table-striped">
-                                                <thead>
-                                                    <tr style="background: #41b53f; height: 30px">
-                                                        <th>Sl</th>
-                                                        <th>Product Name</th>
-                                                        <th>Company</th>
-                                                        <th>Size</th>
-                                                        <th>Quantity</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody style="max-height: 400px; ">
-                                                    <!-- Rows will be dynamically loaded here -->
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </div>
+        .card-report:hover {
+            transform: translateY(-5);
+        }
 
-                                   
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-sm btn-primary" data-dismiss="modal">Close</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+        .card-report .title {
+            font-size: 15px;
+            font-weight: 500;
+            opacity: 0.9;
+            text-transform: uppercase;
+        }
 
-                </div>
+        .card-report .amount--value {
+            font-size: 26px;
+            font-weight: 700;
+            display: block;
+            margin-top: 8px;
+        }
 
-                <div class="row">
-                    <div class="col-md-3 col-sm-6">
-                        <div class="card--wrapper">
-                            <div class="payment--card light--red">
-                                <div class="card--header">
-                                    <div class="amount">
-                                        <span class="title">Sales amount</span>
-                                        <span class="amount--value">
-                                            <img src="~/Content/images/tk_icon.png" alt=""><span id="dailySalesAmt"> </span>
-                                        </span>
-                                    </div>
-                                    @*<i class="fa-solid fa-dollar-sign "></i>*@
-                                    <span class="material-symbols-outlined dollar--icon">
-                                        real_estate_agent
-                                    </span>
-                                </div>
-                                <span class="card--detail">
-                                    **** **** **** ****
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3 col-sm-6">
-                        <div class="card--wrapper">
-                            <div class="payment--card light--purple">
-                                <div class="card--header">
-                                    <div class="amount">
-                                        <span class="title">Purchase amount</span>
-                                        <span class="amount--value">
-                                            <img src="~/Content/images/tk_icon.png" alt=""><span id="dailyPurchaseAmt"> </span>
-                                        </span>
-                                    </div>
-                                    @*<i class="fa-solid fa-dollar-sign  dark--purple"></i>*@
-                                    <span class="material-symbols-outlined dollar--icon dark--purple">
-                                        shopping_cart_checkout
-                                    </span>
-                                </div>
-                                <span class="card--detail">
-                                    **** **** **** ****
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3 col-sm-6">
-                        <div class="card--wrapper">
-                            <div class="payment--card light--green ">
-                                <div class="card--header">
-                                    <div class="amount">
-                                        <span class="title">Expense amount</span>
-                                        <span class="amount--value">
-                                            <img src="~/Content/images/tk_icon.png" alt=""><span id="txtExpense"></span>
-                                        </span>
-                                    </div>
-                                    @*<i class="fa-regular fa-file-pen dollar--icon dark--green"></i>*@
+        .card-report .icon-box {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 45px;
+            opacity: 0.3;
+        }
 
-                                    <span class="dollar--icon dark--green">
-                                        <img src="~/Content/images/amounts.png" alt="">
-                                    </span>
+    .bg-sales {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
 
-                                    @*<span class="material-symbols-outlined dollar--icon dark--green">
-                                            stylus_note
-                                        </span>*@
-                                </div>
-                                <span class="card--detail">
-                                    **** **** **** ****
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3 col-sm-6">
-                        <div class="card--wrapper">
-                            <div class="payment--card light--blue">
-                                <div class="card--header">
-                                    <div class="amount">
-                                        <span class="title">Collection amount</span>
-                                        <span class="amount--value">
-                                            <img src="~/Content/images/tk_icon.png" alt=""><span id="txtCashCollection"></span>
-                                        </span>
-                                    </div>
-                                    <div class="fa-solid fa-sack-dollar dollar--icon dark--blue"></div>
-                                </div>
-                                <span class="card--detail">
-                                    **** **** **** ****
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+    .bg-purchase {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    }
 
+    .bg-expense {
+        background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+    }
+
+    .bg-collection {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    }
+
+    .header-title {
+        font-size: 17px;
+        font-weight: 600;
+        color: #343a40;
+    }
+
+    .table-centered td {
+        vertical-align: middle !important;
+    }
+</style>
+
+<div class="page-title-box">
+    <div class="container-fluid">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h4 class="page-title mb-1">Dashboard Overview</h4>
+                <ol class="breadcrumb m-0">
+                    <li class="breadcrumb-item active">Welcome to Inventory Management</li>
+                </ol>
             </div>
-        </div>
-    </div>
-</div>
-
-<div class="row">
-    <div class="col-md-12">
-        <div class="panel round--shape">
-            <div class="panel-body">
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="chartCard">
-                            <h2 class="chartTitle">Sales Performance</h2>
-                            <div id="barchart"></div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="chartCard">
-                            <h2 class="chartTitle">Expense and Income</h2>
-                            <div id="areachart"></div>
-                        </div>
-                    </div>
+            <div class="col-md-4">
+                <div class="float-right">
+                    <button type="button" class="btn btn-primary shadow-sm" data-toggle="modal" onclick="loadLimitedStockProducts()" data-target="#CategoriesModal">
+                        <i class="mdi mdi-package-variant-closed mr-1"></i> Low Stock Alert
+                    </button>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
+<div class="page-content-wrapper">
+    <div class="container-fluid">-->
 
-<div class="row" style="display: none;">
-
-
-    <div class="col-md-4">
-        <div class="panel round--shape">
-            <div class="panel-body">
-                <div class="main-content">
-                    <div class="title text-center">
-                        <h5>This Month</h5>
-                    </div>
-                    <div class="row" style="display: none;">
-                        <div class="col-md-6 col-sm-6">
-                            <div class="progress-container">
-                                <div class="sale1">
-                                    <svg class="progress-circle coral--color" viewBox="0 0 100 100">
-                                        <circle cx="50" cy="50" r="40"></circle>
-                                    </svg>
-                                    <svg class="progress-bar" viewBox="0 0 100 100">
-                                        <circle cx="50" cy="50" r="40"></circle>
-                                    </svg>
-                                    <div class="count">0%</div>
-                                    <div class="progress--title text-center">
-                                        <span>Cash sale</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6 col-sm-6">
-                            <div class="progress-container">
-                                <div class="sale2">
-                                    <svg class="progress-circle lightpest--color" viewBox="0 0 100 100">
-                                        <circle cx="50" cy="50" r="40"></circle>
-                                    </svg>
-                                    <svg class="progress-bar" viewBox="0 0 100 100">
-                                        <circle cx="50" cy="50" r="40"></circle>
-                                    </svg>
-                                    <div class="count">0%</div>
-                                    <div class="progress--title text-center">
-                                        <span>Hire sale</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="ui-widgets" style="display: none;">
-                        <div class="ui-values">50%</div>
-                        <div class="ui-labels">Sales</div>
-                    </div>
-
-                    <div class="ui-widgets" style="display: none;">
-                        <div class="ui-values">65%</div>
-                        <div class="ui-labels">Credit</div>
-                    </div>
-
+        <!-- Statistics Widgets -->
+        <!--<div class="row">
+            <div class="col-xl-3 col-md-6">
+                <div class="card-report bg-sales">
+                    <span class="title">Total Sales</span>
+                    <span class="amount--value">৳ <span id="dailySalesAmt">0.00</span></span>
+                    <div class="icon-box"><i class="mdi mdi-trending-up"></i></div>
                 </div>
             </div>
-        </div>
-    </div>
-</div>
-
-
-<div class="row" style="display: none">
-    <div class="col-md-10 col-md-offset-1">
-        <div class="panel panel-info">
-            <div class="panel-heading">
-                <div class="row">
-                    <div class="col-md-6">Today's Installment(@ViewBag.LocalDateTime.ToString("dd MMM yyyy"))</div>
-                    <div class="col-md-offset-2 col-md-4">
-                        @using (Ajax.BeginForm("UpComingScheduleReport", "Home", new { ReturnUrl = ViewBag.ReturnUrl }, ajaxOptions: new AjaxOptions { HttpMethod = "Post", UpdateTargetId = "report", LoadingElementId = "spinningIcon" }, htmlAttributes: new { role = "form" }))
-                        {
-                            <div class="col-sm-4">
-                                <img id="spinningIcon" height="45" width="45" style="display: none;" class="pull-right" src="~/Content/images/Spinner.gif" />
-                            </div>
-                            <div class="col-sm-4">
-                                <input id="btnPreview" type="submit" value="Print" class="btn btn-sm btn-info" />
-                            </div>
-                        }
-                    </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="card-report bg-purchase">
+                    <span class="title">Total Purchase</span>
+                    <span class="amount--value">৳ <span id="dailyPurchaseAmt">0.00</span></span>
+                    <div class="icon-box"><i class="mdi mdi-cart-arrow-down"></i></div>
                 </div>
             </div>
-            <div class="panel">
-                <div class="panel-body">
-                    <div class="table-responsive" style="max-height:400px;">
-                        <table class="table table-responsive table-bordered table-striped text-nowrap" cellspacing="0" width="100%">
-                            <thead>
-                                <tr style="border-top:1px solid #ff6a00">
-                                    <th>Sl</th>
-                                    <th>Action</th>
-                                    <th>Invoice No</th>
-                                    <th>Sales Date</th>
-                                    <th>Payment Date</th>
-                                    <th>Remind Date</th>
-                                    <th>Code</th>
-                                    <th>Customer Name</th>
-                                    <th>Address & Contact</th>
-                                    <th>Product Name</th>
-                                    <th>Installment</th>
-                                    <th>Default Amount</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @if (Model != null)
-                                {
-                                    foreach (var item in Model)
+            <div class="col-xl-3 col-md-6">
+                <div class="card-report bg-expense">
+                    <span class="title">Total Expense</span>
+                    <span class="amount--value">৳ <span id="txtExpense">0.00</span></span>
+                    <div class="icon-box"><i class="mdi mdi-currency-usd-off"></i></div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="card-report bg-collection">
+                    <span class="title">Cash Collection</span>
+                    <span class="amount--value">৳ <span id="txtCashCollection">0.00</span></span>
+                    <div class="icon-box"><i class="mdi mdi-hand-coin-outline"></i></div>
+                </div>
+            </div>
+        </div>-->
+
+        <!-- Charts Section -->
+        <!--<div class="row">
+            <div class="col-lg-7">
+                <div class="card card-body shadow-sm mb-4">
+                    <h5 class="header-title mb-4">Yearly Sales Performance</h5>
+                    <div id="barchart"></div>
+                </div>
+            </div>
+            <div class="col-lg-5">
+                <div class="card card-body shadow-sm mb-4">
+                    <h5 class="header-title mb-4">Income vs Expense</h5>
+                    <div id="areachart"></div>
+                </div>
+            </div>
+        </div>-->
+
+        <!-- Today's Installment Table -->
+        <!--<div class="row">
+            <div class="col-lg-12">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-white py-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="header-title m-0">Today's Installments (@DateTime.Now.ToString("dd MMM yyyy"))</h5>
+                            <button class="btn btn-sm btn-info"><i class="mdi mdi-printer mr-1"></i> Print List</button>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-centered table-nowrap table-hover mb-0">
+                                <thead class="thead-light">
+                                    <tr>
+                                        <th class="pl-4">SL</th>
+                                        <th>Action</th>
+                                        <th>Invoice No</th>
+                                        <th>Customer</th>
+                                        <th>Product Name</th>
+                                        <th>Installment</th>
+                                        <th class="pr-4">Default Amt</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (Model != null && Model.Any())
                                     {
-                                        Counter = Counter + 1;
+                                        foreach (var item in Model)
+                                        {
+                                            Counter++;
+                                            <tr>
+                                                <td class="pl-4">@Counter</td>
+                                                <td>
+                                                    <button class="btn btn-outline-primary btn-sm rounded-circle" id="showmodalbtn"
+                                                            data-customerid="@item.CustomerID" data-code="@item.CustomerCode"
+                                                            data-customername="@item.CustomerName" data-totaldue="@item.InstallmentAmount">
+                                                        <i class="mdi mdi-pencil"></i>
+                                                    </button>
+                                                </td>
+                                                <td><span class="badge badge-soft-primary font-size-12">#@item.InvoiceNo</span></td>
+                                                <td>
+                                                    <div class="font-weight-medium">@item.CustomerName</div>
+                                                    <small class="text-muted">@item.CustomerConctact</small>
+                                                </td>
+                                                <td>@string.Join(", ", item.ProductName)</td>
+                                                <td><strong>৳@item.InstallmentAmount.ToString("N2")</strong></td>
+                                                <td class="pr-4"><span class="text-danger font-weight-bold">৳@item.DefaultAmount.ToString("N2")</span></td>
+                                            </tr>
+                                        }
+                                    }
+                                    else
+                                    {
                                         <tr>
-                                            <td>@Counter</td>
-                                            <td>
-                                                <button type="button" class="btn btn-info btn-xs" title="Update Remind Date" id="showmodalbtn" data-customerid="@item.CustomerID" data-code="@item.CustomerCode" data-customername="@item.CustomerName" data-totaldue="@item.InstallmentAmount"><i class="fa fa-pencil-square-o" aria-hidden="true"></i></button>
-                                            </td>
-                                            <td>@item.InvoiceNo</td>
-                                            <td>@item.SalesDate.ToString("dd MMM yyyy")</td>
-                                            <td>
-                                                @if (item.PaymentDate != DateTime.MinValue)
-                                                {
-                                                    @item.PaymentDate.ToString("dd MMM yyyy")
-                                                }
-                                            </td>
-                                            <td>
-                                                @if (item.RemaindDate != null)
-                                                {
-                                                    <text>@item.RemaindDate.Value.ToString("dd MMM yyyy")</text>
-                                                }
-                                            </td>
-                                            <td>@item.CustomerCode</td>
-                                            <td>@item.CustomerName</td>
-                                            <td>@item.CustomerAddress<span>&</span>@item.CustomerConctact</td>
-                                            <td>
-                                                @foreach (var p in item.ProductName)
-                                                {
-                                                    <text>@p</text>
-                                                }
-
-                                            </td>
-                                            <td>@item.InstallmentAmount.ToString("F")</td>
-                                            <td>@item.DefaultAmount.ToString("F")</td>
-
+                                            <td colspan="7" class="text-center py-4 text-muted">No installments scheduled for today.</td>
                                         </tr>
                                     }
-                                }
-                            </tbody>
-                        </table>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
+</div>-->
 
-
-
-
+<!-- Scripts -->
+<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/apexcharts/3.48.0/apexcharts.min.js"></script>
 
 <script>
     $(document).ready(function () {
-        $('#RemindDate').datetimepicker({
-            defaultDate: moment(),
-            format: 'DD-MMM-YYYY'
-        });
-
-
-        loadLimitedStockProducts();
-
-    });
-
-    function loadLimitedStockProducts() {
-        $.ajax({
-            url: '/Home/GetLimitedStockProducts', 
-            type: 'GET',
-            success: function (response) {
-                
-                $("#productTable tbody").empty();
-               
-                $.each(response, function (index, product) {
-                    let row = `<tr style="height: 25px; overflow-y: auto;">
-                            <td>${index + 1}</td>
-                            <td>${product.ProductName}</td>
-                            <td>${product.CompanyName}</td>
-                            <td>${product.SizeName}</td>
-                            <td>${product.Quantity}</td>
-                           </tr>`;
-                    $("#productTable tbody").append(row);
-                });
-            },
-            error: function (error) {
-                console.error("Error fetching data:", error);
-            }
-        });
-    }
-
-    function filterTable() {
-        const input = document.getElementById("searchInput");
-        const filter = input.value.toLowerCase();
-        const rows = document.querySelectorAll("#productTable tbody tr");
-
-        rows.forEach(row => {
-            const cells = Array.from(row.getElementsByTagName("td"));
-            const matches = cells.some(cell => cell.textContent.toLowerCase().includes(filter));
-            row.style.display = matches ? "" : "none";
-        });
-    }
-
-
-    //function loadLimitedStockProducts() {
-    //    $.ajax({
-    //        url: '/Home/GetLimitedStockProducts', // Replace with your controller URL
-    //        type: 'GET',
-    //        success: function (response) {
-    //            // Clear existing rows
-    //            $("#productTable tbody").empty();
-
-    //            // Add rows dynamically
-    //            $.each(response, function (index, product) {
-    //                let row = `<tr>
-    //                        <td>${index + 1}</td>
-    //                        <td>${product.ProductName}</td>
-    //                        <td>${product.CompanyName}</td>
-    //                        <td>${product.SizeName}</td>
-    //                        <td>${product.Quantity}</td>
-    //                       </tr>`;
-    //                $("#productTable tbody").append(row);
-    //            });
-    //        },
-    //        error: function (error) {
-    //            console.error("Error fetching data:", error);
-    //        }
-    //    });
-    //}
-
-
-//    function loadLimitedStockProducts() {
-//    $.ajax({
-//        url: '/Home/GetLimitedStockProducts', 
-//        type: 'GET',
-//        success: function (response) {
-            
-//            $("#productTable tbody").empty();
-
-            
-//            $.each(response, function (index, product) {
-//                let row = `<tr style="height: 25px;">
-//                            <td>${index + 1}</td>
-//                            <td>${product.ProductName}</td>
-//                            <td>${product.CompanyName}</td>
-//                            <td>${product.SizeName}</td>
-//                            <td>${product.Quantity}</td>
-//                           </tr>`;
-//                $("#productTable tbody").append(row);
-//            });
-
-            
-//            $('#productTable').bootstrapTable('resetView');
-//        },
-//        error: function (error) {
-//            console.error("Error fetching data: ", error);
-//        }
-//    });
-//}
-
-
-
-    $(document).on("click", "#showmodalbtn", function () {
-        var CustomerID = $(this).data("customerid");
-        var CustomerCode = $(this).data("code");
-        var CustomerName = $(this).data("customername");
-        var TotalDue = $(this).data("totaldue");
-
-        $("#CustomerID").val(CustomerID);
-        $("#CustomerCode").val(CustomerCode);
-        $("#CustomerName").val(CustomerName);
-        $("#TotalDue").val(TotalDue);
-        $("#myModal").modal("show");
-        //alert(ProductID);
-    });
-
-
-
-    $(document).on("click", "#Submitbtn", function () {
-
-        var CustomerID = $("#CustomerID").val();
-        var RemindDate = $("#RemindDate").find("input").val();;
-        if (CustomerID == "" || CustomerID == 0)
-        {
-            toastr.error("Only Cash Sales remind date can be changed.");
-            return;
-        }
-
-        $.ajax({
-            url: "@Url.Action("ChangeRemindDate", "Home")",
-            type: "POST",
-            contentType: "application/json; charset=utf-8",
-            dataType: "json",
-            data: JSON.stringify({ 'CustomerID': CustomerID, 'RemindDate': RemindDate }),
-            success: function (data) {
-                console.log(data);
-                if (data == true) {
-                    $("#myModal").modal("hide");
-                    ClearTextBox();
-                }
-                location.reload();
-            },
-            error: function (data) {
-                console.log(data);
-                location.reload();
-                toastr.error("Update Failed");
-            }
-
-        });
-
-    });
-
-
-    function ClearTextBox() {
-        $("#CustomerID").val("");
-        $("#CustomerCode").val("");
-        $("#CustomerName").val("");
-        $("#TotalDue").val("");
-    }
-
-
-</script>
-
-
-
-@*<script src="https://cdnjs.cloudflare.com/ajax/libs/apexcharts/3.48.0/apexcharts.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>*@
-
-
-
-<!-- Load ApexCharts library -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/apexcharts/3.48.0/apexcharts.min.js"></script>
-<!-- Load jQuery (Optional: if not already loaded) -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-
-
-
-<script type="text/javascript">
-
-
-    $(function () {
-        function fetchAndRenderCharts() {
-            $.ajax({
-                url: '/Home/GetYearlyData',
-                type: 'GET',
-                data: { dataLength: '365' },  // Assuming 365 days for yearly data
-                success: function (response) {
-                    var salesData = new Array(12).fill(0);
-                    var purchaseData = new Array(12).fill(0);
-                    var incomeData = new Array(12).fill(0);
-                    var expenseData = new Array(12).fill(0);
-                    var cashCollectionData = new Array(12).fill(0);
-
-                    response.forEach(function (item) {
-                        if (item.TrType === 'SalesAmount') {
-                            salesData[item.Month - 1] = item.Amount;
-                        } else if (item.TrType === 'PurchaseAmount') {
-                            purchaseData[item.Month - 1] = item.Amount;
-                        } else if (item.TrType === 'Income') {
-                            incomeData[item.Month - 1] = item.Amount;
-                        } else if (item.TrType === 'Expense') {
-                            expenseData[item.Month - 1] = item.Amount;
-                        } else if (item.TrType === 'CashCollection') {
-                            cashCollectionData[item.Month - 1] = item.Amount;
-                        }
-                    });
-
-                    var barChartOptions = {
-                        series: [{
-                            name: 'Sale',
-                            data: salesData
-                        }],
-                        chart: {
-                            height: 350,
-                            type: 'bar',
-                            toolbar: {
-                                show: false
-                            }
-                        },
-                        plotOptions: {
-                            bar: {
-                                columnWidth: '45%',
-                                borderRadius: 4,
-                                horizontal: false,
-                                distributed: true,
-                            }
-                        },
-                        dataLabels: {
-                            enabled: false
-                        },
-                        legend: {
-                            show: true
-                        },
-                        xaxis: {
-                            categories: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-                            labels: {
-                                style: {
-                                    fontSize: '12px'
-                                }
-                            }
-                        },
-                        yaxis: {
-                            title: {
-                                text: "Amount"
-                            }
-                        }
-                    };
-
-                    var barChart = new ApexCharts(document.querySelector("#barchart"), barChartOptions);
-                    barChart.render();
-
-                    // Update area chart options with fetched data
-                    areaChartOptions.series[0].data = expenseData;
-                    areaChartOptions.series[1].data = incomeData;
-
-                    var areaChart = new ApexCharts(document.querySelector("#areachart"), areaChartOptions);
-                    areaChart.render();
-                },
-                error: function (error) {
-                    console.log("Error fetching data:", error);
-                }
-            });
-        }
-
-        // Initial area chart options
-        var areaChartOptions = {
-            series: [{
-                name: 'Expense',
-                data: [] // Initial empty data, will be filled dynamically
-            }, {
-                name: 'Income',
-                data: [] // Initial empty data, will be filled dynamically
-            }],
-            chart: {
-                height: 350,
-                type: 'area'
-            },
-            dataLabels: {
-                enabled: false
-            },
-            stroke: {
-                curve: 'smooth'
-            },
-            xaxis: {
-                categories: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-                labels: {
-                    style: {
-                        fontSize: '12px'
-                    }
-                }
-            },
-        };
-
-        // Fetch and render the charts
-        fetchAndRenderCharts();
-    });
-
-
-
- //Progress Bar start
-
-    const progress = document.querySelector('.progress-bar');
-    const count = document.querySelector('.count');
-
-    let progressValue = 0;
-
-    //function updateProgress() {
-    //    const circumference = 2 * Math.PI * 40; // Circumference of the circle with radius 40
-    //    const dashOffset = circumference - (progressValue / 70) * circumference;
-    //    progress.setAttribute('stroke-dasharray', `${dashOffset} ${circumference}`);
-    //    count.textContent = `${progressValue}%`;
-
-    //    if (progressValue < 70) {
-    //        progressValue++;
-    //        requestAnimationFrame(updateProgress);
-    //    }
-    //}
-
-    //updateProgress();
-
-    //Progress Bar end
-
-
-
-
-    $(document).ready(function () {
+        // ১. উইজেট ডেটা লোড করা
         GetDailySalesAmt();
+
+        // ২. চার্ট লোড করা
+        fetchAndRenderCharts();
+
+        // ৩. লো স্টক চেক (পেজ লোড হওয়ার সাথে সাথে)
+        loadLimitedStockProducts();
     });
 
-
-
-
+    // উইজেট ডেটা ফেচিং ফাংশন
     function GetDailySalesAmt() {
-
-        var dataLength = "d7";
-
         $.ajax({
             url: "@Url.Action("GetDailySalesAmt", "Home")",
             type: "GET",
-            contentType: "application/json; charset=utf-8",
-            dataType: "json",
-            data: { dataLength: dataLength },
+            data: { dataLength: "d7" },
             success: function (widgets) {
-            if (widgets.length > 0) {
-            $(widgets).each(function (index, element) {
-            var action = element.TrType;
+                if (widgets && widgets.length > 0) {
+                    $.each(widgets, function (index, element) {
+                        var amount = (element.Amount != null) ? element.Amount.toLocaleString('en-US', {minimumFractionDigits: 2}) : "0.00";
 
-            switch (action) {
-            case "SalesAmount":
-            $("#dailySalesAmt").text(getDefaultFloatIfEmpty(element.Amount));
-            break;
-            case "PurchaseAmount":
-            $("#dailyPurchaseAmt").text(getDefaultFloatIfEmpty(element.Amount));
-            break;
-            case "Income":
-            $("#txtIncome").text(getDefaultFloatIfEmpty(element.Amount));
-            break;
-            case "Expense":
-            $("#txtExpense").text(getDefaultFloatIfEmpty(element.Amount));
-            break;
-            case "CashCollection":
-            $("#txtCashCollection").text(getDefaultFloatIfEmpty(element.Amount));
-            break;
-
-            default:
-            console.log("Invalid action");
-            }
-            });
-            } else {
-            console.log("No items in the widgets array to iterate over.");
-            }
-
+                        if (element.TrType === "SalesAmount") $("#dailySalesAmt").text(amount);
+                        else if (element.TrType === "PurchaseAmount") $("#dailyPurchaseAmt").text(amount);
+                        else if (element.TrType === "Expense") $("#txtExpense").text(amount);
+                        else if (element.TrType === "CashCollection") $("#txtCashCollection").text(amount);
+                    });
+                }
             },
-            error: function (data) {
-            console.log(data);
-            location.reload();
-            }
+            error: function (err) { console.error("Widget Load Error:", err); }
+        });
+    }
 
-            });
+    // চার্ট ডেটা ফেচিং ফাংশন
+    function fetchAndRenderCharts() {
+        $.ajax({
+            url: '/Home/GetYearlyData',
+            type: 'GET',
+            data: { dataLength: '365' },
+            success: function (response) {
+                var salesData = new Array(12).fill(0), expenseData = new Array(12).fill(0), incomeData = new Array(12).fill(0);
+
+                response.forEach(function (item) {
+                    if (item.TrType === 'SalesAmount') salesData[item.Month - 1] = item.Amount;
+                    else if (item.TrType === 'Income') incomeData[item.Month - 1] = item.Amount;
+                    else if (item.TrType === 'Expense') expenseData[item.Month - 1] = item.Amount;
+                });
+
+                // বার চার্ট রেন্ডার
+                new ApexCharts(document.querySelector("#barchart"), {
+                    series: [{ name: 'Sales', data: salesData }],
+                    chart: { height: 350, type: 'bar', toolbar: { show: false } },
+                    colors: ['#764ba2'],
+                    plotOptions: { bar: { borderRadius: 4, columnWidth: '45%' } },
+                    xaxis: { categories: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"] }
+                }).render();
+
+                // এরিয়া চার্ট রেন্ডার
+                new ApexCharts(document.querySelector("#areachart"), {
+                    series: [{ name: 'Expense', data: expenseData }, { name: 'Income', data: incomeData }],
+                    chart: { height: 350, type: 'area', toolbar: { show: false } },
+                    colors: ['#f5576c', '#43e97b'],
+                    stroke: { curve: 'smooth', width: 2 },
+                    xaxis: { categories: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"] }
+                }).render();
             }
-</script>
+        });
+    }
+
+    // লো স্টক প্রোডাক্ট লোড
+    function loadLimitedStockProducts() {
+        $.ajax({
+            url: '/Home/GetLimitedStockProducts',
+            type: 'GET',
+            success: function (response) {
+                $("#productTable tbody").empty();
+                $.each(response, function (index, product) {
+                    let row = `<tr>
+                        <td>${index + 1}</td>
+                        <td>${product.ProductName}</td>
+                        <td>${product.CompanyName}</td>
+                        <td>${product.SizeName}</td>
+                        <td><span class="badge badge-soft-danger">${product.Quantity}</span></td>
+                    </tr>`;
+                    $("#productTable tbody").append(row);
+                });
+            }
+        });
+    }
+</script>-->

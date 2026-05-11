@@ -13009,6 +13009,13 @@
     <Content Include="Views\Shared\EditorTemplates\Collection.cshtml" />
     <Content Include="Views\Shared\_Layoutold.cshtml" />
     <Content Include="Views\Shared\_LoginPartialold.cshtml" />
+    <Content Include="Views\Shared\_AdminLogin.cshtml" />
+    <Content Include="Views\Shared\_footer.cshtml" />
+    <Content Include="Views\Shared\_Layout - Copy.cshtml" />
+    <Content Include="Views\Shared\_MRPUpdate.cshtml" />
+    <Content Include="Views\Shared\_sideBar.cshtml" />
+    <Content Include="Views\Shared\_topBar.cshtml" />
+    <Content Include="Views\Shared\BackEdit.cshtml" />
     <None Include="web.Debug.config">
       <DependentUpon>web.config</DependentUpon>
     </None>
