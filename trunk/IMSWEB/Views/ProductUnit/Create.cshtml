@@ -1,56 +1,85 @@
 ﻿@model ProductUnitTypeViewModel
 @{
     string actionName = ViewContext.RouteData.Values["action"].ToString();
-    ViewBag.Title = actionName + "";
+    ViewBag.Title = actionName + " Product Unit";
 }
 
-<h4 class="inline-header">@(ViewBag.Title + " Product Unit.")</h4>
-<hr />
-<div class="row">
-    <div class="col-md-offset-3 col-md-6">
-        <div class="panel panel-default">
-            <div class="panel-body">
-                @using (Html.BeginForm(actionName, "ProductUnit", new { ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
-                {
-                    @Html.AntiForgeryToken()
-                    @Html.HiddenFor(m => m.ProUnitTypeID);
-                    <div class="form-group">
-                        @Html.LabelFor(model => model.Description, htmlAttributes: new { @class = "control-label col-md-3" })
-                        <div class="col-md-9">
-                            @Html.EditorFor(model => model.Description, new { htmlAttributes = new { @class = "form-control input-sm", autofocus = "autofocus" } })
-                            @Html.ValidationMessageFor(model => model.Description, "", new { @class = "text-danger" })
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        @Html.LabelFor(model => model.ConvertValue, htmlAttributes: new { @class = "control-label col-md-3" })
-                        <div class="col-md-9">
-                            @Html.EditorFor(model => model.ConvertValue, new { htmlAttributes = new { @class = "form-control input-sm text-right", @type = "number" } })
-                            @Html.ValidationMessageFor(model => model.ConvertValue, "", new { @class = "text-danger" })
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        @Html.LabelFor(model => model.Position, htmlAttributes: new { @class = "control-label col-md-3" })
-                        <div class="col-md-9">
-                            @Html.EditorFor(model => model.Position, new { htmlAttributes = new { @class = "form-control input-sm text-right", @type = "number" } })
-                            @Html.ValidationMessageFor(model => model.Position, "", new { @class = "text-danger" })
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        @Html.LabelFor(model => model.UnitName, htmlAttributes: new { @class = "control-label col-md-3" })
-                        <div class="col-md-9">
-                            @Html.EditorFor(model => model.UnitName, new { htmlAttributes = new { @class = "form-control input-sm" } })
-                            @Html.ValidationMessageFor(model => model.UnitName, "", new { @class = "text-danger" })
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <div class="col-sm-offset-3 col-sm-9">
-                            <input type="submit" value="Add" class="btn btn-sm btn-primary" />
-                        </div>
-                    </div>
-                }
+<div class="page-title-box">
+    <div class="container-fluid">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h4 class="page-title mb-1">@ViewBag.Title</h4>
+                <ol class="breadcrumb m-0">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index", "ProductUnit")">Product Unit List</a></li>
+                    <li class="breadcrumb-item active">@actionName</li>
+                </ol>
             </div>
         </div>
     </div>
 </div>
 
+<div class="page-content-wrapper">
+    <div class="container-fluid">
+        <div class="row justify-content-center">
+            <div class="col-lg-7">
 
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="header-title mb-4">Unit Information</h5>
+
+                        @using (Html.BeginForm(actionName, "ProductUnit", new { ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, new { role = "form" }))
+                        {
+                            @Html.AntiForgeryToken()
+                            @Html.HiddenFor(m => m.ProUnitTypeID)
+
+                            <div class="form-group row mb-3">
+                                @Html.LabelFor(model => model.Description, htmlAttributes: new { @class = "col-md-3 col-form-label-sm" })
+                                <div class="col-md-9">
+                                    @Html.EditorFor(model => model.Description, new { htmlAttributes = new { @class = "form-control form-control-sm", autofocus = "autofocus", placeholder = "Enter unit description" } })
+                                    @Html.ValidationMessageFor(model => model.Description, "", new { @class = "text-danger small" })
+                                </div>
+                            </div>
+
+                            <div class="form-group row mb-3">
+                                @Html.LabelFor(model => model.ConvertValue, htmlAttributes: new { @class = "col-md-3 col-form-label-sm" })
+                                <div class="col-md-9">
+                                    @Html.EditorFor(model => model.ConvertValue, new { htmlAttributes = new { @class = "form-control form-control-sm text-right", @type = "number", placeholder = "0" } })
+                                    @Html.ValidationMessageFor(model => model.ConvertValue, "", new { @class = "text-danger small" })
+                                </div>
+                            </div>
+
+                            <div class="form-group row mb-3">
+                                @Html.LabelFor(model => model.Position, htmlAttributes: new { @class = "col-md-3 col-form-label-sm" })
+                                <div class="col-md-9">
+                                    @Html.EditorFor(model => model.Position, new { htmlAttributes = new { @class = "form-control form-control-sm text-right", @type = "number", placeholder = "0" } })
+                                    @Html.ValidationMessageFor(model => model.Position, "", new { @class = "text-danger small" })
+                                </div>
+                            </div>
+
+                            <div class="form-group row mb-3">
+                                @Html.LabelFor(model => model.UnitName, htmlAttributes: new { @class = "col-md-3 col-form-label-sm" })
+                                <div class="col-md-9">
+                                    @Html.EditorFor(model => model.UnitName, new { htmlAttributes = new { @class = "form-control form-control-sm", placeholder = "Enter unit name" } })
+                                    @Html.ValidationMessageFor(model => model.UnitName, "", new { @class = "text-danger small" })
+                                </div>
+                            </div>
+
+                            <hr />
+
+                            <div class="form-group row mb-0">
+                                <div class="col-md-9 offset-md-3">
+                                    <button type="submit" class="btn btn-primary btn-sm waves-effect waves-light" style="min-width: 100px;">
+                                        <i class="mdi mdi-check-circle mr-1"></i> @(actionName == "Create" ? "Save" : "Update")
+                                    </button>
+                                    <a href="@Url.Action("Index")" class="btn btn-outline-secondary btn-sm waves-effect ml-1">
+                                        Cancel
+                                    </a>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

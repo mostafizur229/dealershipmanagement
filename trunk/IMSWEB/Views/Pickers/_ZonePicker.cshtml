@@ -1,101 +1,171 @@
 ﻿@model dynamic
-<div class="input-group">
-    <input type="text" class="input-sm form-control input-sm" id="ZonesCode" name="ZonesCode" value="@ViewBag.ZonesCode" readonly="readonly">
-    <span class="input-group-btn">
-        @*<button type="button" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#ZonesModal"><i class="fa fa-plus-circle" aria-hidden="true"></i>&nbsp;Pick</button>*@
-        <button type="button" class="btn btn-sm btn-info" data-toggle="modal" data-target="#ZonesModal" tabindex="-1"><i class="fa fa-plus-circle" aria-hidden="true"></i>&nbsp;Pick</button>
-    </span>
-    <input type="text" class="input-sm form-control input-sm" id="ZonesName" name="ZonesName" value="@ViewBag.ZonesName" readonly="readonly">
-    <input type="hidden" class="input-sm form-control input-sm" id="ZonesId" name="ZonesId" value="@ViewBag.ZonesId" readonly="readonly">
+
+<!-- ========================= -->
+<!-- Zone Picker -->
+<!-- ========================= -->
+<div class="row">
+    <div class="col-md-12">
+        <label class="font-weight-bold mb-2 text-muted">
+            Select Zone
+        </label>
+        <div class="input-group">
+            <!-- Zone Code -->
+            <input type="text"
+                   id="ZonesCode"
+                   name="ZonesCode"
+                   class="form-control form-control-sm bg-light"
+                   value="@ViewBag.ZonesCode"
+                   placeholder="Zone Code"
+                   readonly />
+
+            <!-- Picker Button -->
+            <div class="input-group-append">
+                <button type="button"
+                        class="btn btn-info btn-sm px-3 waves-effect waves-light"
+                        data-toggle="modal"
+                        data-target="#ZonesModal"
+                        tabindex="-1">
+                    <i class="mdi mdi-map-marker-search"></i> Pick
+                </button>
+            </div>
+
+            <!-- Zone Name -->
+            <input type="text"
+                   id="ZonesName"
+                   name="ZonesName"
+                   class="form-control form-control-sm bg-light"
+                   value="@ViewBag.ZonesName"
+                   placeholder="Zone Name"
+                   readonly />
+
+            <!-- Hidden Id -->
+            <input type="hidden"
+                   id="ZonesId"
+                   name="ZonesId"
+                   value="@ViewBag.ZonesId" />
+        </div>
+    </div>
 </div>
 
-<!-- Modal -->
-<div class="modal fade bs-example-modal-lg" id="ZonesModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-    <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h5 class="modal-title" id="myModalLabel">Existing Zones</h5>
+<!-- ========================= -->
+<!-- Zone Modal -->
+<!-- ========================= -->
+<div class="modal fade" id="ZonesModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+
+            <!-- Header -->
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title text-white">
+                    <i class="mdi mdi-map-marker-radius mr-1"></i>
+                    Select Zone
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
             </div>
-            <div class="modal-body">
-                <div id="Colorstoolbar">
-                    @Html.ActionLink("Create new", "Create", "Zone", routeValues: null, htmlAttributes: new { @class = "btn btn-primary btn-sm", target = "_blank" })
-                    <span class="text-warning">&nbsp;(Requires reload current page to get new item)</span>
+
+            <!-- Body -->
+            <div class="modal-body p-3">
+                <!-- Search & Action Section -->
+                <div class="row mb-3">
+                    <div class="col-md-8">
+                        <div class="input-group input-group-sm">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text bg-light border-right-0">
+                                    <i class="mdi mdi-magnify"></i>
+                                </span>
+                            </div>
+                            <input type="text"
+                                   id="zoneSearch"
+                                   class="form-control border-left-0"
+                                   placeholder="Search zone by code or name..." />
+                        </div>
+                    </div>
+                    <div class="col-md-4 text-right">
+                        @Html.ActionLink("Create New Zone", "Create", "Zone", null, new { @class = "btn btn-primary btn-sm", target = "_blank" })
+                    </div>
                 </div>
-                <table id="ZonesTable"
-                       data-toolbar="#Zonestoolbar"
-                       data-toggle="table"
-                       data-search="true"
-                       data-click-to-select="true"
-                       data-single-select="true"
-                       data-detail-view="true"
-                       data-pagination="true"
-                       data-id-field="name"
-                       data-page-list="[10, 25, 50, 100, ALL]"
-                       data-page-size="6"
-                       class="table table-responsive table-bordered table-striped" cellspacing="0" width="100%">
-                    <thead>
-                        <tr>
-                            <th data-field="id" class="hidden">
-                            </th>
-                            <th data-checkbox="true">
-                            </th>
-                            <th>
-                                Sl
-                            </th>
-                            <th data-field="code"
-                                data-sortable="true">
-                                Code
-                            </th>
-                            <th data-field="name"
-                                data-sorter="sorter"
-                                data-sortable="true">
-                                Name
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @{
-                            int count = 1;
-                            foreach (var item in Model)
-                            {
-                                <tr>
-                                    <td class="hidden">
-                                        @item.Id
-                                    </td>
-                                    <td></td>
-                                    <td>
-                                        @count
-                                    </td>
-                                    <td>
-                                        @item.Code
-                                    </td>
-                                    <td>
-                                        @item.Name
-                                    </td>
-                                </tr>
-                                count++;
+
+                <!-- Table Section -->
+                <div class="table-responsive">
+                    <table class="table table-hover table-bordered mb-0" id="ZonesTable">
+                        <thead class="thead-light">
+                            <tr>
+                                <th width="60" class="text-center">SL</th>
+                                <th width="150">Code</th>
+                                <th>Zone Name</th>
+                                <th width="100" class="text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{
+                                int count = 1;
+                                foreach (var item in Model)
+                                {
+                                    <tr>
+                                        <td class="text-center text-muted">@count</td>
+                                        <td class="font-weight-bold text-primary">@item.Code</td>
+                                        <td>@item.Name</td>
+                                        <td class="text-center">
+                                            <button type="button"
+                                                    class="btn btn-success btn-sm select-zone waves-effect waves-light"
+                                                    data-id="@item.Id"
+                                                    data-code="@item.Code"
+                                                    data-name="@item.Name">
+                                                <i class="mdi mdi-check"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    count++;
+                                }
                             }
-                        }
-                    </tbody>
-                </table>
+                        </tbody>
+                    </table>
+                </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-sm btn-default" data-dismiss="modal">Close</button>
+
+            <!-- Footer -->
+            <div class="modal-footer bg-light">
+                <span class="mr-auto text-muted small">
+                    <i class="mdi mdi-information-outline mr-1"></i>
+                    Pick a zone to auto-fill the form
+                </span>
+                <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
 </div>
-<script>
-    var $table = $('#ZonesTable');
-    $table.on('check.bs.table', function (e, row) {
-        $('#ZonesCode').val($.trim(row.code));
-        $('#ZonesName').val($.trim(row.name));
-        $('#ZonesId').val($.trim(row.id));
+
+@section Scripts{
+    <script>
+        $(document).ready(function () {
+            // ====================================
+            // Select Zone Logic
+            // ====================================
+            $(document).on('click', '.select-zone', function () {
+                var id = $(this).data('id');
+                var code = $(this).data('code');
+                var name = $(this).data('name');
+
+                // Set values to parent input fields
+                $('#ZonesId').val($.trim(id));
+                $('#ZonesCode').val($.trim(code));
+                $('#ZonesName').val($.trim(name));
+
+                // Hide the modal
+                $('#ZonesModal').modal('hide');
+            });
+
+            // ====================================
+            // Client-Side Search Logic
+            // ====================================
+            $(document).on('keyup', '#zoneSearch', function () {
+                var value = $(this).val().toLowerCase();
+                $('#ZonesTable tbody tr').filter(function () {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1);
+                });
+            });
         });
-    $table.on('uncheck.bs.table', function (e, row) {
-        $('#ZonesCode').val('');
-        $('#ZonesName').val('');
-        $('#ZonesId').val('');
-        });
-</script>
+    </script>
+}

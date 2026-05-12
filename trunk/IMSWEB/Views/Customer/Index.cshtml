@@ -5,223 +5,161 @@
 }
 
 <style>
+    /* DataTables Modern Customization */
+    #customerTable thead tr {
+        background-color: #3f51b5 !important; /* Theme Color */
+        color: white !important;
+    }
 
     #customerTable thead th {
         text-align: center;
         vertical-align: middle;
+        border-bottom: none;
     }
 
-    #customerTable tbody td {
+    .dataTable td {
         text-align: center;
         vertical-align: middle;
-        /*min-height: 30px;*/
-        max-height: 30px;
+        border-color: #f1f1f1 !important;
     }
 
-    #customerTable tbody > tr > td:last-child {
-        white-space: nowrap;
+    .dt-search .dt-input {
+        border-radius: 4px;
+        border: 1px solid #ced4da;
+        padding: 4px 8px;
     }
-
-    #customerTable {
-        border-collapse: collapse;
-    }
-
-
-        #customerTable thead tr {
-            background-color: #0d85bb !important;
-            color: white !important;
-        }
-
-    .dt-search {
-        display: flex;
-        align-items: center;
-        justify-content: flex-start;
-    }
-
-        .dt-search label {
-            font-size: 14px;
-            font-weight: bold;
-            margin-right: 10px;
-        }
-
-        .dt-search .dt-input {
-            width: 175px;
-            height: 30px;
-            font-size: 12px;
-            padding: 5px 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
-        }
-
-
-    .dt-paging .dt-paging-button {
-        background-color: lightgray !important;
-        color: white;
-        border: none;
-        padding: 5px 10px;
-        margin: 0 5px;
-        border-radius: 5px;
-        cursor: pointer;
-    }
-
-    .dataTable, .dataTable th, .dataTable td {
-        border-color: #0fa0e1 !important;
-        text-align: center;
-        vertical-align: middle;
-    }
-
 
     .dt-paging .dt-paging-button.current {
-        background-color: #0fa0e1 !important;
-        color: white;
-        font-weight: bold;
-    }
-
-    .dt-paging .dt-paging-button.disabled {
-        background-color: lightgray !important;
-        color: #ccc;
-        cursor: not-allowed;
-    }
-
-
-
-    .dt-paging .dt-paging-button:not(.disabled):hover {
-        background-color: #0fa0e1 !important;
-        color: white;
-    }
-
-    .dt-length select {
-        margin-right: 5px;
+        background: #3f51b5 !important;
+        color: white !important;
+        border: 1px solid #3f51b5 !important;
+        border-radius: 4px;
     }
 </style>
 
-<h4 class="text-left inline-header">Existing Customers</h4>
-<hr />
-
-<div class="panel">
-    <div class="panel-body">
-        @Html.ActionLink("Create new customer", "Create", "Customer", null, new { @class = "btn btn-primary btn-sm pull-right m-2" })
-
-        <div style="width: 100%; padding: 5px">
-            <table id="customerTable" class="display cell-border hover" style="width:100%">
-                <thead>
-                    <tr>
-                        <th>Sl</th>
-                        <th>Code</th>
-                        <th>Name</th>
-                        <th>Contact No</th>
-                        <th>Address</th>
-                        <th>Customer Type</th>
-                        <th>Total Due</th>
-                        <th>Actions</th>
-                        <th>Details</th>
-                    </tr>
-                </thead>
-            </table>
+<div class="page-title-box">
+    <div class="container-fluid">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h4 class="page-title mb-1">@ViewBag.Title</h4>
+                <ol class="breadcrumb m-0">
+                    <li class="breadcrumb-item active">Manage Existing Customers</li>
+                </ol>
+            </div>
         </div>
-
     </div>
 </div>
 
-<link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css" />
-<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+<div class="page-content-wrapper">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <h5 class="header-title">Existing Customers</h5>
+                            </div>
+                            <div class="col-md-6 text-right">
+                                @Html.ActionLink("Create New Customer", "Create", "Customer", null, new { @class = "btn btn-primary btn-sm", @id = "btnCreate" })
+                            </div>
+                        </div>
 
-<script>
+                        <div class="table-responsive">
+                            <table id="customerTable" class="table table-bordered dt-responsive nowrap table-hover" style="width:100%">
+                                <thead class="thead-light">
+                                    <tr>
+                                        <th>Sl</th>
+                                        <th>Code</th>
+                                        <th>Name</th>
+                                        <th>Contact No</th>
+                                        <th>Address</th>
+                                        <th>Type</th>
+                                        <th>Total Due</th>
+                                        <th style="width: 120px;">Actions</th>
+                                        <th>Details</th>
+                                    </tr>
+                                </thead>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
-    var userAdmin = '@User.IsInRole(EnumUserRoles.Admin.ToString())';    
-    var userManager = '@User.IsInRole(EnumUserRoles.Manager.ToString())';
-    var userLocalAdmin = '@User.IsInRole(EnumUserRoles.LocalAdmin.ToString())';
-    var userGetConcernId = '@User.Identity.GetConcernId()'; // 25, 573, 578
+@section scripts {
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css" />
+    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
 
+    <script>
+        // Role Checks (C# 5 compatible)
+        var userAdmin = '@User.IsInRole(EnumUserRoles.Admin.ToString())';
+        var userLocalAdmin = '@User.IsInRole(EnumUserRoles.LocalAdmin.ToString())';
 
-
-    //alert(
-    //    "Manager: " + userManager +
-    //    " Hq: " + userHoqueLocalAdmin +
-    //    " Maa Manager: " + userMaaElectronicManager +
-    //    " Admin: " + userAdmin +
-    //    " LocalAdmin: " + userLocalAdmin +
-    //    " Concern: " + userGetConcernId
-
-    //);
-
-
-    $(document).ready(function () {
-        $('#customerTable').DataTable({
-            processing: true,
-            serverSide: true,
-            ajax: {
-                url: '@Url.Action("GetCustomer", "Customer")',
-                type: 'GET'
-            },
-            columns: [
-                {
-                    data: null,
-                    render: function (data, type, row, meta) {
-                        return meta.row + 1 + meta.settings._iDisplayStart;
-                    }
+        $(document).ready(function () {
+            $('#customerTable').DataTable({
+                processing: true,
+                serverSide: true,
+                ajax: {
+                    url: '@Url.Action("GetCustomer", "Customer")',
+                    type: 'GET'
                 },
-                { data: 'Code' },
-                { data: 'Name' },
-                { data: 'ContactNo' },
-                { data: 'Address' },
-                {
-                    data: 'CustomerType',
-                    render: function (data, type, row) {
-                        // Map the CustomerType ID to its corresponding name
-                        const customerTypes = {
-                            1: 'Retail',
-                            2: 'Dealer',
-                            3: 'Hire',
-                            4: 'Branch(B2B)',
-                            5: 'Both'
-                        };
-                        return customerTypes[data] || 'Unknown'; // Return 'Unknown' if the ID doesn't match
-                    } },
-                { data: 'TotalDue' },
-                {
-                    data: null,
-                    render: function (data, type, row) {
-                        if (userAdmin === "True" || userLocalAdmin === "True") {
-                            //<a href="/Customer/Status/${row.Id}" class="btn btn-sm btn-primary">Status</a>
-                            return `
-                                    
-                                    <a href="/Customer/Edit/${row.Id}" class="btn btn-sm btn-primary">Edit</a>
-                                    <a href="/Customer/Delete/${row.Id}" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this customer?');">Delete</a>
-                                `
-
-                        } else {
-                            return `
-                                    
-                                    <a href="/Customer/Edit/${row.Id}" class="btn btn-sm btn-primary disabled">Edit</a>
-                                    <a href="/Customer/Delete/${row.Id}" class="btn btn-sm btn-danger disabled" onclick="return confirm('Are you sure you want to delete this customer?');">Delete</a>
-                                `
+                columns: [
+                    {
+                        data: null,
+                        render: function (data, type, row, meta) {
+                            return meta.row + 1 + meta.settings._iDisplayStart;
+                        }
+                    },
+                    { data: 'Code' },
+                    { data: 'Name' },
+                    { data: 'ContactNo' },
+                    { data: 'Address' },
+                    {
+                        data: 'CustomerType',
+                        render: function (data) {
+                            var types = { 1: 'Retail', 2: 'Dealer', 3: 'Hire', 4: 'Branch(B2B)', 5: 'Both' };
+                            return types[data] || 'Unknown';
+                        }
+                    },
+                    {
+                        data: 'TotalDue',
+                        render: function(data) { return '<b>' + (data || 0) + '</b>'; }
+                    },
+                    {
+                        data: null,
+                        render: function (data, type, row) {
+                            var isDisabled = (userAdmin === "True" || userLocalAdmin === "True") ? "" : "disabled";
+                            return '<div class="btn-group">' +
+                                   '<a href="/Customer/Edit/' + row.Id + '" class="btn btn-outline-secondary btn-sm ' + isDisabled + '" title="Edit"><i class="mdi mdi-pencil"></i></a>' +
+                                   '<a href="/Customer/Delete/' + row.Id + '" class="btn btn-outline-danger btn-sm ' + isDisabled + '" title="Delete" onclick="return confirm(\'Are you sure?\');"><i class="mdi mdi-delete"></i></a>' +
+                                   '</div>';
+                        }
+                    },
+                    {
+                        data: null,
+                        render: function(data, type, row) {
+                            return '<button type="button" class="btn btn-info btn-sm" onclick="showDetails(' + row.Id + ')"><i class="mdi mdi-eye mr-1"></i> Details</button>';
                         }
                     }
-
-
-                },
-                {
-                    data: null,
-                    render: (data, type, row) => `
-            <form id="detailsForm-${row.Id}" data-id="${row.Id}" onsubmit="showDetails(${row.Id}); return false;">
-                <input type="hidden" name="Id" value="${row.Id}" />
-                <button type="submit" class="btn btn-sm btn-info">Details</button>
-            </form>
-    `
+                ],
+                order: [[1, 'asc']],
+                pageLength: 10,
+                language: {
+                    search: "Search:",
+                    paginate: {
+                        previous: "<i class='mdi mdi-chevron-left'>",
+                        next: "<i class='mdi mdi-chevron-right'>"
+                    }
                 }
-
-            ],
-            order: [[1, 'asc']],
-            lengthMenu: [10, 25, 50],
-            pageLength: 10
+            });
         });
 
-
-
-    });
-
-
-
-</script>
+        function showDetails(id) {
+            // Your existing detail logic here
+            console.log("Showing details for ID: " + id);
+        }
+    </script>
+}

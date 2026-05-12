@@ -7,257 +7,259 @@
     var customerTypeBoth = EnumCustomerType.Both;
 }
 
-<h4 class="inline-header">@(ViewBag.Title + ".")</h4>
-
-@using (Html.BeginForm(actionName, "Customer", new { ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, new { @class = "form-horizontal", enctype = "multipart/form-data", role = "form" }))
-{
-    @Html.AntiForgeryToken()
-    @Html.HiddenFor(m => m.Id);
-    @Html.HiddenFor(m => m.PhotoPath);
-    <div class="col-md-6">
-        <div class="panel panel-default">
-            <div class="panel-body">
-                <div class="form-group">
-                    @Html.LabelFor(model => model.Code, htmlAttributes: new { @class = "control-label col-md-3" })
-                    <div class="col-md-9">
-                        @Html.EditorFor(model => model.Code, new { htmlAttributes = new { @class = "form-control input-sm", tabindex = 1 } })
-                        @Html.ValidationMessageFor(model => model.Code, "", new { @class = "text-danger" })
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    @Html.LabelFor(model => model.Name, htmlAttributes: new { @class = "control-label col-md-3" })
-                    <div class="col-md-9">
-                        @Html.EditorFor(model => model.Name, new { htmlAttributes = new { @class = "form-control input-sm", autofocus = "autofocus", tabindex = 2 } })
-                        @Html.ValidationMessageFor(model => model.Name, "", new { @class = "text-danger" })
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    @Html.LabelFor(model => model.CustomerType, htmlAttributes: new { @class = "control-label col-md-3" })
-                    <div class="col-md-9">
-                        @if (ViewBag.IsSalesOrCollectionExist && Model.Id.IsNotNullOrEmpty())
-                        {
-                            @Html.EnumDropDownListFor(model => model.CustomerType, "--Select a type--", new { @class = "form-control input-sm", tabindex = 7, @disabled = "disabled" })
-                            @Html.HiddenFor(m => m.CustomerType);
-                        }
-                        else
-                        {
-                            @Html.EnumDropDownListFor(model => model.CustomerType, "--Select a type--", new { @class = "form-control input-sm", tabindex = 7 })
-                        }
-                        @Html.ValidationMessageFor(model => model.CustomerType, "", new { @class = "text-danger" })
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    @Html.LabelFor(model => model.ContactNo, htmlAttributes: new { @class = "control-label col-md-3" })
-                    <div class="col-md-9">
-                        @Html.EditorFor(model => model.ContactNo, new { htmlAttributes = new { @class = "form-control input-sm", tabindex = 4 } })
-                        @Html.ValidationMessageFor(model => model.ContactNo, "", new { @class = "text-danger" })
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    @Html.LabelFor(model => model.Address, htmlAttributes: new { @class = "control-label col-md-3" })
-                    <div class="col-md-9">
-                        @Html.TextAreaFor(model => model.Address, new { @class = "form-control input-sm", rows = "3", tabindex = 5 })
-                        @Html.ValidationMessageFor(model => model.Address, "", new { @class = "text-danger" })
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    @Html.LabelFor(model => model.FName, htmlAttributes: new { @class = "control-label col-md-3" })
-                    <div class="col-md-9">
-                        @Html.EditorFor(model => model.FName, new { htmlAttributes = new { @class = "form-control input-sm", tabindex = 6 } })
-                        @Html.ValidationMessageFor(model => model.FName, "", new { @class = "text-danger" })
-                    </div>
-                </div>
-
-
-
-                <div class="form-group">
-                    @Html.LabelFor(model => model.EmailId, htmlAttributes: new { @class = "control-label col-md-3" })
-                    <div class="col-md-9">
-                        @Html.EditorFor(model => model.EmailId, new { htmlAttributes = new { @class = "form-control input-sm", tabindex = 7 } })
-                        @Html.ValidationMessageFor(model => model.EmailId, "", new { @class = "text-danger" })
-                    </div>
-                </div>
-                <div class="form-group">
-                    @Html.LabelFor(model => model.OpeningDue, htmlAttributes: new { @class = "control-label col-md-3" })
-                    <div class="col-md-9">
-                        @if (ViewBag.IsSalesOrCollectionExist && Model.Id.IsNotNullOrEmpty())
-                        {
-                            @Html.EditorFor(model => model.OpeningDue, new { htmlAttributes = new { @class = "form-control input-sm text-right", type = "number", @readonly = "readonly" } });
-                        }
-                        else
-                        {
-                            @Html.EditorFor(model => model.OpeningDue, new { htmlAttributes = new { @class = "form-control input-sm text-right", type = "number", tabindex = 6 } });
-                        }
-                        @Html.ValidationMessageFor(model => model.OpeningDue, "", new { @class = "text-danger" })
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    @Html.LabelFor(model => model.TotalDue, htmlAttributes: new { @class = "control-label col-md-3" })
-                    <div class="col-md-9">
-                        @Html.EditorFor(model => model.TotalDue, new { htmlAttributes = new { @class = "form-control input-sm text-right", type = "number", @readonly = "readonly", @tabindex = -1 } })
-                        @Html.ValidationMessageFor(model => model.TotalDue, "", new { @class = "text-danger" })
-                    </div>
-                </div>
-
-
-
-                <div class="form-group">
-                    @Html.LabelFor(m => m.PhotoPath, new { @class = "control-label col-md-3" })
-                    <div class="col-md-9">
-                        <input class="form-control input-sm" id="Photo" name="Photo" type="file" accept="image/*"
-                               onchange="document.getElementById('customerPicture').src = window.URL.createObjectURL(this.files[0]);
-    document.getElementById('PhotoPath').value = window.URL.createObjectURL(this.files[0]);" tabindex="-1">
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <div class="col-md-offset-3 col-md-9">
-                        <img id="customerPicture" src="/Content/photos/customers/@(Model != null ? Model.PhotoPath : string.Empty)" alt="Uploaded picture will appear here." height="200" tabindex="-1" />
-                    </div>
-                </div>
+<div class="page-title-box">
+    <div class="container-fluid">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h4 class="page-title mb-1">@ViewBag.Title</h4>
+                <ol class="breadcrumb m-0">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index", "Customer")">Customer List</a></li>
+                    <li class="breadcrumb-item active">@actionName</li>
+                </ol>
+            </div>
+            <div class="col-md-4 text-right">
+                <a href="@Url.Action("Index", "Customer")" class="btn btn-sm btn-secondary waves-effect">
+                    <i class="mdi mdi-arrow-left mr-1"></i> Back to List
+                </a>
             </div>
         </div>
-
     </div>
+</div>
 
-    <div class="col-md-6">
+<div class="page-content-wrapper">
+    <div class="container-fluid">
+        @using (Html.BeginForm(actionName, "Customer", new { ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, new { enctype = "multipart/form-data", role = "form", autocomplete = "off" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.HiddenFor(m => m.Id)
+            @Html.HiddenFor(m => m.PhotoPath)
 
-        <div class="panel panel-default">
-            <div class="panel-body">
+            <div class="row">
+                @* বাম কলাম: বেসিক ইনফরমেশন *@
+                <div class="col-lg-6">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body">
+                            <h5 class="header-title mb-4 text-primary"><i class="mdi mdi-account-card-details mr-2"></i>Basic Information</h5>
 
+                            <div class="form-group row mb-3">
+                                @Html.LabelFor(model => model.CustomerType, new { @class = "col-md-3 col-form-label-sm" })
+                                <div class="col-md-9">
+                                    @if (ViewBag.IsSalesOrCollectionExist != null && (bool)ViewBag.IsSalesOrCollectionExist && Model != null && !string.IsNullOrEmpty(Model.Id))
+                                    {
+                                        @Html.EnumDropDownListFor(model => model.CustomerType, "--Select Type--", new { @class = "form-control form-control-sm", @disabled = "disabled" })
+                                        @Html.HiddenFor(m => m.CustomerType)
+                                    }
+                                    else
+                                    {
+                                        @Html.EnumDropDownListFor(model => model.CustomerType, "--Select Type--", new { @class = "form-control form-control-sm", id = "CustomerType" })
+                                    }
+                                    @Html.ValidationMessageFor(model => model.CustomerType, "", new { @class = "text-danger small" })
+                                </div>
+                            </div>
 
-                <div class="form-group">
-                    @Html.LabelFor(model => model.RefName, htmlAttributes: new { @class = "control-label col-md-3" })
-                    <div class="col-md-9">
-                        @Html.EditorFor(model => model.RefName, new { htmlAttributes = new { @class = "form-control input-sm", tabindex = 9 } })
-                        @Html.ValidationMessageFor(model => model.RefName, "", new { @class = "text-danger" })
-                    </div>
-                </div>
+                            <div class="form-group row mb-3">
+                                @Html.LabelFor(model => model.Code, new { @class = "col-md-3 col-form-label-sm" })
+                                <div class="col-md-9">
+                                    @Html.EditorFor(model => model.Code, new { htmlAttributes = new { @class = "form-control form-control-sm bg-light", id = "Code", @readonly = "readonly" } })
+                                </div>
+                            </div>
 
-                <div class="form-group">
-                    @Html.LabelFor(model => model.RefContact, htmlAttributes: new { @class = "control-label col-md-3" })
-                    <div class="col-md-9">
-                        @Html.EditorFor(model => model.RefContact, new { htmlAttributes = new { @class = "form-control input-sm", tabindex = 10 } })
-                        @Html.ValidationMessageFor(model => model.RefContact, "", new { @class = "text-danger" })
-                    </div>
-                </div>
-                <div class="form-group">
-                    @Html.LabelFor(model => model.RefAddress, htmlAttributes: new { @class = "control-label col-md-3" })
-                    <div class="col-md-9">
-                        @Html.TextAreaFor(model => model.RefAddress, new { @class = "form-control input-sm", rows = "2", tabindex = 11 })
-                        @Html.ValidationMessageFor(model => model.RefAddress, "", new { @class = "text-danger" })
-                    </div>
-                </div>
+                            <div class="form-group row mb-3">
+                                @Html.LabelFor(model => model.Name, new { @class = "col-md-3 col-form-label-sm" })
+                                <div class="col-md-9">
+                                    @Html.EditorFor(model => model.Name, new { htmlAttributes = new { @class = "form-control form-control-sm", autofocus = "autofocus" } })
+                                    @Html.ValidationMessageFor(model => model.Name, "", new { @class = "text-danger small" })
+                                </div>
+                            </div>
 
+                            <div class="form-group row mb-3">
+                                @Html.LabelFor(model => model.ContactNo, new { @class = "col-md-3 col-form-label-sm" })
+                                <div class="col-md-9">
+                                    @Html.EditorFor(model => model.ContactNo, new { htmlAttributes = new { @class = "form-control form-control-sm" } })
+                                </div>
+                            </div>
 
-                <div class="form-group">
-                    @Html.LabelFor(model => model.CompanyId, htmlAttributes: new { @class = "control-label col-md-3" })
-                    <div class="col-md-9">
-                        @Html.EditorFor(model => model.CompanyId, new { htmlAttributes = new { @class = "form-control input-sm", tabindex = 12 } })
-                        @Html.ValidationMessageFor(model => model.CompanyId, "", new { @class = "text-danger" })
-                    </div>
-                </div>
+                            <div class="form-group row mb-3">
+                                @Html.LabelFor(model => model.Address, new { @class = "col-md-3 col-form-label-sm" })
+                                <div class="col-md-9">
+                                    @Html.TextAreaFor(model => model.Address, new { @class = "form-control form-control-sm", rows = "2" })
+                                </div>
+                            </div>
 
-                <div class="form-group">
-                    @Html.LabelFor(model => model.EmployeeId, htmlAttributes: new { @class = "control-label col-md-3" })
-                    <div class="col-md-9">
-                        @{Html.RenderAction("RenderPicker", "Picker", new { pickerType = PickerType.Employee, id = (Model != null && Model.EmployeeId != null) ? Model.EmployeeId : "0" });}
-                        @Html.ValidationMessageFor(model => model.EmployeeId, "", new { @class = "text-danger" })
-                    </div>
-                </div>
-                <div class="form-group">
-                    @Html.LabelFor(model => model.ZoneID, htmlAttributes: new { @class = "control-label col-md-3" })
-                    <div class="col-md-9">
-                        @{Html.RenderAction("RenderPicker", "Picker", new { pickerType = PickerType.Zone, id = (Model != null && Model.ZoneID != null) ? Model.ZoneID : "0" });}
-                        @Html.ValidationMessageFor(model => model.ZoneID, "", new { @class = "text-danger" })
-                    </div>
-                </div>
+                            <div class="form-group row mb-3">
+                                @Html.LabelFor(model => model.OpeningDue, new { @class = "col-md-3 col-form-label-sm" })
+                                <div class="col-md-4">
+                                    @Html.EditorFor(model => model.OpeningDue, new { htmlAttributes = new { @class = "form-control form-control-sm text-right", type = "number", id = "OpeningDue" } })
+                                </div>
+                                @Html.LabelFor(model => model.TotalDue, new { @class = "col-md-2 col-form-label-sm" })
+                                <div class="col-md-3">
+                                    @Html.EditorFor(model => model.TotalDue, new { htmlAttributes = new { @class = "form-control form-control-sm text-right bg-light", id = "TotalDue", @readonly = "readonly" } })
+                                </div>
+                            </div>
 
-                <div class="form-group">
-                    @Html.LabelFor(model => model.NId, htmlAttributes: new { @class = "control-label col-md-3" })
-                    <div class="col-md-9">
-                        @Html.EditorFor(model => model.NId, new { htmlAttributes = new { @class = "form-control input-sm", tabindex = 13 } })
-                        @Html.ValidationMessageFor(model => model.NId, "", new { @class = "text-danger" })
-                    </div>
-                </div>
-
-
-
-                <div class="form-group">
-                    @Html.LabelFor(model => model.CusDueLimit, htmlAttributes: new { @class = "control-label col-md-3" })
-                    <div class="col-md-9">
-                        @Html.EditorFor(model => model.CusDueLimit, new { htmlAttributes = new { @class = "form-control input-sm text-right", type = "number", tabindex = 14 } })
-                        @Html.ValidationMessageFor(model => model.CusDueLimit, "", new { @class = "text-danger" })
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    @Html.LabelFor(model => model.RefFName, htmlAttributes: new { @class = "control-label col-md-3" })
-                    <div class="col-md-9">
-                        @Html.EditorFor(model => model.RefFName, new { htmlAttributes = new { @class = "form-control input-sm", tabindex = 15 } })
-                        @Html.ValidationMessageFor(model => model.RefFName, "", new { @class = "text-danger" })
-                    </div>
-                </div>
-                <div class="form-group">
-                    @Html.LabelFor(model => model.Remarks, htmlAttributes: new { @class = "control-label col-md-3" })
-                    <div class="col-md-9">
-                        @Html.EditorFor(model => model.Remarks, new { htmlAttributes = new { @class = "form-control input-sm", tabindex = 15 } })
-                        @Html.ValidationMessageFor(model => model.Remarks, "", new { @class = "text-danger" })
-                    </div>
-                </div>
-
-                @if (ViewBag.IsEditMode != null && ViewBag.IsEditMode && ViewBag.CustomerType != customerTypeBoth)
-                {
-                    <div class="form-group">
-                        @Html.LabelFor(model => model.IsSupplier, htmlAttributes: new { @class = "control-label col-md-3" })
-                        <div class="col-md-9">
-                            @Html.EditorFor(m => m.IsSupplier, new { htmlAttributes = new { @class = "form-check-input" } })
-                            @Html.ValidationMessageFor(model => model.IsSupplier, "", new { @class = "text-danger" })
+                            <div class="form-group row mb-3">
+                                <label class="col-md-3 col-form-label-sm">Photo</label>
+                                <div class="col-md-9">
+                                    <input class="form-control form-control-sm" id="Photo" name="Photo" type="file" accept="image/*"
+                                           onchange="document.getElementById('customerPicture').src = window.URL.createObjectURL(this.files[0])">
+                                    <div class="mt-2 text-center">
+                                        @{
+                                            string imgPath = (Model != null && !string.IsNullOrEmpty(Model.PhotoPath)) ? "/Content/photos/customers/" + Model.PhotoPath : "/Content/photos/customers/default.png";
+                                        }
+                                        <img id="customerPicture" src="@imgPath" class="img-thumbnail" style="height: 100px; width: 100px; object-fit: cover;" alt="Preview" />
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                }
+                </div>
 
-                <div class="form-group">
-                    <div class="col-sm-offset-3 col-sm-9">
-                        <input type="submit" value="Add Customer" class="btn btn-sm btn-primary" tabindex="16" />
+                @* ডান কলাম: পিকার এবং রেফারেন্স *@
+                <div class="col-lg-6">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body">
+                            <h5 class="header-title mb-4 text-primary"><i class="mdi mdi-link-variant mr-2"></i>Reference & Assignment</h5>
+
+                            @* Employee Picker *@
+                            <div class="form-group row mb-3">
+                                <label class="col-md-3 col-form-label-sm text-info font-weight-bold">Employee</label>
+                                <div class="col-md-9">
+                                    @{Html.RenderAction("RenderPicker", "Picker", new { pickerType = PickerType.Employee, id = (Model != null && Model.EmployeeId != null) ? Model.EmployeeId : "0" });}
+                                    @Html.ValidationMessageFor(model => model.EmployeeId, "", new { @class = "text-danger small" })
+                                </div>
+                            </div>
+
+                            @* Zone Picker *@
+                            <div class="form-group row mb-3">
+                                <label class="col-md-3 col-form-label-sm text-info font-weight-bold">Zone</label>
+                                <div class="col-md-9">
+                                    @{Html.RenderAction("RenderPicker", "Picker", new { pickerType = PickerType.Zone, id = (Model != null && Model.ZoneID != null) ? Model.ZoneID : "0" });}
+                                    @Html.ValidationMessageFor(model => model.ZoneID, "", new { @class = "text-danger small" })
+                                </div>
+                            </div>
+
+                            <div class="form-group row mb-3">
+                                @Html.LabelFor(model => model.RefName, new { @class = "col-md-3 col-form-label-sm" })
+                                <div class="col-md-9">
+                                    @Html.EditorFor(model => model.RefName, new { htmlAttributes = new { @class = "form-control form-control-sm" } })
+                                </div>
+                            </div>
+
+                            <div class="form-group row mb-3">
+                                @Html.LabelFor(model => model.CusDueLimit, new { @class = "col-md-3 col-form-label-sm" })
+                                <div class="col-md-9">
+                                    @Html.EditorFor(model => model.CusDueLimit, new { htmlAttributes = new { @class = "form-control form-control-sm text-right", type = "number" } })
+                                </div>
+                            </div>
+
+                            <div class="form-group row mb-3">
+                                @Html.LabelFor(model => model.Remarks, new { @class = "col-md-3 col-form-label-sm" })
+                                <div class="col-md-9">
+                                    @Html.TextAreaFor(model => model.Remarks, new { @class = "form-control form-control-sm", rows = "2" })
+                                </div>
+                            </div>
+
+                            @if (ViewBag.IsEditMode != null && (bool)ViewBag.IsEditMode && ViewBag.CustomerType != customerTypeBoth)
+                            {
+                                <div class="form-group row mb-3">
+                                    @Html.LabelFor(model => model.IsSupplier, new { @class = "col-md-3 col-form-label-sm" })
+                                    <div class="col-md-9">
+                                        <div class="custom-control custom-checkbox mt-1">
+                                            @Html.CheckBoxFor(m => m.IsSupplier, new { @class = "custom-control-input", id = "IsSupplier" })
+                                            <label class="custom-control-label" for="IsSupplier">Convert to Supplier</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-    </div>
-}
-<script>
-    $(function () {
-        //$("#CustomerType").select2();
-    });
-    $("#OpeningDue").on("input", function () {
-        var amount = getDefaultFloatIfEmpty($(this).val()).toFixed(2);
-        $("#TotalDue").val(amount);
-    });
-
-    $("#CustomerType").on('change', function () {
-        //alert(this.value);
-        if (this.value == 0) {
-            toastr.info("Please select type.");
-            return;
+            @* Form Buttons *@
+            <div class="row mt-4">
+                <div class="col-12 text-center">
+                    <hr />
+                    <button type="submit" class="btn btn-primary btn-sm waves-effect waves-light px-4">
+                        <i class="mdi mdi-check-circle mr-1"></i> @(actionName == "Create" ? "Save Customer" : "Update Customer")
+                    </button>
+                    <a href="@Url.Action("Index")" class="btn btn-outline-secondary btn-sm px-4 ml-2">Cancel</a>
+                </div>
+            </div>
         }
+    </div>
+</div>
 
-        $.ajax({
-            type: "GET",
-            url: "/Customer/GetUniqueCodeByType",
-            data: { CustomerType: this.value },
-            contentType: "application/json",
-            dataType: "json",
-            success: function (data) {
-                $("#Code").val(data);
-            }
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Select2 initialization
+            $('.select2').select2({ width: '100%' });
+
+            // Opening Due change logic
+            $("#OpeningDue").on("input", function () {
+                var amount = parseFloat($(this).val()) || 0;
+                $("#TotalDue").val(amount.toFixed(2));
+            });
+
+            // Customer Type change logic (Dynamic Code)
+            $("#CustomerType").on('change', function () {
+                var type = $(this).val();
+                if (type == 0 || type == "") return;
+
+                $.ajax({
+                    type: "GET",
+                    url: "/Customer/GetUniqueCodeByType",
+                    data: { CustomerType: type },
+                    success: function (data) {
+                        $("#Code").val(data);
+                    }
+                });
+            });
         });
-    });
-</script>
+
+        // =========================================
+        // Employee Picker Select (ভ্যালু সেট করা)
+        // =========================================
+        $(document).on('click', '.select-employee', function (e) {
+            e.preventDefault();
+            var id = $(this).attr('data-id');
+            var code = $(this).attr('data-code');
+            var name = $(this).attr('data-name');
+
+            $('#EmployeesId').val(id);
+            $('#EmployeesCode').val(code);
+            $('#EmployeesName').val(name);
+
+            $('#EmployeesModal').modal('hide');
+        });
+
+        // =========================================
+        // Zone Picker Select (ভ্যালু সেট করা)
+        // =========================================
+        $(document).on('click', '.select-zone', function (e) {
+            e.preventDefault();
+            var id = $(this).attr('data-id');
+            var code = $(this).attr('data-code');
+            var name = $(this).attr('data-name');
+
+            $('#ZonesId').val(id);
+            $('#ZonesCode').val(code);
+            $('#ZonesName').val(name);
+
+            $('#ZonesModal').modal('hide');
+        });
+
+        // =========================================
+        // Picker Search (Employee & Zone)
+        // =========================================
+        $(document).on('keyup', '#employeeSearch, #zoneSearch', function () {
+            var value = $(this).val().toLowerCase();
+            var tableId = $(this).attr('id') === 'employeeSearch' ? '#EmployeesTable' : '#ZonesTable';
+
+            $(tableId + ' tbody tr').filter(function () {
+                $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1);
+            });
+        });
+    </script>
+}

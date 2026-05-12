@@ -6,205 +6,195 @@
     ViewBag.Title = actionName + " Employee";
 }
 
-<h4>@(ViewBag.Title + ".")</h4>
-<hr />
-
-@using (Html.BeginForm(actionName, "Employee", new { ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, new { @class = "form-horizontal", enctype = "multipart/form-data", role = "form" }))
-{
-    @Html.AntiForgeryToken()
-    @Html.HiddenFor(m => m.Id);
-    @Html.HiddenFor(m => m.PhotoPath);
-    <div class="col-md-6">
-        <div class="form-group">
-            @Html.LabelFor(model => model.Code, htmlAttributes: new { @class = "control-label col-md-3"})
-            <div class="col-md-9">
-                @Html.EditorFor(model => model.Code, new { htmlAttributes = new { @class = "form-control input-sm" } })
-                @Html.ValidationMessageFor(model => model.Code, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-        <div class="form-group">
-            @Html.LabelFor(model => model.Name, htmlAttributes: new { @class = "control-label col-md-3" })
-            <div class="col-md-9">
-                @Html.EditorFor(model => model.Name, new { htmlAttributes = new { @class = "form-control input-sm", tabindex = 1, autofocus = "autofocus" } })
-                @Html.ValidationMessageFor(model => model.Name, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-    
-        <div class="form-group">
-            @Html.LabelFor(model => model.ContactNo, htmlAttributes: new { @class = "control-label col-md-3" })
-            <div class="col-md-9">
-                @Html.EditorFor(model => model.ContactNo, new { htmlAttributes = new { @class = "form-control input-sm", tabindex = 2 } })
-                @Html.ValidationMessageFor(model => model.ContactNo, "", new { @class = "text-danger" })
-            </div>
-        </div>
-        <div class="form-group">
-            @Html.LabelFor(model => model.MachineEMPID, htmlAttributes: new { @class = "control-label col-md-3" })
-            <div class="col-md-9">
-                @Html.EditorFor(model => model.MachineEMPID, new { htmlAttributes = new { @class = "form-control input-sm text-right", tabindex = 3 } })
-                @Html.ValidationMessageFor(model => model.MachineEMPID, "", new { @class = "text-danger" })
-            </div>
-        </div>
-        <div class="form-group">
-            @Html.LabelFor(model => model.Designations, htmlAttributes: new { @class = "control-label col-md-3" })
-            <div class="col-md-9">
-                @Html.DropDownListFor(model => model.DesignationName, Model.Designations, "--Select a designation--", new { @class = "form-control input-sm" ,tabindex=4})
-                @Html.ValidationMessageFor(model => model.DesignationName, "", new { @class = "text-danger" })
-            </div>
-        </div>
-        <div class="form-group">
-            @Html.LabelFor(model => model.ReligionID, htmlAttributes: new { @class = "control-label col-md-3" })
-            <div class="col-md-9">
-                @Html.DropDownListFor(model => model.ReligionID, Model.Religions, "--Select a ReligionName--", new { @class = "form-control input-sm", tabindex = 5 })
-                @Html.ValidationMessageFor(model => model.ReligionID, "", new { @class = "text-danger" })
-            </div>
-        </div>
-        <div class="form-group">
-            @Html.LabelFor(model => model.DepartmentID, htmlAttributes: new { @class = "control-label col-md-3" })
-            <div class="col-md-9">
-                @Html.DropDownListFor(model => model.DepartmentID, Model.Departments, "--Select a Department--", new { @class = "form-control input-sm", tabindex = 6 })
-                @Html.ValidationMessageFor(model => model.DepartmentID, "", new { @class = "text-danger" })
-            </div>
-        </div>
-        <div class="form-group">
-            @Html.LabelFor(model => model.GrossSalary, htmlAttributes: new { @class = "control-label col-md-3" })
-            <div class="col-md-9">
-                @Html.EditorFor(model => model.GrossSalary, new { htmlAttributes = new { @class = "form-control input-sm", type = "number", tabindex =7 } })
-                @Html.ValidationMessageFor(model => model.GrossSalary, "", new { @class = "text-danger" })
-            </div>
-        </div>
-        <div class="form-group">
-            @Html.LabelFor(model => model.SRDueLimit, htmlAttributes: new { @class = "control-label col-md-3" })
-            <div class="col-md-9">
-                @Html.EditorFor(model => model.SRDueLimit, new { htmlAttributes = new { @class = "form-control input-sm text-right", type = "number", tabindex = 8} })
-                @Html.ValidationMessageFor(model => model.SRDueLimit, "", new { @class = "text-danger" })
-            </div>
-        </div>
-        <div class="form-group">
-            @Html.LabelFor(m => m.PhotoPath, new { @class = "control-label col-md-3" })
-            <div class="col-md-9">
-                <input class="form-control input-sm" id="Photo" name="Photo" type="file" accept="image/*" tabindex="9"
-                       onchange="document.getElementById('employeePicture').src = window.URL.createObjectURL(this.files[0]);
-                       document.getElementById('PhotoPath').value = window.URL.createObjectURL(this.files[0]);">
-            </div>
-        </div>
-        <div class="form-group">
-            <div class="col-md-offset-3 col-md-9">
-                <img id="employeePicture" src="/Content/photos/employees/@(Model != null ? Model.PhotoPath : string.Empty)" alt="Uploaded picture will appear here." height="200" />
+<div class="page-title-box">
+    <div class="container-fluid">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h4 class="page-title mb-1">@ViewBag.Title</h4>
+                <ol class="breadcrumb m-0">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index", "Employee")">Employees</a></li>
+                    <li class="breadcrumb-item active">@actionName Employee Details</li>
+                </ol>
             </div>
         </div>
     </div>
-        <div class="col-md-6">
-            <div class="form-group">
-                @Html.LabelFor(model => model.NId, htmlAttributes: new { @class = "control-label col-md-3" })
-                <div class="col-md-9">
-                    @Html.EditorFor(model => model.NId, new { htmlAttributes = new { @class = "form-control input-sm", tabindex = 10 } })
-                    @Html.ValidationMessageFor(model => model.NId, "", new { @class = "text-danger" })
-                </div>
-            </div>
-            <div class="form-group">
-                @Html.LabelFor(model => model.FName, htmlAttributes: new { @class = "control-label col-md-3" })
-                <div class="col-md-9">
-                    @Html.EditorFor(model => model.FName, new { htmlAttributes = new { @class = "form-control input-sm", tabindex = 14 } })
-                    @Html.ValidationMessageFor(model => model.FName, "", new { @class = "text-danger" })
-                </div>
-            </div>
-            <div class="form-group">
-                @Html.LabelFor(model => model.MName, htmlAttributes: new { @class = "control-label col-md-3" })
-                <div class="col-md-9">
-                    @Html.EditorFor(model => model.MName, new { htmlAttributes = new { @class = "form-control input-sm", tabindex = 15 } })
-                    @Html.ValidationMessageFor(model => model.MName, "", new { @class = "text-danger" })
-                </div>
-            </div>
-            <div class="form-group">
-                @Html.LabelFor(m => m.DateOfBirth, new { @class = "control-label col-md-3" })
-                <div class="col-md-9">
-                    <div class='input-group date' id='DateOfBirth'>
-                        <input type='text' class="form-control input-sm" name='DateOfBirth' tabindex="16" />
-                        <span class="input-group-addon">
-                            <i class="fa fa-calendar" aria-hidden="true"></i>
-                        </span>
+</div>
+
+<div class="page-content-wrapper">
+    <div class="container-fluid">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="header-title mb-4">Employee Information</h5>
+
+                @using (Html.BeginForm(actionName, "Employee", new { ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, new { @class = "form-horizontal", enctype = "multipart/form-data", role = "form" }))
+                {
+                    @Html.AntiForgeryToken()
+                    @Html.HiddenFor(m => m.Id)
+                    @Html.HiddenFor(m => m.PhotoPath)
+
+                    <div class="row">
+                        @* Left Column *@
+                        <div class="col-md-6">
+                            <div class="form-group row mb-3">
+                                @Html.LabelFor(model => model.Code, htmlAttributes: new { @class = "control-label col-md-3" })
+                                <div class="col-md-9">
+                                    @Html.EditorFor(model => model.Code, new { htmlAttributes = new { @class = "form-control form-control-sm" } })
+                                    @Html.ValidationMessageFor(model => model.Code, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+
+                            <div class="form-group row mb-3">
+                                @Html.LabelFor(model => model.Name, htmlAttributes: new { @class = "control-label col-md-3" })
+                                <div class="col-md-9">
+                                    @Html.EditorFor(model => model.Name, new { htmlAttributes = new { @class = "form-control form-control-sm", tabindex = 1, autofocus = "autofocus" } })
+                                    @Html.ValidationMessageFor(model => model.Name, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+
+                            <div class="form-group row mb-3">
+                                @Html.LabelFor(model => model.ContactNo, htmlAttributes: new { @class = "control-label col-md-3" })
+                                <div class="col-md-9">
+                                    @Html.EditorFor(model => model.ContactNo, new { htmlAttributes = new { @class = "form-control form-control-sm", tabindex = 2 } })
+                                    @Html.ValidationMessageFor(model => model.ContactNo, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+
+                            <div class="form-group row mb-3">
+                                @Html.LabelFor(model => model.Designations, htmlAttributes: new { @class = "control-label col-md-3" })
+                                <div class="col-md-9">
+                                    @Html.DropDownListFor(model => model.DesignationName, Model.Designations, "--Select a designation--", new { @class = "form-control form-control-sm select2", tabindex = 4 })
+                                    @Html.ValidationMessageFor(model => model.DesignationName, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+
+                            <div class="form-group row mb-3">
+                                @Html.LabelFor(model => model.DepartmentID, htmlAttributes: new { @class = "control-label col-md-3" })
+                                <div class="col-md-9">
+                                    @Html.DropDownListFor(model => model.DepartmentID, Model.Departments, "--Select a Department--", new { @class = "form-control form-control-sm select2", tabindex = 6 })
+                                    @Html.ValidationMessageFor(model => model.DepartmentID, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+
+                            <div class="form-group row mb-3">
+                                @Html.LabelFor(model => model.GrossSalary, htmlAttributes: new { @class = "control-label col-md-3" })
+                                <div class="col-md-9">
+                                    @Html.EditorFor(model => model.GrossSalary, new { htmlAttributes = new { @class = "form-control form-control-sm", type = "number", tabindex = 7 } })
+                                    @Html.ValidationMessageFor(model => model.GrossSalary, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+
+                            <div class="form-group row mb-3">
+                                @Html.LabelFor(m => m.PhotoPath, new { @class = "control-label col-md-3" })
+                                <div class="col-md-9">
+                                    <input class="form-control form-control-sm" id="Photo" name="Photo" type="file" accept="image/*" tabindex="9"
+                                           onchange="document.getElementById('employeePicture').src = window.URL.createObjectURL(this.files[0]);">
+
+                                    <div class="mt-3">
+                                        <img id="employeePicture" src="/Content/photos/employees/@(Model != null ? Model.PhotoPath : "default.png")"
+                                             class="img-thumbnail" style="height: 150px; width: 150px; object-fit: cover;"
+                                             alt="Employee Photo" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        @* Right Column *@
+                        <div class="col-md-6">
+                            <div class="form-group row mb-3">
+                                @Html.LabelFor(model => model.NId, htmlAttributes: new { @class = "control-label col-md-3" })
+                                <div class="col-md-9">
+                                    @Html.EditorFor(model => model.NId, new { htmlAttributes = new { @class = "form-control form-control-sm", tabindex = 10 } })
+                                    @Html.ValidationMessageFor(model => model.NId, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+
+                            <div class="form-group row mb-3">
+                                @Html.LabelFor(m => m.DateOfBirth, new { @class = "control-label col-md-3" })
+                                <div class="col-md-9">
+                                    <div class="input-group date-picker" id="DateOfBirthContainer">
+                                        @Html.TextBoxFor(m => m.DateOfBirth, "{0:dd-MMM-yyyy}", new { @class = "form-control form-control-sm", tabindex = 16, id = "DateOfBirth" })
+                                        <div class="input-group-append">
+                                            <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
+                                        </div>
+                                    </div>
+                                    @Html.ValidationMessageFor(m => m.DateOfBirth, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+
+                            <div class="form-group row mb-3">
+                                @Html.LabelFor(m => m.JoiningDate, new { @class = "control-label col-md-3" })
+                                <div class="col-md-9">
+                                    <div class="input-group date-picker" id="JoiningDateContainer">
+                                        @Html.TextBoxFor(m => m.JoiningDate, "{0:dd-MMM-yyyy}", new { @class = "form-control form-control-sm", tabindex = 10, id = "JoiningDate" })
+                                        <div class="input-group-append">
+                                            <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
+                                        </div>
+                                    </div>
+                                    @Html.ValidationMessageFor(m => m.JoiningDate, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+
+                            <div class="form-group row mb-3">
+                                @Html.LabelFor(model => model.PresentAddress, htmlAttributes: new { @class = "control-label col-md-3" })
+                                <div class="col-md-9">
+                                    @Html.TextAreaFor(model => model.PresentAddress, new { @class = "form-control form-control-sm", rows = "3", tabindex = 11 })
+                                    @Html.ValidationMessageFor(model => model.PresentAddress, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+
+                            <div class="form-group row mb-3">
+                                @Html.LabelFor(model => model.PermanentAddress, htmlAttributes: new { @class = "control-label col-md-3" })
+                                <div class="col-md-9">
+                                    @Html.TextAreaFor(model => model.PermanentAddress, new { @class = "form-control form-control-sm", rows = "3", tabindex = 12 })
+                                    @Html.ValidationMessageFor(model => model.PermanentAddress, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+
+                            <div class="form-group row mt-4">
+                                <div class="col-md-9 offset-md-3">
+                                    <button type="submit" class="btn btn-primary btn-sm waves-effect waves-light">
+                                        <i class="mdi mdi-check-all mr-1"></i> Save Employee
+                                    </button>
+                                    <a href="@Url.Action("Index")" class="btn btn-secondary btn-sm waves-effect">Cancel</a>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    @Html.ValidationMessageFor(m => m.DateOfBirth, "", new { @class = "text-danger" })
-                </div>
-            </div>
-            <div class="form-group">
-                @Html.LabelFor(model => model.BloodGroup, htmlAttributes: new { @class = "control-label col-md-3" })
-                <div class="col-md-9">
-                    @Html.EditorFor(model => model.BloodGroup, new { htmlAttributes = new { @class = "form-control input-sm", tabindex = 17 } })
-                    @Html.ValidationMessageFor(model => model.BloodGroup, "", new { @class = "text-danger" })
-                </div>
-            </div>
-            <div class="form-group">
-                @Html.LabelFor(model => model.EmailId, htmlAttributes: new { @class = "control-label col-md-3" })
-                <div class="col-md-9">
-                    @Html.EditorFor(model => model.EmailId, new { htmlAttributes = new { @class = "form-control input-sm", tabindex =18} })
-                    @Html.ValidationMessageFor(model => model.EmailId, "", new { @class = "text-danger" })
-                </div>
-            </div>
-            <div class="form-group">
-                @Html.LabelFor(m => m.JoiningDate, new { @class = "control-label col-md-3" })
-                <div class="col-md-9">
-                    <div class='input-group date' id='JoiningDate'>
-                        <input type='text' class="form-control input-sm" name='JoiningDate'  tabindex="10"/>
-                        <span class="input-group-addon">
-                            <i class="fa fa-calendar" aria-hidden="true"></i>
-                        </span>
-                    </div>
-                    @Html.ValidationMessageFor(m => m.JoiningDate, "", new { @class = "text-danger" })
-                </div>
-            </div>
-           
-            <div class="form-group">
-                @Html.LabelFor(model => model.PresentAddress, htmlAttributes: new { @class = "control-label col-md-3" })
-                <div class="col-md-9">
-                    @Html.TextAreaFor(model => model.PresentAddress, new { @class = "form-control input-sm", rows = "3", tabindex = 11 })
-                    @Html.ValidationMessageFor(model => model.PresentAddress, "", new { @class = "text-danger" })
-                </div>
-            </div>
-            <div class="form-group">
-                @Html.LabelFor(model => model.PermanentAddress, htmlAttributes: new { @class = "control-label col-md-3" })
-                <div class="col-md-9">
-                    @Html.TextAreaFor(model => model.PermanentAddress, new { @class = "form-control input-sm", rows = "3", tabindex = 12 })
-                    @Html.ValidationMessageFor(model => model.PermanentAddress, "", new { @class = "text-danger" })
-                </div>
-            </div>
-            <div class="form-group">
-                <div class="col-md-offset-3 col-md-9">
-                    <input type="submit" value="Add Employee" class="btn btn-sm btn-primary" tabindex="13" />
-                </div>
+                }
             </div>
         </div>
+    </div>
+</div>
+
+
+@section scripts {
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/css/bootstrap-datetimepicker.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/js/bootstrap-datetimepicker.min.js"></script>
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            if ($.fn.select2) {
+                $('.select2').select2({ width: '100%' });
+            }
+
+            var dateOptions = {
+                format: 'DD-MMM-YYYY',
+                showTodayButton: true,
+                allowInputToggle: true,
+                icons: {
+                    time: 'mdi mdi-clock',
+                    date: 'mdi mdi-calendar',
+                    up: 'mdi mdi-chevron-up',
+                    down: 'mdi mdi-chevron-down',
+                    previous: 'mdi mdi-chevron-left',
+                    next: 'mdi mdi-chevron-right'
+                }
+            };
+
+            $('#DateOfBirthContainer').datetimepicker(dateOptions);
+            $('#JoiningDateContainer').datetimepicker(dateOptions);
+        });
+    </script>
 }
-<script>
-    $(function () {
-        $("#DesignationName").select2();
-        $("#ReligionID").select2();
-        $("#DepartmentID").select2();
-        $('#JoiningDate').datetimepicker({
-            @{
-                if (Model == null || Model.JoiningDate == null) {
-                    @:defaultDate: moment(),
-                    }
-                else
-                {
-            @:defaultDate:'@(Convert.ToDateTime(Model.JoiningDate).ToString("dd-MMM-yyyy"))',
-            }
-            @:format: 'DD-MMM-YYYY'
-                    }
-        });
-        $('#DateOfBirth').datetimepicker({
-            @{
-                if (Model == null || Model.DateOfBirth == null) {
-                    @:defaultDate: moment().endOf('month'),
-                    }
-                else
-                {
-            @:defaultDate:'@(Convert.ToDateTime(Model.DateOfBirth).ToString("dd-MMM-yyyy"))',
-            }
-            @:format: 'DD-MMM-YYYY'
-                    }
-        });
-    });
-</script>
