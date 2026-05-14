@@ -54,7 +54,9 @@ namespace IMSWEB.Model
         IncomeItemHeadNew,
         SupplierDamageProducts,
         SalesDOProductPicker,
-        Zone
+        Zone,
+        SupplierNew,
+        ProductNew
     }
 
     public enum EnumStatus

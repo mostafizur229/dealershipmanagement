@@ -1,0 +1,341 @@
+﻿<style>
+    /* Modern Product Picker Styles for New Theme */
+    .dropdown-wrapper {
+        position: relative;
+        width: 100%;
+        font-family: 'Inter', 'Segoe UI', sans-serif;
+    }
+
+    .custom-dropdown {
+        padding: 6px 12px;
+        border: 1px solid #ced4da;
+        background: #fff;
+        cursor: pointer;
+        border-radius: 4px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        height: 38px; /* Theme input height */
+        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    }
+
+        .custom-dropdown:hover {
+            border-color: #6278fe;
+        }
+
+        .custom-dropdown span {
+            font-size: 13px;
+            color: #495057;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+    .dropdown-list {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 0 0 8px 8px;
+        max-height: 450px;
+        z-index: 1060;
+        display: none;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        margin-top: 2px;
+    }
+
+    .search-box {
+        padding: 10px;
+        background: #f8f9fa;
+        border-bottom: 1px solid #eee;
+    }
+
+        .search-box input {
+            width: 100%;
+            height: 35px;
+            padding: 5px 15px;
+            border: 1px solid #ced4da;
+            border-radius: 20px;
+            font-size: 13px;
+            outline: none;
+        }
+
+            .search-box input:focus {
+                border-color: #6278fe;
+                box-shadow: 0 0 0 0.2rem rgba(98, 120, 254, 0.25);
+            }
+
+    #productDropdownItems {
+        max-height: 320px;
+        overflow-y: auto;
+    }
+
+    /* Product Item Layout Like Screenshot_13 */
+    .dropdown-item-custom {
+        padding: 12px 15px;
+        border-bottom: 1px solid #f8f9fa;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+
+        .dropdown-item-custom:hover {
+            background: #f0f4ff;
+        }
+
+    .product-title-row {
+        font-size: 14px;
+        font-weight: 700;
+        color: #2c3e50;
+        margin-bottom: 4px;
+        display: block;
+    }
+
+    .product-meta-row {
+        font-size: 11px;
+        color: #7f8c8d;
+        display: flex;
+        gap: 10px;
+        margin-bottom: 6px;
+    }
+
+    .badge-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    .p-badge {
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 11px;
+        font-weight: 600;
+        border: 1px solid #ddd;
+        background: #fdfdfd;
+    }
+
+    .badge-rp {
+        color: #555;
+    }
+
+    .badge-mrp {
+        color: #2980b9;
+        border-color: #bcdff5;
+        background: #ebf5fb;
+    }
+
+    .badge-parent {
+        color: #27ae60;
+        border-color: #c2eabd;
+        background: #f1f9f1;
+    }
+
+    .badge-child {
+        color: #7f8c8d;
+        border-color: #ddd;
+        background: #f9f9f9;
+    }
+
+    #productDropdownItems::-webkit-scrollbar {
+        width: 5px;
+    }
+
+    #productDropdownItems::-webkit-scrollbar-thumb {
+        background: #ced4da;
+        border-radius: 10px;
+    }
+</style>
+
+@{
+    string currentLabel = "Click to select product";
+    if (ViewBag.ProductsName != null)
+    {
+        currentLabel = string.Format("{0} ({1})", ViewBag.ProductsName, ViewBag.ProductsCode);
+    }
+}
+
+<!-- Hidden Fields for Form Data -->
+<input type="hidden" id="ProductsId" name="ProductsId" value="@ViewBag.ProductsId" />
+<input type="hidden" id="ProductsCode" name="ProductsCode" value="@ViewBag.ProductsCode" />
+<input type="hidden" id="ProductsName" name="ProductsName" value="@ViewBag.ProductsName" />
+<input type="hidden" id="ProductsType" name="ProductsType" value="@ViewBag.ProductsType">
+
+<div class="dropdown-wrapper">
+    <div id="productDropdownTrigger" class="custom-dropdown shadow-sm">
+        <span id="productDropdownLabel">@currentLabel</span>
+        <i class="mdi mdi-chevron-down font-size-18 text-muted"></i>
+    </div>
+    <div id="productDropdownList" class="dropdown-list">
+        <div class="search-box">
+            <input type="text" id="productSearchInput" placeholder="Search by name, code or company..." autocomplete="off" />
+        </div>
+        <div id="productDropdownItems"></div>
+    </div>
+</div>
+
+<script>
+    (function () {
+        // Elements Selection
+        const trigger = document.getElementById('productDropdownTrigger');
+        const list = document.getElementById('productDropdownList');
+        const itemsContainer = document.getElementById('productDropdownItems');
+        const label = document.getElementById('productDropdownLabel');
+        const searchInput = document.getElementById('productSearchInput');
+
+        let page = 1;
+        const pageSize = 10;
+        let loading = false;
+        let hasMore = true;
+        let searchTerm = '';
+
+        // Open/Close Dropdown
+        trigger.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const isVisible = list.style.display === 'block';
+            list.style.display = isVisible ? 'none' : 'block';
+            if (!isVisible) {
+                searchInput.focus();
+                if (itemsContainer.children.length === 0) loadProducts(true);
+            }
+        });
+
+        // Search Input Logic
+        searchInput.addEventListener('input', () => {
+            searchTerm = searchInput.value.trim();
+            page = 1;
+            hasMore = true;
+            loadProducts(true);
+        });
+
+        // Infinite Scroll Logic
+        itemsContainer.addEventListener('scroll', () => {
+            if (itemsContainer.scrollTop + itemsContainer.clientHeight >= itemsContainer.scrollHeight - 15) {
+                if (!loading && hasMore) {
+                    page++;
+                    loadProducts();
+                }
+            }
+        });
+
+        // Fetch Products via API
+        async function loadProducts(reset = false) {
+            if (loading) return;
+            loading = true;
+
+            try {
+                const response = await fetch(`/product/GetPOProducts?search=${encodeURIComponent(searchTerm)}&page=${page}&pageSize=${pageSize}`);
+                const result = await response.json();
+
+                if (reset) itemsContainer.innerHTML = '';
+
+                if (result.data && result.data.length > 0) {
+                    result.data.forEach(p => {
+                        const div = document.createElement('div');
+                        div.className = 'dropdown-item-custom';
+
+                        // HTML Structure matching Screenshot_13.png
+                        div.innerHTML = `
+                            <div class="product-title-row text-uppercase">${p.ProductName} (${p.ProductCode})</div>
+                            <div class="product-meta-row">
+                                <span>Co: <b>${p.CompanyName || 'N/A'}</b></span>
+                                <span>Cat: <b>${p.CategoryName || 'N/A'}</b></span>
+                                <span>Size: <b>${p.SizeName || 'N/A'}</b></span>
+                            </div>
+                            <div class="badge-container">
+                                <span class="p-badge badge-rp">RP: ${p.RP}</span>
+                                <span class="p-badge badge-mrp">MRP: ${p.MRP}</span>
+                                <span class="p-badge badge-parent">${p.ParentQuantity} ${p.ParentUnitName}</span>
+                                <span class="p-badge badge-child">${p.ChildQuantity} ${p.ChildUnitName}</span>
+                            </div>
+                        `;
+
+                        div.addEventListener('click', () => {
+                            selectProduct(p);
+                            list.style.display = 'none';
+                        });
+                        itemsContainer.appendChild(div);
+                    });
+                    hasMore = (page * pageSize) < result.recordsTotal;
+                } else if (reset) {
+                    itemsContainer.innerHTML = '<div class="p-4 text-center text-muted">No products found</div>';
+                }
+            } catch (err) {
+                console.error("AJAX Fetch Error:", err);
+            } finally {
+                loading = false;
+            }
+        }
+
+        // Handle Product Selection & UI Updates
+        function selectProduct(p) {
+            // 1. Update Hidden Fields
+            document.getElementById('ProductsId').value = p.ProductID || p.id;
+            document.getElementById('ProductsCode').value = p.ProductCode || p.code;
+            document.getElementById('ProductsName').value = p.ProductName || p.name;
+            document.getElementById('ProductsType').value = p.ProductType;
+
+            // 2. Update Dropdown Display Label
+            label.textContent = `${p.ProductName} (${p.ProductCode})`;
+
+            // 3. jQuery Logic for Unit/Price fields
+            if (window.jQuery) {
+                const $ = window.jQuery;
+
+                $('#PODetail_Category').val(p.CategoryName || p.categoryName);
+                $('#PODetail_SizeName').val(p.SizeName || p.sizeName);
+
+                var parentUnit = (p.ParentUnitName || "").trim();
+                var childUnit = (p.ChildUnitName || "").trim();
+                var unitTypeLower = parentUnit.toLowerCase();
+
+                // Logic for showing/hiding Unit Price and Child Qty (KG/GM Logic)
+                if (unitTypeLower !== "" && unitTypeLower !== "pcs" && unitTypeLower !== "pc") {
+                    $("#divUnitPrice, #divChildQuantity").show();
+                    $("#lblParentUnit").text(parentUnit);
+                    $("#lblChildUnit").text(childUnit);
+                    $("#lblMRPParent").text('Rate/' + parentUnit);
+                    $("#lblMRP").text('Rate/' + childUnit);
+                    $("#lblConvertValue").text(childUnit + '/' + parentUnit);
+                } else {
+                    $("#divUnitPrice, #divChildQuantity").hide();
+                    $("#lblParentUnit").text("Quantity (Pcs)");
+                }
+
+                // Rates Calculations
+                var rp = parseFloat(p.RP || p.rp) || 0;
+                var convertVal = parseFloat(p.ConvertValue || p.convertValue) || 1;
+                var unitPricePerPiece = (rp / convertVal).toFixed(4);
+
+                $('#PODetail_ConvertValue').val(convertVal);
+                $('[id*="_ConvertValue"]').val(convertVal);
+                $('#PODetail_UnitPrice').val(unitPricePerPiece);
+                $('#tmpUnitPrice').val(unitPricePerPiece);
+                $('#PODetail_UnitType').val(parentUnit);
+                $('#PODetail_TempChildUnitType').val(childUnit);
+
+                $('#PODetail_MRPRateParent').val(rp).trigger('input');
+                $('#PODetail_MRPRate').val(rp);
+                $('#PODetail_SalesRate').val(p.MRP || p.mrp).trigger('input');
+
+                // Special Logic for Tiles
+                if (p.CategoryName && p.CategoryName.toLowerCase() === 'tiles') {
+                    $("#AreaPerCartondiv, #TotalAreadiv, #RatePerAreadiv").show();
+                    $("#PODetail_MRPRateParent, #PODetail_MRPRate").prop("readonly", true);
+                    $('[id*="_AreaPerCarton"]').val(p.PurchaseCSft || 0);
+                } else {
+                    $("#AreaPerCartondiv, #TotalAreadiv, #RatePerAreadiv").hide();
+                    $("#PODetail_MRPRateParent, #PODetail_MRPRate").prop("readonly", false);
+                }
+
+                if (typeof ToggleUnitPriceField === "function") ToggleUnitPriceField(parentUnit);
+                $('#PODetail_ParentQuantity').focus();
+            }
+        }
+
+        // Close on Outside Click
+        document.addEventListener('click', e => {
+            if (!e.target.closest('.dropdown-wrapper')) list.style.display = 'none';
+        });
+    })();
+</script>

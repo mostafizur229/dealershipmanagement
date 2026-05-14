@@ -252,5 +252,110 @@ namespace IMSWEB.Controllers
             return View("ConcernWiseSupplierDueRpt");
         }
 
+
+
+
+        [HttpPost]
+        [Authorize]
+        [Route("CreateSupplierAjax")]
+        public JsonResult CreateSupplierAjax(CreateSupplierViewModel newSupplier)
+        {
+            try
+            {
+
+                string code = _miscellaneousService.GetUniqueKey(x => int.Parse(x.Code));
+                newSupplier.Code = CheakAndIncrement(code);
+
+                if (_supplierService.GetAllSupplier().Any(i => i.ContactNo.Equals(newSupplier.ContactNo)))
+                {
+                    return Json(new { Result = false, ErrorMsg = "Supplier with same contact number already exists." });
+                }
+                else
+                {
+
+                    var supplier = _mapper.Map<CreateSupplierViewModel, Supplier>(newSupplier);
+
+                    supplier.ConcernID = User.Identity.GetConcernId();
+                    supplier.OpeningDue = decimal.Parse(GetDefaultIfNull(newSupplier.OpeningDue.ToString()));
+                    supplier.TotalDue = supplier.OpeningDue;
+
+                    AddAuditTrail(supplier, true);
+
+                    _supplierService.AddSupplier(supplier);
+                    _supplierService.SaveSupplier();
+
+
+                    if (newSupplier.IsBoth == true)
+                    {
+                        CreateCustomerFromSupplier(supplier);
+                    }
+
+
+                    var resultViewModel = new GetSupplierViewModel
+                    {
+                        Id = supplier.SupplierID.ToString(),
+                        Name = supplier.Name,
+                        Code = supplier.Code,
+                        TotalDue = supplier.TotalDue.ToString(),
+                        ContactNo = supplier.ContactNo
+                    };
+
+                    return Json(new { Result = true, ErrorMsg = "Supplier saved successfully.", Supplier = resultViewModel });
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new { Result = false, ErrorMsg = ex.Message });
+            }
+        }
+
+
+
+
+
+        [HttpGet]
+        [Route("GetSupllier")]
+        public JsonResult GetSupllier(string search, int page = 1, int pageSize = 3)
+        {
+            try
+            {
+
+                var query = _supplierService.GetAll();
+
+                if (!string.IsNullOrEmpty(search))
+                {
+                    query = query.Where(c => c.Name.Contains(search) ||
+                                             c.Code.Contains(search) ||
+                                             c.Address.Contains(search) ||
+                                             c.ContactNo.Contains(search));
+                }
+
+                int totalRecords = query.Count();
+
+                int skip = (page - 1) * pageSize;
+
+                var suppliers = query
+                    .OrderBy(s => s.SupplierID)
+                    .Skip(skip)
+                    .Take(pageSize)
+                    .ToList();
+
+                var mappedSupllier = _mapper.Map<List<Supplier>, List<GetSupplierViewModel>>(suppliers);
+
+                return Json(new
+                {
+
+                    recordsTotal = totalRecords,
+
+                    data = mappedSupllier,
+                    pageSize = pageSize
+                }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new { error = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
     }
 }

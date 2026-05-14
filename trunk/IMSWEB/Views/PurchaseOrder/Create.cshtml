@@ -7,6 +7,87 @@
         padding-left: 0px !important;
     }
 </style>
+
+<style>
+    /* Wrapper jate form-control er moto dekhay */
+    .dropdown-wrapper {
+        position: relative;
+        width: 100%;
+        display: block;
+    }
+
+    .custom-dropdown {
+        background-color: #fff;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        padding: 6px 12px;
+        height: 34px; /* Bootstrap 3 default input height */
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: inset 0 1px 1px rgba(0,0,0,.075);
+    }
+
+        .custom-dropdown:hover {
+            border-color: #66afe9;
+        }
+
+    /* Dropdown List jate overlap na kore niche thake */
+    .dropdown-list {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        z-index: 2000; /* Z-index bariye dewa hoyeche jate overlap na kore */
+        display: none;
+        float: left;
+        min-width: 100%;
+        padding: 5px 0;
+        margin: 2px 0 0;
+        font-size: 14px;
+        text-align: left;
+        background-color: #fff;
+        border: 1px solid rgba(0,0,0,.15);
+        border-radius: 4px;
+        box-shadow: 0 6px 12px rgba(0,0,0,.175);
+    }
+
+    .search-box {
+        padding: 8px;
+        border-bottom: 1px solid #ddd;
+    }
+
+        .search-box input {
+            height: 30px;
+            padding: 5px 10px;
+            font-size: 12px;
+            line-height: 1.5;
+            border-radius: 3px;
+            border: 1px solid #ccc;
+            width: 100%;
+        }
+
+    #dropdownItems {
+        max-height: 200px;
+        overflow-y: auto;
+    }
+
+    .dropdown-item {
+        padding: 10px 15px;
+        cursor: pointer;
+        border-bottom: 1px solid #eee;
+    }
+
+        .dropdown-item:hover {
+            background-color: #f5f5f5;
+        }
+
+    /* Icon thik rakhar jonno */
+    .dropdown-trigger-icon {
+        color: #555;
+        font-size: 12px;
+    }
+</style>
 @using IMSWEB.Model
 @model PurchaseOrderViewModel
 
@@ -14,7 +95,7 @@
     string actionName = ViewContext.RouteData.Values["action"].ToString();
     ViewBag.Title = actionName + " Purchase Order";
 }
-<h4 class="inline-header">@(ViewBag.Title + ".")</h4>
+@*<h4 class="inline-header">@(ViewBag.Title + ".")</h4>*@
 <hr />
 @using (Html.BeginForm(actionName, "PurchaseOrder", new { ReturnUrl = ViewBag.ReturnUrl, IsDO = false }, FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
 {
@@ -24,346 +105,100 @@
     @Html.HiddenFor(m => m.PODetail.PPOffer);
     @Html.HiddenFor(m => m.PurchaseOrder.IsDamagePO)
 
-    @*@Html.HiddenFor(m => m.PODetail.SizeName);*@
-    @*@Html.Hidden("PrevQuantity", Model.PODetail != null ? !string.IsNullOrEmpty(Model.PODetail.Quantity) ? Model.PODetail.Quantity : string.Empty : string.Empty)*@
+
     <div class="row">
         <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-transparent border-bottom">
+                    <h5 class="header-title mb-0"><i class="mdi mdi-cart-plus mr-2 text-primary"></i>Purchase Order Entry</h5>
+                </div>
+                <div class="card-body">
+                    <!-- Supplier Section -->
+                    <div class="form-group row mb-3">
+                        @Html.LabelFor(m => m.PurchaseOrder.SupplierId, new { @class = "col-md-3 col-form-label font-weight-bold" })
+                        <div class="col-md-6">
+                            <div class="full-width-picker shadow-sm rounded">
+                                @{Html.RenderAction("RenderPicker", "Picker", new { pickerType = PickerType.SupplierNew, id = (Model != null && !string.IsNullOrEmpty(Model.PurchaseOrder.SupplierId)) ? Model.PurchaseOrder.SupplierId : "0" });}
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <button type="button" class="btn btn-primary btn-sm btn-block h-100" data-toggle="modal" data-target="#SuppliersModal">
+                                <i class="mdi mdi-plus-circle mr-1"></i> Add Supplier
+                            </button>
+                        </div>
+                    </div>
 
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="panel panel-default">
-                        <div class="panel-body">
-                            <div class="row">
-                                <div class="col-md-12">
-                                    <div class="row">
+                    <!-- Product Section -->
+                    <div class="form-group row mb-4">
+                        @Html.LabelFor(m => m.PODetail.ProductId, new { @class = "col-md-3 col-form-label font-weight-bold" })
+                        <div class="col-md-6">
+                            <div class="full-width-picker shadow-sm rounded">
+                                @{Html.RenderAction("RenderPicker", "Picker", new { pickerType = PickerType.ProductNew, id = (Model != null && !string.IsNullOrEmpty(Model.PODetail.ProductId)) ? Model.PODetail.ProductId : "0" });}
+                            </div>
+                            @Html.ValidationMessageFor(m => m.PODetail.ProductId, "", new { @class = "text-danger small" })
+                        </div>
+                        <div class="col-md-3">
+                            <button id="btnAddProduct" type="button" class="btn btn-info btn-sm btn-block h-100 text-white">
+                                <i class="mdi mdi-package-variant-plus mr-1"></i> Add Product
+                            </button>
+                        </div>
+                    </div>
 
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-md-12">
-                                            <div class="form-group">
-                                                @Html.LabelFor(m => m.PurchaseOrder.SupplierId, new { @class = "control-label col-md-2  full-width-picker-label" })
-                                                <div class="col-md-10 full-width-picker">
-                                                    @{Html.RenderAction("RenderPicker", "Picker", new { pickerType = PickerType.Supplier, id = (Model != null && !string.IsNullOrEmpty(Model.PurchaseOrder.SupplierId)) ? Model.PurchaseOrder.SupplierId : "0" });}
-                                                    @Html.ValidationMessageFor(m => m.PurchaseOrder.SupplierId, "", new { @class = "text-danger" })
-                                                </div>
-                                            </div>
-                                            <div class="form-group">
-                                                @Html.LabelFor(m => m.PODetail.ProductId, new { @class = "control-label col-md-2 full-width-picker-label" })
-                                                <div class="col-md-10 full-width-picker">
-                                                    @{Html.RenderAction("RenderPicker", "Picker", new { pickerType = PickerType.Product, id = (Model != null && !string.IsNullOrEmpty(Model.PODetail.ProductId)) ? Model.PODetail.ProductId : "0" });}
-                                                    @Html.ValidationMessageFor(m => m.PODetail.ProductId, "", new { @class = "text-danger" })
-                                                </div>
-                                            </div>
+                    <hr class="my-4" />
 
+                    <!-- Quantity & Rate Section -->
+                    <div class="row">
+                        <div class="col-md-6 border-right">
+                            <div class="form-group mb-3">
+                                @Html.LabelFor(m => m.PODetail.ParentQuantity, new { @class = "small font-weight-bold text-muted", id = "lblParentUnit" })
+                                @Html.EditorFor(m => m.PODetail.ParentQuantity, new { htmlAttributes = new { @class = "form-control form-control-sm text-right", type = "number", step = "0.01", tabindex = 1, placeholder = "0.00" } })
+                                @Html.ValidationMessageFor(m => m.PODetail.ParentQuantity, "", new { @class = "text-danger small" })
+                            </div>
 
-                                            <div class="row">
+                            <div id="divChildQuantity" style="display:none" class="form-group mb-3">
+                                @Html.LabelFor(m => m.PODetail.ChildQuantity, new { @class = "small font-weight-bold text-muted", id = "lblChildUnit" })
+                                @Html.EditorFor(m => m.PODetail.ChildQuantity, new { htmlAttributes = new { @class = "form-control form-control-sm text-right", type = "number", step = "0.01", tabindex = 1, placeholder = "0.00" } })
+                                @Html.ValidationMessageFor(m => m.PODetail.ChildQuantity, "", new { @class = "text-danger small" })
+                            </div>
 
-                                                <div class="col-md-6">
-                                                    <div class="form-group">
-                                                        @Html.LabelFor(m => m.PODetail.ParentQuantity, new { @class = "control-label col-md-4", id = "lblParentUnit" })
-                                                        <div class="col-md-8">
-                                                            @Html.EditorFor(m => m.PODetail.ParentQuantity, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", tabindex = 1 } })
-                                                            @Html.ValidationMessageFor(m => m.PODetail.ParentQuantity, "", new { @class = "text-danger" })
-                                                        </div>
-                                                    </div>                                                    
-                                                    <div>
-                                                        <div class="form-group" id="divChildQuantity" style="display:none">
-                                                            @Html.LabelFor(m => m.PODetail.ChildQuantity, new { @class = "control-label col-md-4", id = "lblChildUnit" })
-                                                            <div class="col-md-8">
-                                                                @Html.EditorFor(m => m.PODetail.ChildQuantity, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", tabindex = 1 } })
-                                                                @Html.ValidationMessageFor(m => m.PODetail.ChildQuantity, "", new { @class = "text-danger" })
-                                                            </div>
-                                                        </div>
-                                                    </div>
+                            <div class="form-group mb-3">
+                                @Html.LabelFor(m => m.PODetail.MRPRateParent, new { @class = "small font-weight-bold text-muted", id = "lblMRPParent" })
+                                @Html.EditorFor(m => m.PODetail.MRPRateParent, new { htmlAttributes = new { @class = "form-control form-control-sm text-right", type = "number", step = "0.01", tabindex = 2, placeholder = "0.00" } })
+                                @Html.ValidationMessageFor(m => m.PODetail.MRPRateParent, "", new { @class = "text-danger small" })
+                            </div>
 
-                                                    <div class="form-group">
-                                                        @Html.LabelFor(m => m.PODetail.MRPRateParent, new { @class = "control-label col-md-4", id = "lblMRPParent" })
-                                                        <div class="col-md-8">
-                                                            @Html.EditorFor(m => m.PODetail.MRPRateParent, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", tabindex = 2 } })
-                                                            @Html.ValidationMessageFor(m => m.PODetail.MRPRateParent, "", new { @class = "text-danger" })
-                                                        </div>
-                                                    </div>
-                                                    <div style="display:none">
-                                                        <div class="form-group" id="divUnitPrice" style="display:none">
-                                                            @Html.LabelFor(m => m.PODetail.MRPRate, new { @class = "control-label col-md-4", id = "lblMRP" })
-                                                            <div class="col-md-8">
-                                                                @Html.EditorFor(m => m.PODetail.MRPRate, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", tabindex = 2 } })
-                                                                @Html.ValidationMessageFor(m => m.PODetail.MRPRate, "", new { @class = "text-danger" })
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                <div class="col-md-6">
-                                                    <div class="form-group salesRate">
-                                                        @Html.LabelFor(m => m.PODetail.SalesRate, new { @class = "control-label col-md-4" })
-                                                        <div class="col-md-8">
-                                                            @Html.EditorFor(m => m.PODetail.SalesRate, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", tabindex = 6 } })
-                                                            @Html.ValidationMessageFor(m => m.PODetail.SalesRate, "", new { @class = "text-danger" })
-                                                        </div>
-                                                    </div>
-
-                                                    <div class="form-group" style="display:none">
-                                                        @Html.LabelFor(m => m.PODetail.UnitType, new { @class = "control-label col-md-4", id = "lblSize" })
-                                                        <div class="col-md-8">
-                                                            @Html.EditorFor(m => m.PODetail.UnitType, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "text", tabindex = 1, @readonly = "readonly" } })
-                                                            @Html.ValidationMessageFor(m => m.PODetail.UnitType, "", new { @class = "text-danger" })
-                                                        </div>
-                                                    </div>
-                                                    <div class="form-group" style="display:none">
-                                                        @Html.LabelFor(m => m.PODetail.TempChildUnitType, new { @class = "control-label col-md-4", id = "lblSize" })
-                                                        <div class="col-md-8">
-                                                            @Html.EditorFor(m => m.PODetail.TempChildUnitType, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "text", tabindex = 1, @readonly = "readonly" } })
-                                                            @Html.ValidationMessageFor(m => m.PODetail.TempChildUnitType, "", new { @class = "text-danger" })
-                                                        </div>
-                                                    </div>
-                                                    <div class="form-group">
-                                                        @Html.LabelFor(m => m.PODetail.TAmount, new { @class = "control-label col-md-4" })
-                                                        <div class="col-md-8">
-                                                            @Html.EditorFor(m => m.PODetail.TAmount, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", @readonly = "readonly" } })
-                                                            @Html.ValidationMessageFor(m => m.PODetail.TAmount, "", new { @class = "text-danger" })
-                                                        </div>
-                                                    </div>
-                                                    <div class="form-group" style="display: none">
-                                                        @Html.LabelFor(m => m.PODetail.Quantity, new { @class = "control-label col-md-4", id = "lblChildUnit" })
-                                                        <div class="col-md-8">
-                                                            @Html.EditorFor(m => m.PODetail.Quantity, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", tabindex = 1, @readonly = "readonly" } })
-                                                            @Html.ValidationMessageFor(m => m.PODetail.Quantity, "", new { @class = "text-danger" })
-                                                        </div>
-                                                    </div>
-                                                    <div class="form-group" style="display: none">
-                                                        @Html.LabelFor(m => m.PODetail.SizeName, new { @class = "control-label col-md-4", id = "lblSize" })
-                                                        <div class="col-md-8">
-                                                            @Html.EditorFor(m => m.PODetail.SizeName, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "text", tabindex = 1, @readonly = "readonly" } })
-                                                            @Html.ValidationMessageFor(m => m.PODetail.SizeName, "", new { @class = "text-danger" })
-                                                        </div>
-                                                    </div>
-
-                                                    <div class="panel-body">
-                                                        <div class="pull-right">
-                                                            <input type="submit" class="btn btn-sm btn-primary" name="addButton" value="Add to order" />
-                                                            @*<button  type="reset" class="btn btn-sm btn-danger clearButton">Clear</button>*@
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>                                        
-                                    </div>
+                            <div style="display:none">
+                                <div class="form-group" id="divUnitPrice">
+                                    @Html.LabelFor(m => m.PODetail.MRPRate, new { @class = "small font-weight-bold", id = "lblMRP" })
+                                    @Html.EditorFor(m => m.PODetail.MRPRate, new { htmlAttributes = new { @class = "form-control form-control-sm text-right", type = "number", step = "0.01" } })
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
-            </div>
-        </div>
 
-        <div class="row previewDue">
-            <div class="col-md-6">
-                <div class="panel panel-default">
-                    <div class="panel-body">
-                        <div class="row">
-                            <div class="col-md-12">
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            @Html.LabelFor(m => m.PurchaseOrder.CurrentDue, new { @class = "control-label col-md-4" })
-                                            <div class="col-md-8">
-                                                @Html.EditorFor(m => m.PurchaseOrder.CurrentDue, new { htmlAttributes = new { @class = "input-sm form-control text-right", type = "number", step = "0.01", @readonly = "readonly" } })
-                                                @Html.ValidationMessageFor(m => m.PurchaseOrder.CurrentDue, "", new { @class = "text-danger" })
-                                            </div>
-                                        </div>
-
-                                        <div class="form-group">
-                                            @Html.LabelFor(m => m.PODetail.UnitPrice, new { @class = "control-label col-md-4" })
-                                            <div class="col-md-8">
-                                                @Html.HiddenFor(m => m.PODetail.UnitPrice)
-                                                @*@Html.EditorFor(m => m.PODetail.UnitPrice, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", @readonly = "readonly", @hidden = "hidden" } })*@
-                                                <input type="number" name="tmpUnitPrice" id="tmpUnitPrice" class="input-sm form-control input-sm text-right" readonly />
-                                                @Html.ValidationMessageFor(m => m.PODetail.UnitPrice, "", new { @class = "text-danger" })
-                                            </div>
-                                        </div>
-
-                                        <div class="form-group">
-                                            @Html.LabelFor(m => m.PurchaseOrder.GrandTotal, new { @class = "control-label col-md-4" })
-                                            <div class="col-md-8">
-                                                @Html.EditorFor(m => m.PurchaseOrder.GrandTotal, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", @readonly = "readonly" } })
-                                                @Html.ValidationMessageFor(m => m.PurchaseOrder.TotalAmount, "", new { @class = "text-danger" })
-                                            </div>
-                                        </div>
-
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            @Html.LabelFor(m => m.PurchaseOrder.ChallanNo, new { @class = "control-label col-md-4" })
-                                            <div class="col-md-8">
-                                                @Html.EditorFor(m => m.PurchaseOrder.ChallanNo, new { htmlAttributes = new { @class = "input-sm form-control input-sm" } })
-                                                @Html.ValidationMessageFor(m => m.PurchaseOrder.ChallanNo, "", new { @class = "text-danger" })
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            @Html.LabelFor(m => m.PurchaseOrder.OrderDate, new { @class = "control-label col-md-4" })
-                                            <div class="col-md-8">
-                                                <div class='input-group date' id='OrderDate'>
-                                                    <input type='text' class="input-sm form-control input-sm" name='OrderDate' />
-                                                    <span class="input-group-addon">
-                                                        <i class="fa fa-calendar" aria-hidden="true"></i>
-                                                    </span>
-                                                </div>
-                                            </div>
-                                            @Html.ValidationMessageFor(m => m.PurchaseOrder.OrderDate, "", new { @class = "text-danger" })
-                                        </div>
-                                        <div class="form-group">
-                                            @Html.LabelFor(m => m.PurchaseOrder.TotalAmount, new { @class = "control-label col-md-4" })
-                                            <div class="col-md-8">
-                                                @Html.EditorFor(m => m.PurchaseOrder.TotalAmount, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", @readonly = "readonly" } })
-                                                @Html.ValidationMessageFor(m => m.PurchaseOrder.TotalAmount, "", new { @class = "text-danger" })
-                                            </div>
-                                        </div>
-                                    </div>
-
-
-                                </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                @Html.LabelFor(m => m.PODetail.SalesRate, new { @class = "small font-weight-bold text-muted" })
+                                @Html.EditorFor(m => m.PODetail.SalesRate, new { htmlAttributes = new { @class = "form-control form-control-sm text-right", type = "number", step = "0.01", tabindex = 6, placeholder = "0.00" } })
+                                @Html.ValidationMessageFor(m => m.PODetail.SalesRate, "", new { @class = "text-danger small" })
                             </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
 
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="panel panel-default">
-                        <div class="panel-body">
-                            <div class="row">
-                                <div class="col-md-12">
-                                    <div class="form-group">
-                                        @Html.LabelFor(m => m.PODetail.GodownID, new { @class = "control-label col-md-2" })
-                                        <div class="col-md-10">
-                                            @{Html.RenderAction("RenderPicker", "Picker", new { pickerType = PickerType.Godown, id = (Model != null && !string.IsNullOrEmpty(Model.PODetail.GodownID)) ? Model.PODetail.GodownID : "0" });}
-                                            @Html.ValidationMessageFor(m => m.PODetail.GodownID, "", new { @class = "text-danger" })
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-
-
-
-                                    @*<div class="form-group">
-                                @Html.LabelFor(m => m.PODetail.PreviousStock, new { @class = "control-label col-md-4" })
-                                <div class="col-md-8">
-                                    @Html.EditorFor(m => m.PODetail.PreviousStock, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", @readonly = "readonly" } })
-                                    @Html.ValidationMessageFor(m => m.PODetail.PreviousStock, "", new { @class = "text-danger" })
-                                </div>
-                            </div>*@
-
-                                    @*biplob*@
-                                    <div class="form-group" style="display:none" id="RatePerAreadiv">
-                                        @Html.LabelFor(m => m.PODetail.RatePerArea, new { @class = "control-label col-md-4" })
-                                        <div class="col-md-8">
-                                            @Html.EditorFor(m => m.PODetail.RatePerArea, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", tabindex = 2 } })
-                                            @Html.ValidationMessageFor(m => m.PODetail.RatePerArea, "", new { @class = "text-danger" })
-                                        </div>
-                                    </div>
-
-                                    <div class="form-group" style="display:none" id="divUnitPrice">
-                                        @Html.LabelFor(m => m.PODetail.MRPRate, new { @class = "control-label col-md-4", id = "lblMRP" })
-                                        <div class="col-md-8">
-                                            @Html.EditorFor(m => m.PODetail.MRPRate, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", tabindex = 2 } })
-                                            @Html.ValidationMessageFor(m => m.PODetail.MRPRate, "", new { @class = "text-danger" })
-                                        </div>
-                                    </div>
-
-
-
-                                    @*<div class="form-group">
-                                @Html.LabelFor(m => m.PODetail.PPDisPercentage, new { @class = "control-label col-md-4" })
-                                <div class="col-md-8">
-                                    @Html.EditorFor(m => m.PODetail.PPDisPercentage, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", tabindex = 3 } })
-                                    @Html.ValidationMessageFor(m => m.PODetail.PPDisPercentage, "", new { @class = "text-danger" })
-                                </div>
+                            <div class="form-group mb-4">
+                                @Html.LabelFor(m => m.PODetail.TAmount, new { @class = "small font-weight-bold text-primary" })
+                                @Html.EditorFor(m => m.PODetail.TAmount, new { htmlAttributes = new { @class = "form-control form-control-sm text-right bg-light font-weight-bold", type = "number", step = "0.01", @readonly = "readonly" } })
                             </div>
-                            <div class="form-group">
-                                @Html.LabelFor(m => m.PODetail.PPDiscountAmount, new { @class = "control-label col-md-4" })
-                                <div class="col-md-8">
-                                    @Html.EditorFor(m => m.PODetail.PPDiscountAmount, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", tabindex = -4 } })
-                                    @Html.ValidationMessageFor(m => m.PODetail.PPDiscountAmount, "", new { @class = "text-danger" })
-                                </div>
-                            </div>*@
-                                    @*<div class="form-group">
-                                @Html.LabelFor(m => m.PODetail.ExtraPPDISPer, new { @class = "control-label col-md-4" })
-                                <div class="col-md-8">
-                                    @Html.EditorFor(m => m.PODetail.ExtraPPDISPer, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", tabindex = 4 } })
-                                    @Html.ValidationMessageFor(m => m.PODetail.ExtraPPDISPer, "", new { @class = "text-danger" })
-                                </div>
-                            </div>*@
 
-                                    <div class="form-group " style="display:none">
-                                        @Html.LabelFor(m => m.PODetail.CreditSalesRate, new { @class = "control-label col-md-4" })
-                                        <div class="col-md-8">
-                                            @Html.EditorFor(m => m.PODetail.CreditSalesRate, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", tabindex = 8 } })
-                                            @Html.ValidationMessageFor(m => m.PODetail.CreditSalesRate, "", new { @class = "text-danger" })
-                                        </div>
-                                    </div>
-
-                                </div>
-
-                                <div class="col-md-6">
-                                    @*<div class="form-group">
-                                @Html.LabelFor(m => m.PODetail.ColorId, new { @class = "control-label col-md-4" })
-                                <div class="col-md-8">
-                                    @{Html.RenderAction("RenderPicker", "Picker", new { pickerType = PickerType.Color, id = (Model != null && !string.IsNullOrEmpty(Model.PODetail.ColorId)) ? Model.PODetail.ColorId : "0" });}
-                                    @Html.ValidationMessageFor(m => m.PODetail.ColorId, "", new { @class = "text-danger" })
-                                </div>
-                            </div>*@
-                                    <div class="form-group" style="display:none">
-                                        @Html.LabelFor(m => m.PODetail.ConvertValue, new { @class = "control-label col-md-4", id = "lblConvertValue" })
-                                        <div class="col-md-8">
-                                            @Html.EditorFor(m => m.PODetail.ConvertValue, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", tabindex = 1, @readonly = "readonly" } })
-                                            @Html.ValidationMessageFor(m => m.PODetail.ConvertValue, "", new { @class = "text-danger" })
-                                        </div>
-                                    </div>
-
-
-                                    @*<div class="form-group">
-                                @Html.LabelFor(m => m.PODetail.ExtraPPDISAmt, new { @class = "control-label col-md-4" })
-                                <div class="col-md-8">
-                                    @Html.EditorFor(m => m.PODetail.ExtraPPDISAmt, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", tabindex = -6 } })
-                                    @Html.ValidationMessageFor(m => m.PODetail.ExtraPPDISAmt, "", new { @class = "text-danger" })
-                                </div>
-                            </div>*@
-                                    @*<div class="form-group">
-                                @Html.LabelFor(m => m.PODetail.CRSalesRate3Month, new { @class = "control-label col-md-4" })
-                                <div class="col-md-8">
-                                    @Html.EditorFor(m => m.PODetail.CRSalesRate3Month, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", tabindex = 7 } })
-                                    @Html.ValidationMessageFor(m => m.PODetail.CRSalesRate3Month, "", new { @class = "text-danger" })
-                                </div>
+                            <!-- Hidden Fields Managed by Script -->
+                            <div style="display:none">
+                                @Html.EditorFor(m => m.PODetail.UnitType)
+                                @Html.EditorFor(m => m.PODetail.TempChildUnitType)
+                                @Html.EditorFor(m => m.PODetail.Quantity)
+                                @Html.EditorFor(m => m.PODetail.SizeName)
                             </div>
-                            <div class="form-group">
-                                @Html.LabelFor(m => m.PODetail.CRSalesRate12Month, new { @class = "control-label col-md-4" })
-                                <div class="col-md-8">
-                                    @Html.EditorFor(m => m.PODetail.CRSalesRate12Month, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", tabindex = 9 } })
-                                    @Html.ValidationMessageFor(m => m.PODetail.CRSalesRate12Month, "", new { @class = "text-danger" })
-                                </div>
-                            </div>*@
 
-                                    <div class="form-group" style="display:none" id="TotalAreadiv">
-                                        @Html.LabelFor(m => m.PODetail.TotalArea, new { @class = "control-label col-md-4" })
-                                        <div class="col-md-8">
-                                            @Html.EditorFor(m => m.PODetail.TotalArea, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", @readonly = "readonly" } })
-                                            @Html.ValidationMessageFor(m => m.PODetail.TotalArea, "", new { @class = "text-danger" })
-                                        </div>
-                                    </div>
-
-                                    <div class="form-group" style="display: none">
-                                        @Html.LabelFor(m => m.PODetail.Category, new { @class = "control-label col-md-4", id = "lblSize" })
-                                        <div class="col-md-8">
-                                            @Html.EditorFor(m => m.PODetail.Category, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "text", tabindex = 1, @readonly = "readonly" } })
-                                            @Html.ValidationMessageFor(m => m.PODetail.Category, "", new { @class = "text-danger" })
-                                        </div>
-                                    </div>
-
-                                </div>
+                            <div class="text-right pt-2">
+                                <button type="submit" name="addButton" value="Add to order" class="btn btn-success btn-sm px-4 shadow">
+                                    <i class="mdi mdi-plus-box mr-1"></i> Add to List
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -372,454 +207,858 @@
         </div>
 
 
-        
-
-
-
-        <div class="row">
-            <div class="col-md-12">
-                <div class="col-md-7">
-                    <div class="panel panel-default">
-
-                        <div class="panel-body">
-                            <table id="productTable"
-                                   data-toggle="table"
-                                   data-height="280"
-                                   class="table table-responsive table-bordered table-striped text-nowrap" cellspacing="0" width="100%">
-                                <thead>
-                                    <tr>
-                                        <th>
-                                            Sl
-                                        </th>
-                                        <th data-field="name"
-                                            data-sortable="true">
-                                            @Html.DisplayNameFor(model => model.PODetail.ProductName)
-                                        </th>
-                                        <th data-field="category"
-                                            data-sortable="true">
-                                            @Html.DisplayNameFor(model => model.PODetail.Category)
-                                        </th>
-
-
-                                        <th>
-                                            @Html.DisplayNameFor(model => model.PODetail.UnitType)
-                                        </th>
-
-                                        <th>
-                                            @Html.DisplayNameFor(model => model.PODetail.SizeName)
-                                        </th>
-
-
-                                        <th>
-                                            @Html.DisplayNameFor(model => model.PODetail.Quantity)
-                                        </th>
-                                        @*<th>
-                                                @Html.DisplayNameFor(model => model.PODetail.MRPRate)
-                                            </th>*@
-                                        @*<th>
-                                                @Html.DisplayNameFor(model => model.PODetail.PPDiscountAmount)
-                                            </th>*@
-                                        <th>
-                                            @Html.DisplayNameFor(model => model.PODetail.UnitPrice)
-                                        </th>
-                                        <th>
-                                            @Html.DisplayNameFor(model => model.PODetail.TAmount)
-                                        </th>
-                                        <th></th>
-                                        <th></th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @{
-                                        int c = 1;
-                                        decimal MRP = 0;
-                                        decimal Qty = 0;
-                                        decimal DisAmt = 0;
-                                        decimal UnitPrice = 0;
-
-
-                                        foreach (var item in Model.PODetails)
-                                        {
-                                            MRP = Math.Round((Convert.ToDecimal(@item.MRPRate) * Convert.ToDecimal(@item.ConvertValue)), 4);
-                                            Qty = Math.Round((Convert.ToDecimal(@item.Quantity) / Convert.ToDecimal(@item.ConvertValue)), 4);
-                                            DisAmt = Math.Round((Convert.ToDecimal(@item.PPDiscountAmount) * Convert.ToDecimal(@item.ConvertValue)), 4);
-                                            UnitPrice = Math.Round((Convert.ToDecimal(@item.UnitPrice) * Convert.ToDecimal(@item.ConvertValue)), 4);
-
-                                            if (item.Status == EnumStatus.Updated || item.Status == EnumStatus.Deleted) { continue; }
-                                            <tr>
-                                                <td>
-                                                    @c
-                                                </td>
-                                                <td>
-                                                    @Html.DisplayFor(modelItem => item.ProductName)
-                                                </td>
-                                                <td>
-                                                    @Html.DisplayFor(modelItem => item.Category)
-                                                </td>
-
-                                                <td>
-                                                    @Html.DisplayFor(modelItem => item.UnitType)
-                                                </td>
-                                                <td>
-                                                    @Html.DisplayFor(modelItem => item.SizeName)
-                                                </td>
-
-                                                <td>
-                                                    @Qty
-                                                </td>
-                                                @*<td>
-                                                        @MRP
-
-                                                    </td>*@
-
-                                                @*<td>
-                                                        @DisAmt
-                                                    </td>*@
-                                                <td>
-                                                    @UnitPrice
-                                                </td>
-                                                <td>
-                                                    @Html.DisplayFor(modelItem => item.TAmount)
-                                                </td>
-                                                <td>
-                                                    @Html.ActionLink("Edit", "EditFromView", "PurchaseOrder", new { id = item.ProductId, cid = item.ColorId, previousAction = actionName.ToLower(), IsDO = false }, new { @class = "btn btn-xs btn-info" })
-                                                </td>
-                                                <td>
-                                                    @Html.ActionLink("Delete", "DeleteFromView", "PurchaseOrder", new { id = item.ProductId, cid = item.ColorId, previousAction = actionName.ToLower(), IsDO = false }, new { onclick = "if(!confirm('Do you want to delete this item?')) return false;" })
-                                                </td>
-                                            </tr>
-                                            c++;
-                                        }
-                                    }
-                                </tbody>
-                            </table>
-                        </div>
-
-                    </div>
-
-                </div>
-
-                <div class="col-md-5">
-
-                    <div class="panel panel-default">
-                        <div class="panel-body">
-                            <div class="row">
-
-                                <div class="col-md-6">
-
-
-                                    @*<div class="form-group">
-                                            @Html.LabelFor(m => m.PurchaseOrder.TotalDiscountPercentage, new { @class = "control-label col-md-4" })
-                                            <div class="col-md-8">
-                                                @Html.EditorFor(m => m.PurchaseOrder.TotalDiscountPercentage, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01" } })
-                                                @Html.ValidationMessageFor(m => m.PurchaseOrder.TotalDiscountPercentage, "", new { @class = "text-danger" })
-                                            </div>
-                                        </div>*@
-                                    <div class="form-group totalDiscountPercentage">
-                                        @Html.LabelFor(m => m.PurchaseOrder.TotalDiscountPercentage, new { @class = "control-label col-md-4" })
-                                        <div class="col-md-8">
-                                            @Html.EditorFor(m => m.PurchaseOrder.TotalDiscountPercentage, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01" } })
-                                            @Html.ValidationMessageFor(m => m.PurchaseOrder.TotalDiscountPercentage, "", new { @class = "text-danger" })
-                                            @Html.HiddenFor(m => m.PurchaseOrder.PPDiscountAmount, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", @readonly = "readonly" } })
-                                        </div>
-                                    </div>
-                                    @*<div class="form-group">
-                                            @Html.LabelFor(m => m.PurchaseOrder.TotalDiscountAmount, new { @class = "control-label col-md-4" })
-                                            <div class="col-md-8">
-
-                                                @Html.HiddenFor(m => m.PurchaseOrder.tempFlatDiscountAmount, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01" } })
-                                                @Html.EditorFor(m => m.PurchaseOrder.TotalDiscountAmount, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01" } })
-                                                @Html.ValidationMessageFor(m => m.PurchaseOrder.TotalDiscountAmount, "", new { @class = "text-danger" })
-                                            </div>
-                                        </div>*@
-                                    @*<div class="form-group">
-                                            @Html.LabelFor(m => m.PurchaseOrder.TotalDiscountAmount, new { @class = "control-label col-md-4" })
-                                            <div class="col-md-8">
-                                                @Html.HiddenFor(m => m.PurchaseOrder.LabourCost, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01" } })
-                                                @Html.HiddenFor(m => m.PurchaseOrder.tempFlatDiscountAmount, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01" } })
-                                                @Html.EditorFor(m => m.PurchaseOrder.TotalDiscountAmount, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01" } })
-                                                @Html.ValidationMessageFor(m => m.PurchaseOrder.TotalDiscountAmount, "", new { @class = "text-danger" })
-                                            </div>
-                                        </div>*@
-
-                                    <div class="form-group totalDiscountAmount">
-                                        @Html.LabelFor(m => m.PurchaseOrder.TotalDiscountAmount, new { @class = "control-label col-md-4" })
-                                        <div class="col-md-8">
-
-                                            @Html.HiddenFor(m => m.PurchaseOrder.tempFlatDiscountAmount, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01" } })
-                                            @Html.EditorFor(m => m.PurchaseOrder.TotalDiscountAmount, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01" } })
-                                            @Html.ValidationMessageFor(m => m.PurchaseOrder.TotalDiscountAmount, "", new { @class = "text-danger" })
-                                        </div>
-                                    </div>
-
-                                    <div class="form-group">
-                                        @Html.LabelFor(m => m.PurchaseOrder.RecieveAmount, new { @class = "control-label col-md-4" })
-                                        <div class="col-md-8">
-                                            @Html.EditorFor(m => m.PurchaseOrder.RecieveAmount, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01" } })
-                                            @Html.ValidationMessageFor(m => m.PurchaseOrder.RecieveAmount, "", new { @class = "text-danger" })
-                                        </div>
-                                    </div>
-
-
-                                    <div class="form-group remarks">
-                                        @Html.LabelFor(m => m.PurchaseOrder.Remarks, new { @class = "control-label col-md-4" })
-                                        <div class="col-md-8">
-                                            @Html.EditorFor(m => m.PurchaseOrder.Remarks, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "text", step = "0.01" } })
-                                            @Html.ValidationMessageFor(m => m.PurchaseOrder.Remarks, "", new { @class = "text-danger" })
-                                        </div>
-                                    </div>
-
-                                    <div class="form-group ">
-                                        <div class="col-md-8">
-                                            <input type="submit" class="btn btn-sm btn-primary pull-right" name="submitButton" value="Save order" />
-                                        </div>
-                                    </div>
-
-                                </div>
-
-
-                                <div class="col-md-6">
-
-                                    <div class="form-group adjAmount">
-                                        @Html.LabelFor(m => m.PurchaseOrder.AdjAmount, new { @class = "control-label col-md-4" })
-                                        <div class="col-md-8">
-                                            @Html.EditorFor(m => m.PurchaseOrder.AdjAmount, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01" } })
-                                            @Html.ValidationMessageFor(m => m.PurchaseOrder.AdjAmount, "", new { @class = "text-danger" })
-                                        </div>
-                                    </div>
-
-
-                                    @*<div class="form-group">
-            @Html.LabelFor(m => m.PurchaseOrder.NetDiscount, new { @class = "control-label col-md-4" })
-            <div class="col-md-8">
-                @Html.HiddenFor(m => m.PurchaseOrder.tempNetDiscount, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", @readonly = "readonly" } })
-                @Html.EditorFor(m => m.PurchaseOrder.NetDiscount, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", @readonly = "readonly" } })
-                @Html.ValidationMessageFor(m => m.PurchaseOrder.NetDiscount, "", new { @class = "text-danger" })
-            </div>
-        </div>*@
-                                    <div class="form-group netDiscount">
-                                        @Html.LabelFor(m => m.PurchaseOrder.NetDiscount, new { @class = "control-label col-md-4" })
-                                        <div class="col-md-8">
-                                            @Html.HiddenFor(m => m.PurchaseOrder.tempNetDiscount, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", @readonly = "readonly" } })
-                                            @Html.EditorFor(m => m.PurchaseOrder.NetDiscount, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", @readonly = "readonly" } })
-                                            @Html.ValidationMessageFor(m => m.PurchaseOrder.NetDiscount, "", new { @class = "text-danger" })
-                                        </div>
-                                    </div>
-                                    <div class="form-group PaymentDue">
-                                        @Html.LabelFor(m => m.PurchaseOrder.PaymentDue, new { @class = "control-label col-md-4" })
-                                        <div class="col-md-8">
-                                            @Html.EditorFor(m => m.PurchaseOrder.PaymentDue, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", @readonly = "readonly" } })
-                                            @Html.ValidationMessageFor(m => m.PurchaseOrder.PaymentDue, "", new { @class = "text-danger" })
-                                        </div>
-                                    </div>
-
-
-                                    <div class="form-group LabourCost">
-                                        @Html.LabelFor(m => m.PurchaseOrder.LabourCost, new { @class = "control-label col-md-4" })
-                                        <div class="col-md-8">
-                                            @Html.EditorFor(m => m.PurchaseOrder.LabourCost, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01" } })
-                                            @Html.ValidationMessageFor(m => m.PurchaseOrder.LabourCost, "", new { @class = "text-danger" })
-                                        </div>
-                                    </div>
-
-                                    <div class="form-group preview">
-                                        <div class="col-md-offset-4 col-md-4">
-                                            <button type="button" class="btn btn-sm btn-info pull-right">Preview</button>
-                                        </div>
-                                    </div>
-                                    @* Reason Of Mobile View *@
-                                    
-                                </div>
-
-                                <div class="row">
-
-                                </div>
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-            </div>
-
-        </div>
-
-
-
-
-
-
-
-
-
-
-
+        <!-- Summary & Order Info Section -->
         <div class="col-md-6">
-            <div class="row">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-soft-primary border-bottom-0">
+                    <h5 class="header-title mb-0 font-size-14 text-primary">
+                        <i class="mdi mdi-information-outline mr-1"></i> Order Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 border-right">
+                            <div class="form-group mb-2">
+                                @Html.LabelFor(m => m.PurchaseOrder.CurrentDue, new { @class = "small font-weight-bold text-muted mb-1" })
+                                @Html.EditorFor(m => m.PurchaseOrder.CurrentDue, new { htmlAttributes = new { @class = "form-control form-control-sm text-right bg-soft-danger font-weight-bold text-danger", @readonly = "readonly" } })
+                            </div>
 
+                            <div class="form-group mb-2">
+                                @Html.LabelFor(m => m.PODetail.UnitPrice, new { @class = "small font-weight-bold text-muted mb-1" })
+                                @Html.HiddenFor(m => m.PODetail.UnitPrice)
+                                <input type="number" name="tmpUnitPrice" id="tmpUnitPrice" class="form-control form-control-sm text-right bg-light" readonly />
+                            </div>
+
+                            <div class="form-group mb-0">
+                                @Html.LabelFor(m => m.PurchaseOrder.GrandTotal, new { @class = "small font-weight-bold text-muted mb-1" })
+                                @Html.EditorFor(m => m.PurchaseOrder.GrandTotal, new { htmlAttributes = new { @class = "form-control form-control-sm text-right font-weight-bold bg-soft-primary text-primary", @readonly = "readonly" } })
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-group mb-2">
+                                @Html.LabelFor(m => m.PurchaseOrder.ChallanNo, new { @class = "small font-weight-bold text-muted mb-1" })
+                                @Html.EditorFor(m => m.PurchaseOrder.ChallanNo, new { htmlAttributes = new { @class = "form-control form-control-sm", placeholder = "Enter Challan No" } })
+                                @Html.ValidationMessageFor(m => m.PurchaseOrder.ChallanNo, "", new { @class = "text-danger small" })
+                            </div>
+
+                            <div class="form-group mb-2">
+                                @Html.LabelFor(m => m.PurchaseOrder.OrderDate, new { @class = "small font-weight-bold text-muted mb-1" })
+                                <div class="input-group input-group-sm date-picker" id="OrderDateContainer">
+                                    <input type='text' class="form-control" name='PurchaseOrder.OrderDate' id="OrderDate" /> <!-- id এবং name ঠিক করুন -->
+                                    <div class="input-group-append">
+                                        <span class="input-group-text"><i class="mdi mdi-calendar-month"></i></span>
+                                    </div>
+                                </div>
+                                @Html.ValidationMessageFor(m => m.PurchaseOrder.OrderDate, "", new { @class = "text-danger small" })
+                            </div>
+
+                            <div class="form-group mb-0">
+                                @Html.LabelFor(m => m.PurchaseOrder.TotalAmount, new { @class = "small font-weight-bold text-muted mb-1" })
+                                @Html.EditorFor(m => m.PurchaseOrder.TotalAmount, new { htmlAttributes = new { @class = "form-control form-control-sm text-right bg-light font-weight-bold", @readonly = "readonly" } })
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <div class="row" style="display:none">
+
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-soft-info border-bottom-0">
+                    <h5 class="header-title mb-0 font-size-14 text-info">
+                        <i class="mdi mdi-warehouse mr-1"></i> Storage & Area
+                    </h5>
+                </div>
+
+                <!-- Warehouse & Additional Info Section -->
+                <div class="card-body">
+                    <div class="form-group mb-3">
+                        @Html.LabelFor(m => m.PODetail.GodownID, new { @class = "small font-weight-bold text-muted mb-1" })
+                        <div class="shadow-sm rounded">
+                            @{Html.RenderAction("RenderPicker", "Picker", new { pickerType = PickerType.Godown, id = (Model != null && !string.IsNullOrEmpty(Model.PODetail.GodownID)) ? Model.PODetail.GodownID : "0" });}
+                        </div>
+                        @Html.ValidationMessageFor(m => m.PODetail.GodownID, "", new { @class = "text-danger small" })
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6" id="RatePerAreadiv" style="display:none">
+                            <div class="form-group mb-2">
+                                @Html.LabelFor(m => m.PODetail.RatePerArea, new { @class = "small font-weight-bold text-muted mb-1" })
+                                @Html.EditorFor(m => m.PODetail.RatePerArea, new { htmlAttributes = new { @class = "form-control form-control-sm text-right", type = "number", step = "0.01", tabindex = 2 } })
+                            </div>
+                        </div>
+
+                        <div class="col-md-6" id="divUnitPrice" style="display:none">
+                            <div class="form-group mb-2">
+                                @Html.LabelFor(m => m.PODetail.MRPRate, new { @class = "small font-weight-bold text-muted mb-1", id = "lblMRP" })
+                                @Html.EditorFor(m => m.PODetail.MRPRate, new { htmlAttributes = new { @class = "form-control form-control-sm text-right", type = "number", step = "0.01", tabindex = 2 } })
+                            </div>
+                        </div>
+
+                        <div class="col-md-6" id="TotalAreadiv" style="display:none">
+                            <div class="form-group mb-2">
+                                @Html.LabelFor(m => m.PODetail.TotalArea, new { @class = "small font-weight-bold text-muted mb-1" })
+                                @Html.EditorFor(m => m.PODetail.TotalArea, new { htmlAttributes = new { @class = "form-control form-control-sm text-right bg-light", type = "number", step = "0.01", @readonly = "readonly" } })
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-group mb-2" style="display:none">
+                                @Html.LabelFor(m => m.PODetail.ConvertValue, new { @class = "small font-weight-bold text-muted mb-1", id = "lblConvertValue" })
+                                @Html.EditorFor(m => m.PODetail.ConvertValue, new { htmlAttributes = new { @class = "form-control form-control-sm text-right", @readonly = "readonly" } })
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Category Hidden Field -->
+                    <div style="display: none">
+                        @Html.LabelFor(m => m.PODetail.Category, new { @class = "control-label", id = "lblSize" })
+                        @Html.EditorFor(m => m.PODetail.Category, new { htmlAttributes = new { @class = "form-control text-right", @readonly = "readonly" } })
+                    </div>
+
+                    <div class="alert bg-soft-info border-0 mb-0 mt-2 p-2">
+                        <p class="mb-0 small text-info"><i class="mdi mdi-alert-circle-outline mr-1"></i> Additional details are automatically calculated based on selection.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+    </div>
+
+
+
+
+
+
+    <div class="row">
+        <!-- Left Column: Item List Table -->
+        <div class="col-xl-7">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-transparent border-bottom">
+                    <h5 class="header-title mb-0">
+                        <i class="mdi mdi-format-list-bulleted mr-1 text-primary"></i> Order Items
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table id="productTable"
+                               data-toggle="table"
+                               data-height="300"
+                               class="table table-centered table-nowrap mb-0 table-hover table-bordered">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th style="width: 50px;">Sl</th>
+                                    <th>@Html.DisplayNameFor(model => model.PODetail.ProductName)</th>
+                                    <th>@Html.DisplayNameFor(model => model.PODetail.Category)</th>
+                                    <th>Unit</th>
+                                    <th>Size</th>
+                                    <th class="text-right">Qty</th>
+                                    <th class="text-right">Rate</th>
+                                    <th class="text-right">Total</th>
+                                    <th class="text-center">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @{
+                                    int c = 1;
+                                    foreach (var item in Model.PODetails)
+                                    {
+                                        if (item.Status == EnumStatus.Updated || item.Status == EnumStatus.Deleted) { continue; }
+                                        var qty = Math.Round((Convert.ToDecimal(item.Quantity) / Convert.ToDecimal(item.ConvertValue)), 2);
+                                        var unitPrice = Math.Round((Convert.ToDecimal(item.UnitPrice) * Convert.ToDecimal(item.ConvertValue)), 2);
+
+                                        <tr>
+                                            <td>@c</td>
+                                            <td class="font-weight-bold">@item.ProductName</td>
+                                            <td><span class="badge badge-soft-info">@item.Category</span></td>
+                                            <td>@item.UnitType</td>
+                                            <td>@item.SizeName</td>
+                                            <td class="text-right">@qty</td>
+                                            <td class="text-right">@unitPrice</td>
+                                            <td class="text-right font-weight-bold text-primary">@item.TAmount</td>
+                                            <td class="text-center">
+                                                <div class="btn-group">
+                                                    <a href="@Url.Action("EditFromView", "PurchaseOrder", new { id = item.ProductId, cid = item.ColorId, previousAction = actionName.ToLower(), IsDO = false })" class="btn btn-outline-info btn-sm">
+                                                        <i class="mdi mdi-pencil"></i>
+                                                    </a>
+                                                    <a href="@Url.Action("DeleteFromView", "PurchaseOrder", new { id = item.ProductId, cid = item.ColorId, previousAction = actionName.ToLower(), IsDO = false })" class="btn btn-outline-danger btn-sm" onclick="return confirm('Do you want to delete this item?');">
+                                                        <i class="mdi mdi-trash-can"></i>
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        c++;
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Calculation Summary -->
+        <div class="col-xl-5">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-soft-primary border-bottom-0">
+                    <h5 class="header-title mb-0 text-primary">
+                        <i class="mdi mdi-calculator mr-1"></i> Payment Summary
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 border-right">
+                            <div class="form-group mb-2 totalDiscountPercentage">
+                                @Html.LabelFor(m => m.PurchaseOrder.TotalDiscountPercentage, new { @class = "small font-weight-bold text-muted mb-1" })
+                                @Html.EditorFor(m => m.PurchaseOrder.TotalDiscountPercentage, new { htmlAttributes = new { @class = "form-control form-control-sm text-right", type = "number", step = "0.01" } })
+                                @Html.HiddenFor(m => m.PurchaseOrder.PPDiscountAmount)
+                            </div>
+
+                            <div class="form-group mb-2 totalDiscountAmount">
+                                @Html.LabelFor(m => m.PurchaseOrder.TotalDiscountAmount, new { @class = "small font-weight-bold text-muted mb-1" })
+                                @Html.EditorFor(m => m.PurchaseOrder.TotalDiscountAmount, new { htmlAttributes = new { @class = "form-control form-control-sm text-right", type = "number", step = "0.01" } })
+                                @Html.HiddenFor(m => m.PurchaseOrder.tempFlatDiscountAmount)
+                            </div>
+
+                            <div class="form-group mb-2">
+                                @Html.LabelFor(m => m.PurchaseOrder.RecieveAmount, new { @class = "small font-weight-bold text-success mb-1" })
+                                @Html.EditorFor(m => m.PurchaseOrder.RecieveAmount, new { htmlAttributes = new { @class = "form-control form-control-sm text-right border-success", type = "number", step = "0.01" } })
+                            </div>
+
+                            <div class="form-group mb-0 remarks">
+                                @Html.LabelFor(m => m.PurchaseOrder.Remarks, new { @class = "small font-weight-bold text-muted mb-1" })
+                                @Html.EditorFor(m => m.PurchaseOrder.Remarks, new { htmlAttributes = new { @class = "form-control form-control-sm", placeholder = "Notes..." } })
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-group mb-2 adjAmount">
+                                @Html.LabelFor(m => m.PurchaseOrder.AdjAmount, new { @class = "small font-weight-bold text-muted mb-1" })
+                                @Html.EditorFor(m => m.PurchaseOrder.AdjAmount, new { htmlAttributes = new { @class = "form-control form-control-sm text-right", type = "number", step = "0.01" } })
+                            </div>
+
+                            <div class="form-group mb-2 netDiscount">
+                                @Html.LabelFor(m => m.PurchaseOrder.NetDiscount, new { @class = "small font-weight-bold text-muted mb-1" })
+                                @Html.EditorFor(m => m.PurchaseOrder.NetDiscount, new { htmlAttributes = new { @class = "form-control form-control-sm text-right bg-light", @readonly = "readonly" } })
+                                @Html.HiddenFor(m => m.PurchaseOrder.tempNetDiscount)
+                            </div>
+
+                            <div class="form-group mb-2 PaymentDue">
+                                @Html.LabelFor(m => m.PurchaseOrder.PaymentDue, new { @class = "small font-weight-bold text-danger mb-1" })
+                                @Html.EditorFor(m => m.PurchaseOrder.PaymentDue, new { htmlAttributes = new { @class = "form-control form-control-sm text-right bg-soft-danger font-weight-bold text-danger", @readonly = "readonly" } })
+                            </div>
+
+                            <div class="form-group mb-3 LabourCost">
+                                @Html.LabelFor(m => m.PurchaseOrder.LabourCost, new { @class = "small font-weight-bold text-muted mb-1" })
+                                @Html.EditorFor(m => m.PurchaseOrder.LabourCost, new { htmlAttributes = new { @class = "form-control form-control-sm text-right", type = "number", step = "0.01" } })
+                            </div>
+
+                            <div class="text-right">
+                                <button type="button" class="btn btn-soft-info btn-sm mr-1 shadow-sm">
+                                    <i class="mdi mdi-eye-outline mr-1"></i> Preview
+                                </button>
+                                <button type="submit" name="submitButton" value="Save order" class="btn btn-primary btn-sm px-3 shadow">
+                                    <i class="mdi mdi-content-save-all mr-1"></i> Save Order
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+
+
+
+
+
+    <div class="row">
+        <div class="col-md-6">
+            <!-- IMEI / Barcode Entry Section -->
+            <div class="row" style="display:none" id="imeiEntryRow">
                 <div class="col-md-12">
-                    <div class="panel panel-default">
-                        <div class="panel-body">
-                            <table id="productIdentifierTable"
-                                   data-toggle="table"
-                                   data-height="255"
-                                   class="table table-responsive table-bordered table-striped text-nowrap" cellspacing="0" width="100%">
-                                <thead>
-                                    <tr>
-                                        <th>
-                                            Sl
-                                        </th>
-                                        <th data-field="code">
-                                            Name
-                                        </th>
-                                        <th data-field="iemi">
-                                            IMEI /Barcode
-                                        </th>
-                                        <th data-field="DIMENO">
-                                            Damage IMEI /Barcode
-                                        </th>
-                                        <th>
-                                            Select
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @{
-                                        int i = 1;
-                                        if (TempData["POProductDetails"] != null)
-                                        {
-                                            foreach (var item in (List<POProductDetail>)TempData["POProductDetails"])
+                    <div class="card shadow-sm border-0">
+                        <div class="card-header bg-soft-warning border-bottom-0">
+                            <h5 class="header-title mb-0 font-size-14 text-warning">
+                                <i class="mdi mdi-barcode-scan mr-1"></i> Product Identifiers (IMEI/Barcode)
+                            </h5>
+                        </div>
+                        <div class="card-body p-0">
+                            <!-- Padding 0 for seamless table -->
+                            <div class="table-responsive">
+                                <table id="productIdentifierTable"
+                                       data-toggle="table"
+                                       data-height="255"
+                                       class="table table-sm table-centered table-nowrap mb-0 table-hover">
+                                    <thead class="thead-light">
+                                        <tr>
+                                            <th style="width: 5%">Sl</th>
+                                            <th style="width: 25%">Product Name</th>
+                                            <th style="width: 30%">IMEI / Barcode</th>
+                                            <th style="width: 30%">Damage IMEI</th>
+                                            <th style="width: 10%" class="text-center">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @{
+                                            int i = 1;
+                                            if (TempData["POProductDetails"] != null)
                                             {
-                                                <tr>
-                                                    <td width="5%">@i</td>
-                                                    <td width="26.84%">@Model.PODetail.ProductName</td>
-                                                    <td width="30%">
-                                                        <input type="text" class="form-control input-sm input-sm" value="@item.IMENO" name="@("IMEINo" +  i.ToString())" />
-                                                    </td>
-                                                    <td width="50%">
-                                                        <input type="text" class="form-control input-sm input-sm" value="@item.DIMENO" name="@("DIMEINo" +  i.ToString())" id="@("DIMEINo" +  i.ToString())" readonly />
-                                                    </td>
-                                                    <td>
-                                                        @if (Model.PurchaseOrder.IsDamagePO)
-                                                        {
-                                                            <button type="button" id=@i class="btn btn-xs btn-info btnGetDamageProduct" title="Get Damage Product"><i class="fa fa-info-circle"></i></button>
-                                                        }
-                                                        else
-                                                        {
-                                                            <button type="button" id=@i class="btn btn-xs btn-info btnGetDamageProduct" title="Get Damage Product" disabled><i class="fa fa-info-circle"></i></button>
-                                                        }
-                                                    </td>
-                                                </tr>
-                                                i++;
+                                                foreach (var item in (List<POProductDetail>)TempData["POProductDetails"])
+                                                {
+                                                    <tr>
+                                                        <td>@i</td>
+                                                        <td class="font-weight-medium">@Model.PODetail.ProductName</td>
+                                                        <td>
+                                                            <input type="text" class="form-control form-control-sm" value="@item.IMENO" name="@("IMEINo" + i.ToString())" placeholder="Scan Barcode" />
+                                                        </td>
+                                                        <td>
+                                                            <input type="text" class="form-control form-control-sm bg-light" value="@item.DIMENO" name="@("DIMEINo" + i.ToString())" id="@("DIMEINo" + i.ToString())" readonly />
+                                                        </td>
+                                                        <td class="text-center">
+                                                            @if (Model.PurchaseOrder.IsDamagePO)
+                                                            {
+                                                                <button type="button" id="@i" class="btn btn-soft-info btn-sm btnGetDamageProduct" title="Get Damage Product">
+                                                                    <i class="mdi mdi-information-outline"></i>
+                                                                </button>
+                                                            }
+                                                            else
+                                                            {
+                                                                <button type="button" id="@i" class="btn btn-soft-secondary btn-sm btnGetDamageProduct" title="Get Damage Product" disabled>
+                                                                    <i class="mdi mdi-information-outline"></i>
+                                                                </button>
+                                                            }
+                                                        </td>
+                                                    </tr>
+                                                    i++;
+                                                }
                                             }
                                         }
-                                    }
-                                </tbody>
-                            </table>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-transparent border-top py-2">
+                            <small class="text-muted"><i class="mdi mdi-help-circle-outline mr-1"></i> Use barcode scanner for faster entry.</small>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="row">
+            <!-- Empty placeholder panel for future use (Matching New Theme) -->
+            <div class="row mt-3">
                 <div class="col-md-12">
-                    <div class="panel panel-default">
-
+                    <div class="card border-0 shadow-none bg-transparent">
+                        <!-- If you need any summary here, add card-body -->
                     </div>
                 </div>
             </div>
-
-
         </div>
+
+
     </div>
 }
 
 
-<div class="modal fade bs-example-modal-lg" id="DamageProductDetailsModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-    <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h5 class="modal-title" id="myModalLabel">Damage Return ProductDetails</h5>
+<!-- Damage Product Details Modal -->
+<div class="modal fade" id="DamageProductDetailsModal" tabindex="-1" role="dialog" aria-labelledby="damageModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+        <div class="modal-content border-0 shadow-lg">
+            <!-- Modal Header -->
+            <div class="modal-header bg-soft-danger border-bottom-0">
+                <h5 class="modal-title text-danger" id="damageModalLabel">
+                    <i class="mdi mdi-alert-octagon-outline mr-1"></i> Damage Return Product Details
+                </h5>
+                <button type="button" class="close text-danger" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
             </div>
-            <div class="modal-body">
-                <div id="ProductDetailstoolbar">
-                    @*@Html.ActionLink("Create new", "Create", "Product", routeValues: null, htmlAttributes: new { @class = "btn btn-primary btn-sm", target = "_blank" })*@
-                    <span class="text-warning">&nbsp;(Requires reload current page to get new item)</span>
+
+            <!-- Modal Body -->
+            <div class="modal-body p-4">
+                <div id="ProductDetailstoolbar" class="mb-3 d-flex align-items-center">
+                    <span class="badge badge-soft-warning p-2">
+                        <i class="mdi mdi-alert-outline mr-1"></i>
+                        Note: Requires reload of the current page to reflect new items.
+                    </span>
                 </div>
-                <div class="table-responsive" style="max-height:200px">
+
+                <div class="table-responsive" style="max-height:350px; overflow-y: auto;">
                     <table id="DamageProductDetailsTable"
                            data-toggle="table"
                            data-search="true"
                            data-click-to-select="true"
                            data-single-select="true"
-                           data-detail-view="true"
                            data-pagination="true"
-                           data-id-field="name"
-                           data-page-list="[10, 25, 50, 100, ALL]"
                            data-page-size="6"
-                           class="table table-responsive table-bordered table-striped" cellspacing="0" width="100%">
-                        <thead>
+                           class="table table-sm table-centered table-nowrap mb-0 table-hover border">
+                        <thead class="thead-light">
                             <tr>
-                                @*<th data-field="id" class="hidden">
-                                    </th>*@
-
-                                <th>
-                                    Sl
-                                </th>
-                                <th data-field="code"
-                                    data-sortable="true">
-                                    Code
-                                </th>
-                                <th data-field="name"
-                                    data-sorter="sorter"
-                                    data-sortable="true">
-                                    Name
-                                </th>
-                                <th data-field="category"
-                                    data-sorter="sorter"
-                                    data-sortable="true">
-                                    Category
-                                </th>
-                                @*<th data-field="detailId" class="hidden">
-                                    </th>
-                                    <th data-field="colorId" class="hidden">
-                                    </th>*@
-                                <th data-field="imeNo"
-                                    data-sorter="sorter"
-                                    data-sortable="true">
-                                    Company
-                                </th>
-                                <th data-field="colorname"
-                                    data-sorter="sorter"
-                                    data-sortable="true">
-                                    Color
-                                </th>
-                                <th data-field="mrpRate"
-                                    data-sorter="sorter"
-                                    data-sortable="true">
-                                    IMEI
-                                </th>
+                                <th style="width: 50px;">Sl</th>
+                                <th data-field="code" data-sortable="true">Code</th>
+                                <th data-field="name" data-sortable="true">Product Name</th>
+                                <th data-field="category" data-sortable="true">Category</th>
+                                <th data-field="imeNo" data-sortable="true">Company</th>
+                                <th data-field="colorname" data-sortable="true">Color</th>
+                                <th data-field="mrpRate" data-sortable="true">IMEI/Barcode</th>
                             </tr>
                         </thead>
-                        <tbody></tbody>
+                        <tbody class="font-size-13">
+                            <!-- Dynamic data will be injected here via JS -->
+                        </tbody>
                     </table>
                 </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-sm btn-primary" data-dismiss="modal">Close</button>
+
+            <!-- Modal Footer -->
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-secondary btn-sm px-4" data-dismiss="modal">
+                    <i class="mdi mdi-close-circle-outline mr-1"></i> Close
+                </button>
             </div>
         </div>
     </div>
 </div>
 
+
+
+<!-- Modal for Adding New Supplier -->
+<!-- Modal for Adding New Supplier -->
+<div class="modal fade" id="SuppliersModal" tabindex="-1" role="dialog" aria-labelledby="supplierModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-md modal-dialog-centered" role="document">
+        <div class="modal-content border-0 shadow-lg">
+            <!-- Modal Header -->
+            <div class="modal-header bg-soft-primary border-bottom-0">
+                <h5 class="modal-title text-primary" id="supplierModalLabel">
+                    <i class="mdi mdi-truck-delivery-outline mr-1"></i> Add New Supplier
+                </h5>
+                <button type="button" class="close text-primary" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="modal-body p-4">
+                <form id="ajaxSupplierForm">
+                    <!-- Supplier Name -->
+                    <div class="form-group row mb-3">
+                        <label class="col-md-4 col-form-label-sm font-weight-bold text-muted">Supplier Name</label>
+                        <div class="col-md-8">
+                            <input type="text" id="mSupplierName" name="Name" class="form-control form-control-sm" placeholder="Enter supplier name" required />
+                        </div>
+                    </div>
+
+                    <!-- Contact No -->
+                    <div class="form-group row mb-3">
+                        <label class="col-md-4 col-form-label-sm font-weight-bold text-muted">Contact No</label>
+                        <div class="col-md-8">
+                            <input type="text" id="mSupplierContact" name="ContactNo" class="form-control form-control-sm" placeholder="e.g. 017xxxxxxxx" required />
+                        </div>
+                    </div>
+
+                    <!-- Address -->
+                    <div class="form-group row mb-3">
+                        <label class="col-md-4 col-form-label-sm font-weight-bold text-muted">Address</label>
+                        <div class="col-md-8">
+                            <textarea id="mAddress" name="Address" class="form-control form-control-sm" rows="2" placeholder="Full address..."></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Opening Due -->
+                    <div class="form-group row mb-3">
+                        <label class="col-md-4 col-form-label-sm font-weight-bold text-muted">Opening Due</label>
+                        <div class="col-md-8">
+                            <div class="input-group input-group-sm">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">৳</span>
+                                </div>
+                                <input type="number" id="mOpeningDue" name="OpeningDue" class="form-control form-control-sm text-right" value="0" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Remarks -->
+                    <div class="form-group row mb-3">
+                        <label class="col-md-4 col-form-label-sm font-weight-bold text-muted">Remarks</label>
+                        <div class="col-md-8">
+                            <textarea id="mRemarks" name="Remarks" class="form-control form-control-sm" rows="1" placeholder="Short note..."></textarea>
+                        </div>
+                    </div>
+
+                    <hr class="my-4" />
+
+                    <!-- Checkbox (Modern Style) -->
+                    <div class="form-group row mb-0">
+                        <div class="col-md-8 offset-md-4">
+                            <div class="custom-control custom-checkbox">
+                                <input type="checkbox" class="custom-control-input" id="mIsBoth" name="IsBoth" value="true">
+                                <label class="custom-control-label font-weight-bold text-primary" for="mIsBoth" style="cursor:pointer;">
+                                    Also a Customer?
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="modal-footer bg-light border-top-0">
+                <button type="button" class="btn btn-secondary btn-sm px-4" data-dismiss="modal">
+                    <i class="mdi mdi-close-circle-outline mr-1"></i> Cancel
+                </button>
+                <button type="button" id="btnSaveSupplierAjax" class="btn btn-primary btn-sm px-4 shadow-sm">
+                    <i class="mdi mdi-content-save-outline mr-1"></i> Save Supplier
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@*<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />*@
+
+
+<!-- Modal for Adding New Product -->
+<div id="newProductAddModal" class="modal fade" role="dialog" aria-labelledby="addNewHeader" aria-hidden="true">
+    <div class="modal-dialog modal-md modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <!-- Modal Header -->
+            <div class="modal-header bg-soft-info border-bottom-0">
+                <h5 class="modal-title text-info" id="addNewHeader">
+                    <i class="mdi mdi-cart-plus mr-1"></i> Add New Product
+                </h5>
+                <button type="button" class="close text-info" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="modal-body p-4">
+                <div class="form-horizontal">
+                    <!-- Product Name -->
+                    <div class="form-group row mb-3">
+                        <label class="col-md-3 col-form-label-sm font-weight-bold text-muted">Product Name</label>
+                        <div class="col-md-9">
+                            @Html.Editor("ProductName", new { htmlAttributes = new { @class = "form-control form-control-sm", placeholder = "Enter product name", id = "mProductName" } })
+                        </div>
+                    </div>
+
+                    <!-- Company -->
+                    <div class="form-group row mb-3">
+                        <label class="col-md-3 col-form-label-sm font-weight-bold text-muted">Company</label>
+                        <div class="col-md-9">
+                            <div class="input-group input-group-sm shadow-sm">
+                                @Html.Hidden("CompanyId")
+                                @Html.Editor("CompanyName", new { htmlAttributes = new { @class = "form-control form-control-sm", placeholder = "Select company" } })
+                                <div class="input-group-append">
+                                    <button id="btnAddCompany" type="button" class="btn btn-info" title="Add Company">
+                                        <i class="mdi mdi-plus"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Category -->
+                    <div class="form-group row mb-3">
+                        <label class="col-md-3 col-form-label-sm font-weight-bold text-muted">Category</label>
+                        <div class="col-md-9">
+                            <div class="input-group input-group-sm shadow-sm">
+                                @Html.Hidden("CategoryId")
+                                @Html.Editor("CategoryName", new { htmlAttributes = new { @class = "form-control form-control-sm", placeholder = "Select category" } })
+                                <div class="input-group-append">
+                                    <button id="btnAddCategory" type="button" class="btn btn-info">
+                                        <i class="mdi mdi-plus"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Size -->
+                    <div class="form-group row mb-3">
+                        <label class="col-md-3 col-form-label-sm font-weight-bold text-muted">Size</label>
+                        <div class="col-md-9">
+                            <div class="input-group input-group-sm shadow-sm">
+                                @Html.Hidden("SizeID")
+                                @Html.Editor("SizeName", new { htmlAttributes = new { @class = "form-control form-control-sm", placeholder = "Select size" } })
+                                <div class="input-group-append">
+                                    <button id="btnAddSize" type="button" class="btn btn-info">
+                                        <i class="mdi mdi-plus"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            @Html.ValidationMessage("SizeID", "", new { @class = "text-danger small" })
+                        </div>
+                    </div>
+
+                    <!-- Unit Type -->
+                    <div class="form-group row mb-3">
+                        <label class="col-md-3 col-form-label-sm font-weight-bold text-muted">Unit Type</label>
+                        <div class="col-md-9">
+                            <div class="input-group input-group-sm shadow-sm">
+                                @Html.Hidden("UnitType")
+                                @Html.Editor("UnitTypeName", new { htmlAttributes = new { @class = "form-control form-control-sm", placeholder = "Select unit type" } })
+                                <div class="input-group-append">
+                                    <button id="btnAddUnitType" type="button" class="btn btn-info">
+                                        <i class="mdi mdi-plus"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            @Html.ValidationMessage("UnitType", "", new { @class = "text-danger small" })
+                        </div>
+                    </div>
+
+                    <hr class="my-4" />
+
+                    <!-- Rates Row -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label class="small font-weight-bold text-muted mb-1">Purchase Rate</label>
+                                <div class="input-group input-group-sm">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text bg-light border-right-0">৳</span>
+                                    </div>
+                                    <input type="number" id="mRP" class="form-control form-control-sm text-right" placeholder="0.00" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label class="small font-weight-bold text-muted mb-1">MRP Rate</label>
+                                <div class="input-group input-group-sm">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text bg-light border-right-0">৳</span>
+                                    </div>
+                                    <input type="number" id="mMRP" class="form-control form-control-sm text-right" placeholder="0.00" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Qty & Type Row -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label class="small font-weight-bold text-muted mb-1">Low Stock Qty</label>
+                                <input type="number" id="mLimitedStkQty" class="form-control form-control-sm text-right" placeholder="Min Qty" />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label class="small font-weight-bold text-muted mb-1">Product Type</label>
+                                @Html.DropDownList("ProductType", new SelectList(Enum.GetValues(typeof(EnumProductType)).Cast<EnumProductType>().Select(x => new { ID = (int)x, Name = x.ToString() }).ToList(), "ID", "Name", (int)EnumProductType.NoBarcode), new { @class = "form-control form-control-sm shadow-sm" })
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="modal-footer bg-light border-top-0">
+                <button type="button" class="btn btn-secondary btn-sm px-4" data-dismiss="modal">
+                    <i class="mdi mdi-close-circle-outline mr-1"></i> Cancel
+                </button>
+                <button type="button" class="btn btn-primary btn-sm px-4 shadow-sm" id="btnNewSaveProduct">
+                    <i class="mdi mdi-content-save-outline mr-1"></i> Save Product
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<!-- Modal for Quick Entry (Company/Category/Size etc.) -->
+<div id="newEntryModal" class="modal fade" role="dialog" aria-labelledby="addEntryNewHeader" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered shadow-lg">
+        <div class="modal-content border-0">
+            <!-- Modal Header -->
+            <div class="modal-header bg-soft-primary border-bottom-0">
+                <h5 class="modal-title text-primary" id="addEntryNewHeader">
+                    <i class="mdi mdi-plus-box-outline mr-1"></i> Add New Entry
+                </h5>
+                <button type="button" class="close text-primary" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="modal-body p-4">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group row mb-3">
+                            <label id="lblEntryName" class="col-md-3 col-form-label-sm font-weight-bold text-muted text-right">Name:</label>
+                            <div class="col-md-9">
+                                <input type="text" class="form-control form-control-sm shadow-sm" autofocus id="newName" placeholder="Enter name" />
+                                <input type="hidden" id="entryType" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product Category Section (Conditional) -->
+                <div class="row" id="divPCategory" style="display:none">
+                    <div class="col-md-12">
+                        <div class="form-group row mb-0">
+                            @Html.Label("PCategoryID", new { @class = "col-md-3 col-form-label-sm font-weight-bold text-muted text-right" })
+                            <div class="col-md-9">
+                                @Html.Hidden("PCategoryID")
+                                @Html.Editor("PCategoryName", new { htmlAttributes = new { @class = "form-control form-control-sm shadow-sm", placeholder = "Select category" } })
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="modal-footer bg-light border-top-0">
+                <button type="button" class="btn btn-secondary btn-sm px-4" data-dismiss="modal">
+                    <i class="mdi mdi-close-circle-outline mr-1"></i> Close
+                </button>
+                <button type="button" class="btn btn-primary btn-sm px-4 shadow-sm" id="btnAddCompanyCategory">
+                    <i class="mdi mdi-check-circle-outline mr-1"></i> Add Now
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="~/Scripts/productConfig.js"></script>
+
+
+<style>
+    /* Professional Styling overrides */
+    #newProductAddModal .modal-content {
+        border-radius: 8px;
+        border: none;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+
+    #newProductAddModal .modal-header {
+        background-color: #f8f9fa;
+        border-bottom: 1px solid #eee;
+        border-radius: 8px 8px 0 0;
+        padding: 15px 25px;
+    }
+
+    #newProductAddModal .modal-title {
+        font-weight: 600;
+        color: #333;
+        font-size: 18px;
+    }
+
+    #newProductAddModal .form-group {
+        margin-bottom: 18px; /* Better vertical spacing */
+    }
+
+    #newProductAddModal .control-label {
+        font-weight: 500;
+        color: #555;
+        padding-top: 7px;
+    }
+
+    .input-group-addon-btn {
+        padding: 0;
+        border: none;
+    }
+
+    .input-group .btn-info {
+        height: 30px; /* input-sm height matches */
+        border-radius: 0 4px 4px 0;
+    }
+
+    .form-control:focus {
+        border-color: #5bc0de;
+        box-shadow: none;
+        outline: 0;
+    }
+
+    .modal-footer {
+        background-color: #f8f9fa;
+        border-top: 1px solid #eee;
+        padding: 12px 25px;
+    }
+</style>
+
+<style>
+
+    .select2-container--default .select2-selection--single {
+        height: 30px !important;
+        padding: 3px 6px !important;
+        border: 1px solid #ccc !important;
+    }
+
+    .select2-container {
+        z-index: 99999 !important;
+        width: 100% !important;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 28px !important;
+    }
+</style>
+
+<!-- Select2 JS (jQuery এর নিচে থাকতে হবে) -->
+@*<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>*@
+
+
 <script>
+
+
+  $("#btnSaveSupplierAjax").click(function () {
+    var supplierData = {
+        Name: $("#mSupplierName").val(),
+        ContactNo: $("#mSupplierContact").val(),
+        OpeningDue: $("#mOpeningDue").val() || 0,
+        Address: $("#mAddress").val(),
+        Remarks: $("#mRemarks").val(),
+        IsBoth: $("#mIsBoth").is(":checked") ? 1 : 0
+    };
+
+    $.ajax({
+        type: "POST",
+        url: "/supplier/CreateSupplierAjax",
+        data: supplierData,
+        success: function (response) {
+            if (response.Result) {
+                toastr.success(response.ErrorMsg);
+                $('#SuppliersModal').modal('hide');
+
+                // --- Picker field update logic ---
+                var s = response.Supplier;
+                $('#SuppliersId').val(s.Id);
+                $('#SuppliersCode').val(s.Code);
+                $('#SuppliersName').val(s.Name);
+                $('[id*="CurrentDue"]').val(s.TotalDue);
+
+
+                // Dropdown label update
+                $('#dropdownLabel').text(s.Name + " (" + s.Code + ")");
+
+                updateFields(s);
+
+                loadSuppliers(true);
+                // Form reset
+                $("#ajaxSupplierForm")[0].reset();
+            } else {
+                toastr.error(response.ErrorMsg);
+            }
+        },
+        error: function () {
+            toastr.error("Server error occurred.");
+        }
+    });
+});
+
+
     $(document).ready(function () {
         $(window).keydown(function (event) {
             if (event.keyCode == 10 || event.keyCode == 13) {
@@ -862,7 +1101,7 @@
 
 
 
-    $('#OrderDate').datetimepicker({
+    @*$('#OrderDate').datetimepicker({
         @{
                 if (Model == null || Model.PurchaseOrder.OrderDate == null) {
                     @:defaultDate: moment(),
@@ -874,7 +1113,7 @@
             @:format: 'DD-MMM-YYYY',
             @:maxDate: moment()
                                                                                                                                             }
-    });
+    });*@
 
 
     //************************************************************
@@ -1508,11 +1747,229 @@
         calculateVariousValue(totalDiscountAmount, totalAmount);
     });
 
-    //$("#PurchaseOrder_CurrentDue").on("input", function () {
-    //    if (window.location.pathname.toLowerCase() == "/purchaseorder/create") {
-    //        var totalAmount = getDefaultFloatIfEmpty($("#PurchaseOrder_GrandTotal").val());
-    //        var totalDiscountAmount = getDefaultFloatIfEmpty($("#PurchaseOrder_TotalDiscountAmount").val());
-    //        calculateVariousValue(totalDiscountAmount, totalAmount);
-    //    }
-    //});
+
+
 </script>
+
+
+
+<script>
+
+
+    $(document).ready(function () {
+
+        $("#btnNewSaveProduct").click(function () {
+
+            var productData = {
+
+                ProductName: $("#ProductName").val(),
+                CompanyId: $("#CompanyId").val(),
+                CategoryId: $("#CategoryId").val(),
+                SizeID: $("#SizeID").val(),
+
+                SizeName: $("#SizeName").val(),
+                CompanyName: $("#CompanyName").val(),
+                CategoryName: $("#CategoryName").val(),
+
+                IDCode: $("#IDCode").val(),
+
+                UnitType: $("#UnitType").val(),
+
+                RP: $("#mRP").val() || 0,
+
+                MRP: $("#mMRP").val() || 0,
+
+                LimitedStkQty: $("#mLimitedStkQty").val() || 0,
+
+                ProductType: $("#ProductType").val(),
+
+                BundleQty: 0,
+
+                ServiceWarrentyMonth: "0 Month(s)",
+
+                SparePartsWarrentyMonth: "0 Month(s)"
+            };
+
+            console.log(productData);
+
+            if (!productData.ProductName ||
+                !productData.CompanyId ||
+                !productData.CategoryId ||
+                !productData.UnitType) {
+
+                toastr.warning("Please fill Name, Company, Category and Unit.");
+                return;
+            }
+
+            $.ajax({
+
+                type: "POST",
+
+                url: "/product/AddProduct",
+
+                data: productData,
+
+                success: function (response) {
+
+                    if (response.result) {
+
+                        toastr.success(response.msg);
+
+                        var p = response.data;
+
+                        $('#ProductsId').val(p.ProductID);
+                        $('#ProductsCode').val(p.Code);
+                        $('#ProductsName').val(p.ProductName);
+                        $('#ProductsType').val(p.ProductType);
+
+                        $('#PODetail_MRPRateParent')
+                            .val(p.RP)
+                            .trigger("input");
+
+                        $('#PODetail_SalesRate')
+                            .val(p.MRP)
+                            .trigger("input");
+
+                        if (typeof loadProducts === "function") {
+                            loadProducts(true);
+                        }
+
+                        $('#newProductAddModal').modal('hide');
+
+                    } else {
+
+                        toastr.error(response.msg);
+                    }
+                },
+
+                error: function (xhr) {
+
+                    console.log(xhr);
+
+                    toastr.error("An error occurred while saving the product.");
+                }
+            });
+
+        });
+
+    });
+</script>
+
+
+@section scripts {
+    <!-- CSS and JS Libraries -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/css/bootstrap-datetimepicker.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/js/bootstrap-datetimepicker.min.js"></script>
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            // Date Picker Initialization
+            var dateOptions = {
+                format: 'DD-MMM-YYYY',
+                showTodayButton: true,
+                allowInputToggle: true,
+                maxDate: moment(), 
+                icons: {
+                    time: 'mdi mdi-clock',
+                    date: 'mdi mdi-calendar',
+                    up: 'mdi mdi-chevron-up',
+                    down: 'mdi mdi-chevron-down',
+                    previous: 'mdi mdi-chevron-left',
+                    next: 'mdi mdi-chevron-right'
+                }
+            };
+
+            
+            $('#OrderDateContainer').datetimepicker(dateOptions);
+
+        
+            @{
+                if (Model != null && Model.PurchaseOrder.OrderDate != null)
+                {
+                    <text>
+                    $('#OrderDateContainer').data("DateTimePicker").date('@(Convert.ToDateTime(Model.PurchaseOrder.OrderDate).ToString("dd-MMM-yyyy"))');
+                    </text>
+                }
+                else {
+                    <text>
+                    $('#OrderDateContainer').data("DateTimePicker").date(moment());
+                    </text>
+                }
+            }
+        });
+    </script>
+}
+
+<!-- Select2 JS -->
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+<style>
+    /* Autocomplete list jate modal er upore thake */
+    .ui-autocomplete {
+        z-index: 99999999 !important;
+        max-height: 200px;
+        overflow-y: auto;
+        background-color: #fff;
+        border: 1px solid #ccc;
+    }
+
+    .col-md-4 {
+        padding-right: 0px !important;
+    }
+
+    .col-md-8 {
+        padding-left: 0px !important;
+    }
+
+
+
+
+    .form-horizontal .control-label {
+        text-align: left;
+        font-weight: bold;
+    }
+
+
+    .fix-width-picker {
+        padding-right: 5px !important;
+    }
+
+    .btn-action-align {
+        padding-left: 5px !important;
+        margin-top: 2px;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    #productDropdownList {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        z-index: 2100;
+        display: none;
+        width: 100%;
+        background-color: #fff;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-shadow: 0 6px 12px rgba(0,0,0,.175);
+    }
+
+    #productDropdownItems {
+        max-height: 250px;
+        overflow-y: auto;
+    }
+</style>
+

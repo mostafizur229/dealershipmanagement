@@ -1,0 +1,263 @@
+﻿<style>
+    /* Modern Supplier Picker Styles */
+    .dropdown-wrapper {
+        position: relative;
+        width: 100%;
+        font-family: 'Inter', 'Segoe UI', sans-serif;
+    }
+
+    .custom-dropdown {
+        padding: 6px 12px;
+        border: 1px solid #ced4da;
+        background: #fff;
+        cursor: pointer;
+        border-radius: 4px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        height: 34px; /* Bootstrap form-control-sm height */
+        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    }
+
+        .custom-dropdown:hover {
+            border-color: #6278fe;
+        }
+
+        .custom-dropdown span {
+            font-size: 13px;
+            color: #495057;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+    .dropdown-list {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 0 0 8px 8px;
+        max-height: 450px;
+        z-index: 1050;
+        display: none;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        margin-top: 2px;
+    }
+
+    .search-box {
+        padding: 10px;
+        background: #f8f9fa;
+        border-bottom: 1px solid #eee;
+    }
+
+        .search-box input {
+            width: 100%;
+            height: 32px;
+            padding: 5px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 20px;
+            font-size: 12px;
+            outline: none;
+        }
+
+            .search-box input:focus {
+                border-color: #6278fe;
+                box-shadow: 0 0 0 0.2rem rgba(98, 120, 254, 0.25);
+            }
+
+    #dropdownItems {
+        max-height: 320px;
+        overflow-y: auto;
+    }
+
+    /* Supplier Row Styling */
+    .dropdown-item {
+        padding: 12px 15px;
+        border-bottom: 1px solid #f8f9fa;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+
+        .dropdown-item:hover {
+            background: #f0f4ff;
+        }
+
+    .supplier-main-name {
+        font-size: 14px;
+        font-weight: 700;
+        color: #2c3e50;
+        margin-bottom: 3px;
+        display: block;
+    }
+
+    .supplier-sub-details {
+        font-size: 11px;
+        color: #7f8c8d;
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .supplier-code {
+        background: #eff2f7;
+        padding: 1px 6px;
+        border-radius: 4px;
+        font-weight: 600;
+        color: #495057;
+    }
+
+    .supplier-due {
+        color: #e74c3c;
+        font-weight: bold;
+    }
+
+    .supplier-contact {
+        color: #34495e;
+    }
+
+    /* Scrollbar Style */
+    #dropdownItems::-webkit-scrollbar {
+        width: 5px;
+    }
+
+    #dropdownItems::-webkit-scrollbar-thumb {
+        background: #ced4da;
+        border-radius: 10px;
+    }
+</style>
+
+<div class="form-group mb-0">
+    <div class="dropdown-wrapper">
+        <div id="dropdownTrigger" class="custom-dropdown shadow-sm">
+            <span id="dropdownLabel" class="font-weight-medium">Click to select supplier</span>
+            <i class="mdi mdi-chevron-down font-size-18 text-muted"></i>
+        </div>
+        <div id="dropdownList" class="dropdown-list border-0">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Search by name, code, contact..." autocomplete="off" />
+            </div>
+            <div id="dropdownItems">
+                <!-- Data will be loaded here via AJAX -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Hidden fields for form submission -->
+<input type="hidden" id="SuppliersId" name="SuppliersId" value="@ViewBag.SuppliersId" />
+<input type="hidden" id="SuppliersCode" name="SuppliersCode" value="@ViewBag.SuppliersCode" />
+<input type="hidden" id="SuppliersName" name="SuppliersName" value="@ViewBag.SuppliersName" />
+
+<script>
+    (function () {
+        const selectedSupplierId = '@ViewBag.SuppliersId';
+        const dropdownTrigger = document.getElementById('dropdownTrigger');
+        const dropdownList = document.getElementById('dropdownList');
+        const dropdownItems = document.getElementById('dropdownItems');
+        const dropdownLabel = document.getElementById('dropdownLabel');
+        const searchInput = document.getElementById('searchInput');
+
+        let currentPage = 1;
+        const pageSize = 15; // Better UX
+        let loading = false;
+        let hasMore = true;
+        let currentSearch = '';
+
+        dropdownTrigger.addEventListener('click', () => {
+            const isVisible = dropdownList.style.display === 'block';
+            dropdownList.style.display = isVisible ? 'none' : 'block';
+            if (!isVisible) {
+                searchInput.focus();
+                if (dropdownItems.children.length === 0) {
+                    loadSuppliers(true);
+                }
+            }
+        });
+
+        dropdownItems.addEventListener('scroll', () => {
+            if (dropdownItems.scrollTop + dropdownItems.clientHeight >= dropdownItems.scrollHeight - 20) {
+                if (!loading && hasMore) {
+                    currentPage++;
+                    loadSuppliers();
+                }
+            }
+        });
+
+        searchInput.addEventListener('input', () => {
+            currentSearch = searchInput.value.trim();
+            currentPage = 1;
+            hasMore = true;
+            loadSuppliers(true);
+        });
+
+        async function loadSuppliers(reset = false) {
+            if (loading) return;
+            loading = true;
+
+            try {
+                const response = await fetch(`/supplier/GetSupllier?search=${encodeURIComponent(currentSearch)}&page=${currentPage}&pageSize=${pageSize}`);
+                const data = await response.json();
+
+                if (reset) dropdownItems.innerHTML = '';
+
+                if (data.data && data.data.length > 0) {
+                    data.data.forEach(supplier => {
+                        const div = document.createElement('div');
+                        div.className = 'dropdown-item';
+                        div.innerHTML = `
+                            <div class="supplier-row">
+                                <div class="supplier-main-name text-uppercase">${supplier.Name}</div>
+                                <div class="supplier-sub-details">
+                                    <span class="supplier-code"><i class="mdi mdi-tag-outline mr-1"></i>${supplier.Code}</span>
+                                    <span class="supplier-contact"><i class="mdi mdi-phone mr-1"></i>${supplier.ContactNo || 'N/A'}</span>
+                                    <span class="supplier-due"><i class="mdi mdi-cash-multiple mr-1"></i>Due: ${supplier.TotalDue}</span>
+                                </div>
+                            </div>
+                        `;
+
+                        div.addEventListener('click', () => {
+                            updateFields(supplier);
+                            dropdownList.style.display = 'none';
+                        });
+
+                        dropdownItems.appendChild(div);
+                    });
+                    hasMore = (currentPage * pageSize) < (data.recordsTotal || 0);
+                } else if (reset) {
+                    dropdownItems.innerHTML = '<div class="p-4 text-center text-muted">No suppliers found</div>';
+                }
+            } catch (err) {
+                console.error("Error loading suppliers:", err);
+            } finally {
+                loading = false;
+            }
+        }
+
+        function updateFields(supplier) {
+            $('#SuppliersId').val(supplier.Id || supplier.id);
+            $('#SuppliersCode').val(supplier.Code || supplier.code);
+            $('#SuppliersName').val(supplier.Name || supplier.name);
+            $('[id*="CurrentDue"]').val(supplier.TotalDue || supplier.totalDue || 0);
+            dropdownLabel.textContent = (supplier.Name || supplier.name) + " (" + (supplier.Code || supplier.code) + ")";
+        }
+
+        document.addEventListener('click', e => {
+            if (!e.target.closest('.dropdown-wrapper')) {
+                dropdownList.style.display = 'none';
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (selectedSupplierId && selectedSupplierId !== '0') {
+                const initialName = '@ViewBag.SuppliersName';
+                const initialCode = '@ViewBag.SuppliersCode';
+                if(initialName && initialName !== '') {
+                    dropdownLabel.textContent = `${initialName} (${initialCode})`;
+                }
+            }
+        });
+    })();
+</script>

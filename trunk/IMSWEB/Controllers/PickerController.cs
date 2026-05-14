@@ -46,7 +46,7 @@ namespace IMSWEB.Controllers
             IExpenseItemService expenseItemService, IAllowanceDeductionService allowanceDeductionService,
             ISystemInformationService SystemInformationService, ISalaryMonthlyService SalaryMonthlyService,
             IDepartmentService DepartmentService,
-            IMapper mapper, ISizeService SizeService, IProductUnitTypeService ProductUnitTypeService , IShareInvestmentHeadService ShareInvestmentHeadService,
+            IMapper mapper, ISizeService SizeService, IProductUnitTypeService ProductUnitTypeService, IShareInvestmentHeadService ShareInvestmentHeadService,
             IZoneService zoneService
             )
             : base(errorService)
@@ -235,22 +235,22 @@ namespace IMSWEB.Controllers
                         ViewBag.CustomersName = vmCustomer.Name;
                         ViewBag.CustomerId = vmCustomer.Id;
                         //ViewBag.CustomersCurrentDue = !string.IsNullOrEmpty(vmCustomer.TotalDue) ?
-                            //Math.Round(decimal.Parse(vmCustomer.TotalDue), 2).ToString() : string.Empty;
-                    }                    
+                        //Math.Round(decimal.Parse(vmCustomer.TotalDue), 2).ToString() : string.Empty;
+                    }
                     return PartialView("~/Views/Pickers/_BothCustomerPicker.cshtml", vmBothCustomers);
 
 
-                case PickerType.ExceptCreditCustomer:                                        
-                    
+                case PickerType.ExceptCreditCustomer:
+
                     if (id != default(int))
                     {
-                        var customerss = _customerService.GetCustomerById(id);                        
+                        var customerss = _customerService.GetCustomerById(id);
                         ViewBag.CustomersCode = customerss.Code;
                         ViewBag.CustomersName = customerss.Name;
                         ViewBag.CustomerId = customerss.CustomerID;
                         ViewBag.CustomersCurrentDue = Math.Round(customerss.TotalDue, 2).ToString();
                     }
-                    
+
                     return PartialView("~/Views/Pickers/_CustomerPicker.cshtml");
 
                 //case PickerType.ExceptCreditCustomer:
@@ -363,6 +363,27 @@ namespace IMSWEB.Controllers
                     }
                     return PartialView("~/Views/Pickers/_SupplierPicker.cshtml", vmSuppliers);
 
+
+
+                case PickerType.SupplierNew:
+
+                    var supplierss = _supplierService.GetAllSupplier();
+                    var vmSupplierss = _mapper.Map<IEnumerable<Supplier>, IEnumerable<CreateSupplierViewModel>>(supplierss);
+                    if (id != default(int))
+                    {
+                        var vmSupplier = vmSupplierss.First(x => int.Parse(x.Id) == id);
+                        ViewBag.SuppliersCode = vmSupplier.Code;
+                        ViewBag.SuppliersName = vmSupplier.Name;
+                        ViewBag.SuppliersId = vmSupplier.Id;
+                        ViewBag.SuppliersCurrentDue = !string.IsNullOrEmpty(vmSupplier.TotalDue) ?
+                            Math.Round(decimal.Parse(vmSupplier.TotalDue), 2).ToString() : string.Empty;
+                    }
+                    return PartialView("~/Views/Pickers/_SupplierPickerNew.cshtml");
+
+
+
+
+
                 case PickerType.Employee:
 
                     var employees = _employeeService.GetAllEmployee();
@@ -376,7 +397,7 @@ namespace IMSWEB.Controllers
                     }
                     return PartialView("~/Views/Pickers/_EmployeePicker.cshtml", vmEmployees);
 
-                case PickerType.SalesProduct:                    
+                case PickerType.SalesProduct:
                     return PartialView("~/Views/Pickers/_SalesProductPicker.cshtml");
 
 
@@ -408,6 +429,10 @@ namespace IMSWEB.Controllers
                     return PartialView("~/Views/Pickers/_ProductPicker.cshtml", productsWithParentQuantity);
 
 
+                case PickerType.ProductNew:
+                    return PartialView("~/Views/Pickers/_ProductPickerNew.cshtml");
+
+
                 //case PickerType.Product:
                 //    var customProducts = _productService.GetAllProductIQueryable();
                 //    if (id != default(int))
@@ -420,7 +445,7 @@ namespace IMSWEB.Controllers
                 //            ViewBag.ProductsId = vmProduct.ProductID;
                 //            ViewBag.ProductsType = (int)vmProduct.ProductType;
 
-                            
+
                 //            var totalQuantity = customProducts
                 //                .Where(p => p.ProductID == id)
                 //                .Sum(p => p.Quantity);
@@ -428,7 +453,7 @@ namespace IMSWEB.Controllers
                 //        }
                 //    }
 
-                    
+
                 //    var productsWithParentQuantity = customProducts.GroupBy(p => p.ProductID)
                 //                                                   .Select(group => group.FirstOrDefault())
                 //                                                   .ToList();
@@ -597,42 +622,42 @@ namespace IMSWEB.Controllers
                     var vmCreditProductGroupBY = (from vm in vmcreditpdeatils
                                                   group vm by new { vm.IMENo, vm.ProductId, vm.CategoryID, vm.ProductName, vm.ProductCode, vm.ColorId, vm.CategoryName, vm.ColorName, vm.ModelName, vm.GodownName }
                                                       into g
-                                                      select new GetProductViewModel
-                                                      {
-                                                          IMENo = g.Key.IMENo,
-                                                          ProductId = g.Key.ProductId,
-                                                          ProductCode = g.Key.ProductCode,
-                                                          ProductName = g.Key.ProductName,
-                                                          CategoryID = g.Key.CategoryID,
+                                                  select new GetProductViewModel
+                                                  {
+                                                      IMENo = g.Key.IMENo,
+                                                      ProductId = g.Key.ProductId,
+                                                      ProductCode = g.Key.ProductCode,
+                                                      ProductName = g.Key.ProductName,
+                                                      CategoryID = g.Key.CategoryID,
 
-                                                          CategoryName = g.Key.CategoryName,
-                                                          ColorName = g.Key.ColorName,
-                                                          ColorId = g.Key.ColorId,
-                                                          ModelName = g.Key.ModelName,
-                                                          StockDetailsId = g.Select(o => o.StockDetailsId).FirstOrDefault(),
+                                                      CategoryName = g.Key.CategoryName,
+                                                      ColorName = g.Key.ColorName,
+                                                      ColorId = g.Key.ColorId,
+                                                      ModelName = g.Key.ModelName,
+                                                      StockDetailsId = g.Select(o => o.StockDetailsId).FirstOrDefault(),
 
-                                                          MRPRate = g.Select(o => o.MRPRate).FirstOrDefault(),
-                                                          MRPRate12 = g.Select(o => o.MRPRate12).FirstOrDefault(),
-                                                          CashSalesRate = g.Select(o => o.CashSalesRate).FirstOrDefault(),
-                                                          PWDiscount = g.Select(o => o.PWDiscount).FirstOrDefault(),
-                                                          PicturePath = g.Select(o => o.PicturePath).FirstOrDefault(),
+                                                      MRPRate = g.Select(o => o.MRPRate).FirstOrDefault(),
+                                                      MRPRate12 = g.Select(o => o.MRPRate12).FirstOrDefault(),
+                                                      CashSalesRate = g.Select(o => o.CashSalesRate).FirstOrDefault(),
+                                                      PWDiscount = g.Select(o => o.PWDiscount).FirstOrDefault(),
+                                                      PicturePath = g.Select(o => o.PicturePath).FirstOrDefault(),
 
-                                                          PreStock = g.Select(o => o.PreStock).FirstOrDefault(),
-                                                          OfferDescription = g.Select(o => o.OfferDescription).FirstOrDefault(),
-                                                          ProductType = g.Select(o => o.ProductType).FirstOrDefault(),
-                                                          CompressorWarrentyMonth = g.Select(o => o.CompressorWarrentyMonth).FirstOrDefault(),
-                                                          PanelWarrentyMonth = g.Select(o => o.PanelWarrentyMonth).FirstOrDefault(),
+                                                      PreStock = g.Select(o => o.PreStock).FirstOrDefault(),
+                                                      OfferDescription = g.Select(o => o.OfferDescription).FirstOrDefault(),
+                                                      ProductType = g.Select(o => o.ProductType).FirstOrDefault(),
+                                                      CompressorWarrentyMonth = g.Select(o => o.CompressorWarrentyMonth).FirstOrDefault(),
+                                                      PanelWarrentyMonth = g.Select(o => o.PanelWarrentyMonth).FirstOrDefault(),
 
-                                                          MotorWarrentyMonth = g.Select(o => o.MotorWarrentyMonth).FirstOrDefault(),
-                                                          SparePartsWarrentyMonth = g.Select(o => o.SparePartsWarrentyMonth).FirstOrDefault(),
-                                                          ServiceWarrentyMonth = g.Select(o => o.ServiceWarrentyMonth).FirstOrDefault(),
-                                                          IsSelect = g.Select(o => o.IsSelect).FirstOrDefault(),
-                                                          Status = g.Select(o => o.Status).FirstOrDefault(),
+                                                      MotorWarrentyMonth = g.Select(o => o.MotorWarrentyMonth).FirstOrDefault(),
+                                                      SparePartsWarrentyMonth = g.Select(o => o.SparePartsWarrentyMonth).FirstOrDefault(),
+                                                      ServiceWarrentyMonth = g.Select(o => o.ServiceWarrentyMonth).FirstOrDefault(),
+                                                      IsSelect = g.Select(o => o.IsSelect).FirstOrDefault(),
+                                                      Status = g.Select(o => o.Status).FirstOrDefault(),
 
-                                                          Quantity = g.Select(o => o.Quantity).FirstOrDefault(),
-                                                          GodownName = g.Key.GodownName
+                                                      Quantity = g.Select(o => o.Quantity).FirstOrDefault(),
+                                                      GodownName = g.Key.GodownName
 
-                                                      });
+                                                  });
 
 
 

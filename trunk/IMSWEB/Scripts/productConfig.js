@@ -1,6 +1,8 @@
 ﻿//Auto search by name
 $('input[id="CompanyName"]').autocomplete({
     source: function (request, response) {
+        console.log("Autocomplete Fired");
+        console.log(request.term);
         $('#CompanyId').val("");
         $.ajax({
             url: "/Company/GetCompanyByName/",
@@ -28,44 +30,39 @@ $('input[id="CompanyName"]').autocomplete({
 });
 
 
-//$('input[id="CompanyName"]').autocomplete({
-//    source: function (request, response) {
-//        console.log("Autocomplete triggered for: " + request.term); // ১. ফাংশন কল হচ্ছে কি না
 
-//        $('#CompanyId').val("");
 
-//        $.ajax({
-//            url: "/Company/GetCompanyByName",
-//            type: "GET",
-//            data: { prefix: request.term },
-//            success: function (data) {
-//                console.log("Ajax Success. Data received:", data); // ২. সার্ভার থেকে ডাটা এল কি না
 
-//                if (data == false) {
-//                    console.log("No data found or server returned false");
-//                    return;
-//                }
 
-//                response($.map(data, function (item) {
-//                    return { label: item.Name, value: item.Name, ID: item.ID };
-//                }));
-//            },
-//            error: function (xhr, status, error) {
-//                // ৩. যদি কোনো এরর হয় (যেমন ৪0৪ বা ৫00)
-//                console.error("Ajax Error!");
-//                console.error("Status: " + status);
-//                console.error("Error Detail: " + error);
-//                console.log("Response Text: " + xhr.responseText);
-//            }
-//        });
-//    },
-//    minLength: 1,
-//    select: function (event, ui) {
-//        console.log("Item selected:", ui.item); // ৪. আইটেম সিলেক্ট করলে আইডি দেখাচ্ছে কি না
-//        $("#CompanyId").val(ui.item.ID);
-//        $('#CompanyName').attr('style', 'border:1px solid #ced4da !important');
-//    }
-//});
+$('input[id="UnitTypeName"]').autocomplete({
+    source: function (request, response) {
+
+        $('#UnitType').val("");
+        $.ajax({
+            url: "/ProductUnit/GetProductUnitByName/",
+            type: "POST",
+            dataType: "json",
+            data: { prefix: request.term },
+            success: function (data) {
+                if (data.result == false) {
+                    toastr.error("Not found");
+                    return;
+                }
+                response($.map(data, function (item) {
+                    return { label: item.Name, value: item.Name, ID: item.ID };
+                }))
+            }
+        });
+    },
+    minLength: 0,
+    select: function (event, ui) {
+        $("#UnitType").val(ui.item.ID);
+    },
+    maxShowItems: 5
+}).focus(function () {
+    $(this).autocomplete("search")
+});
+
 
 
 $('input[id="SizeName"]').autocomplete({
@@ -431,27 +428,13 @@ $(document).on('click', '#btnAddColor', function () {
 });
 
 function ShowNewEntryModal(HeaderName, LabelName, EntryType) {
-    $('#addNewHeader').text(HeaderName); // ID ঠিক করুন: addEntryNewHeader -> addNewHeader
-    $('#lblName').text(LabelName);       // ID ঠিক করুন: lblEntryName -> lblName
+    $('#addEntryNewHeader').text(HeaderName);
+    $('#lblEntryName').text(LabelName);
     $('#entryType').val(EntryType);
-    $('#newName').val("");
+    $('#newName').attr('style', 'border:1px solid #c4daf1  !important');
     $('#newEntryModal').modal('show');
 }
 
-function SetupFieldValue(type, data) {
-    if (type == "company") {
-        $('#CompanyId').val(data.data.CompanyID);
-        $('#CompanyName').val(data.data.Name);
-    }
-    else if (type == "category") {
-        $('#CategoryId').val(data.data.CategoryID);
-        $('#CategoryName').val(data.data.Name); // মডেল অনুযায়ী Description বা Name চেক করুন
-    }
-    else if (type == "Sizes") {
-        $('#SizeID').val(data.data.SizeID);
-        $('#SizeName').val(data.data.Name);
-    }
-}
 
 $(document).on('click', '#btnAddCompanyCategory', function (e) {
     var newName = $('#newName').val();
@@ -526,30 +509,34 @@ function AddNewEntity(newName) {
 }
 
 
-//function SetupFieldValue(type, data) {
-//    if (type == "company") {
-//        $('#CompanyId').val(data.data.CompanyID);
-//        $('#CompanyName').val(data.data.Name);
-//    }
-//    else if (type == "category") {
-//        $('#CategoryId').val(data.data.CategoryID);
-//        $('#CategoryName').val(data.data.Description);
-//    }
+function SetupFieldValue(type, data) {
+    if (type == "company") {
+        $('#CompanyId').val(data.data.CompanyID);
+        $('#CompanyName').val(data.data.Name);
+    }
+    else if (type == "category") {
+        $('#CategoryId').val(data.data.CategoryID);
+        $('#CategoryName').val(data.data.Description);
+    }
 
-//    else if (type == "Sizes") {
-//        $('#SizeID').val(data.data.SizeID);
-//        $('#SizeName').val(data.data.Description);
-//    }
+    else if (type == "Sizes") {
+        $('#SizeID').val(data.data.SizeID);
+        $('#SizeName').val(data.data.Description);
+    }
 
-//    else if (type == "godown") {
-//        $('input[id*="_GodownID"]').val(data.data.GodownID);
-//        $('input[id*="_GodownName"]').val(data.data.Name);
-//    }
-//    else if (type == "color") {
-//        $('input[id*="_ColorId"]').val(data.data.ColorID);
-//        $('input[id*="_ColorName"]').val(data.data.Name);
-//    }
-//}
+    else if (type == "godown") {
+        $('input[id*="_GodownID"]').val(data.data.GodownID);
+        $('input[id*="_GodownName"]').val(data.data.Name);
+    }
+    else if (type == "color") {
+        $('input[id*="_ColorId"]').val(data.data.ColorID);
+        $('input[id*="_ColorName"]').val(data.data.Name);
+    }
+}
 
 
+//Add New Product modal show
+$(document).on('click', '#btnAddProduct', function () {
+    $('#newProductAddModal').modal('show');
+});
 

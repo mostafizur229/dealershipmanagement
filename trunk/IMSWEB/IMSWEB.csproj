@@ -13016,6 +13016,8 @@
     <Content Include="Views\Shared\_sideBar.cshtml" />
     <Content Include="Views\Shared\_topBar.cshtml" />
     <Content Include="Views\Shared\BackEdit.cshtml" />
+    <Content Include="Views\Pickers\_ProductPickerNew.cshtml" />
+    <Content Include="Views\Pickers\_SupplierPickerNew.cshtml" />
     <None Include="web.Debug.config">
       <DependentUpon>web.config</DependentUpon>
     </None>

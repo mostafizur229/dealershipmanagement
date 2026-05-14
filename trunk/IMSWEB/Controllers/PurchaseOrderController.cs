@@ -1,15 +1,16 @@
 ﻿using AutoMapper;
 using IMSWEB.Model;
+using IMSWEB.Model.TOs;
 using IMSWEB.Service;
+using log4net;
+using Microsoft.AspNet.Identity;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using System.Web.Mvc;
-using Microsoft.AspNet.Identity;
-using System.Data;
-using System.Text;
-using log4net;
 
 namespace IMSWEB.Controllers
 {
@@ -30,6 +31,14 @@ namespace IMSWEB.Controllers
         IProductService _productService;
         ISisterConcernService _SisterConcern;
         ISystemInformationService _SysInfoService;
+        IUserService _UserService;
+        ICompanyService _companyService;
+        ICategoryService _categoryService;
+        ISizeService _sizeService;
+        IProductUnitTypeService _productUnitTypeService;
+
+
+
         private static readonly ILog log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         public PurchaseOrderController(IErrorService errorService,
@@ -38,7 +47,8 @@ namespace IMSWEB.Controllers
             IStockDetailService stockDetailService, IMiscellaneousService<POrder> miscellaneousService, IMapper mapper,
             IColorService colorService,
             IGodownService godownService,
-            IProductService productService, ISisterConcernService SisService, ISystemInformationService SysInfoService
+            IProductService productService, ISisterConcernService SisService, ISystemInformationService SysInfoService, IUserService UserService, ICompanyService companyService, ICategoryService categoryService,
+        ISizeService sizeService, IProductUnitTypeService productUnitTypeService
             )
             : base(errorService)
         {
@@ -55,6 +65,11 @@ namespace IMSWEB.Controllers
             _productService = productService;
             _SisterConcern = SisService;
             _SysInfoService = SysInfoService;
+            _UserService = UserService;
+            _companyService = companyService;
+            _categoryService = categoryService;
+            _sizeService = sizeService;
+            _productUnitTypeService = productUnitTypeService;
         }
 
         [HttpGet]
@@ -616,6 +631,8 @@ namespace IMSWEB.Controllers
             if (string.IsNullOrEmpty(formCollection["ProductsId"]))
                 ModelState.AddModelError("PODetail.ProductId", "Product is required");
 
+
+
             if (string.IsNullOrEmpty(formCollection["ColorsId"]))
             {
                 //ModelState.AddModelError("PODetail.ColorId", "Grade is required");
@@ -1012,7 +1029,7 @@ namespace IMSWEB.Controllers
                         pOrder = _mapper.Map<CreatePurchaseOrderViewModel, POrder>(purchaseOrder.PurchaseOrder);
                         pOrder.POrderDetails = _mapper.Map<IEnumerable<CreatePurchaseOrderDetailViewModel>, List<POrderDetail>>(purchaseOrder.PODetails);
                         TempData["POInvoiceData"] = pOrder;
-                        TempData["IsInvoiceReady"] = true;                        
+                        TempData["IsInvoiceReady"] = true;
                         TempData["POSSOrderID"] = dbResult.Item2;
                         TempData["IsPOSInvoiceReady"] = true;
                         TempData["IsPOSShow"] = _SysInfoService.GetSystemInformationByConcernId(User.Identity.GetConcernId()).IsPosInvoiceShow > 0 ? true : false;
@@ -1444,6 +1461,8 @@ namespace IMSWEB.Controllers
         private ActionResult ReturnCreateViewWithTempData(bool IsDeliveryOrder)
         {
             ViewBag.IsLabourCostDeduct = _SysInfoService.IsLabourCostDeduct();
+
+
             PurchaseOrderViewModel purchaseOrder = (PurchaseOrderViewModel)TempData.Peek("purchaseOrderViewModel");
             if (purchaseOrder != null)
             {
@@ -2249,5 +2268,74 @@ namespace IMSWEB.Controllers
             TempData["IsPOSShow"] = _SysInfoService.GetSystemInformationByConcernId(User.Identity.GetConcernId()).IsPosInvoiceShow > 0 ? true : false;
             return RedirectToAction("Index");
         }
+
+
+
+
+
+        #region Product Crete Elements
+
+        private List<TOIdNameDDL> GetAllCompaniesForDDL()
+        {
+
+            var Company = _companyService.GetAllCompany();
+            var vmCompany = _mapper.Map<IEnumerable<Company>, IEnumerable<CreateCompanyViewModel>>(Company).Select(s => new TOIdNameDDL
+            {
+                Id = int.Parse(s.Id),
+                Name = s.Name
+            }).ToList();
+            return vmCompany;
+
+        }
+
+
+
+        private List<TOIdNameDDL> GetAllCategoryForDDL()
+        {
+
+            var category = _categoryService.GetAllIQueryable();
+            var vmCategory = _mapper.Map<IEnumerable<Category>, IEnumerable<CreateCategoryViewModel>>(category).Select(s => new TOIdNameDDL
+            {
+                Id = int.Parse(s.Id),
+                Name = s.Name
+            }).ToList();
+            return vmCategory;
+
+        }
+
+
+        private List<TOIdNameDDL> GetAllSizeForDDL()
+        {
+
+            var size = _sizeService.GetAllIQueryable();
+            var vmsize = _mapper.Map<IEnumerable<Size>, IEnumerable<SizeViewModel>>(size).Select(s => new TOIdNameDDL
+            {
+                Id = Convert.ToInt16(s.SizeID),
+                Name = s.Description
+            }).ToList();
+            return vmsize;
+
+        }
+
+
+
+
+        private List<TOIdNameDDL> GetAllUintTypeForDDL()
+        {
+
+            var productUnits = _productUnitTypeService.GetAll();
+            var vmProductUnits = _mapper.Map<IEnumerable<ProductUnitType>, IEnumerable<ProductUnitTypeViewModel>>(productUnits).Select(s => new TOIdNameDDL
+            {
+                Id = Convert.ToInt16(s.ProUnitTypeID),
+                Name = s.Description
+            }).ToList();
+            return vmProductUnits;
+
+        }
+
+
+
+
+        #endregion
     }
 }

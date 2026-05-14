@@ -43,7 +43,7 @@ namespace IMSWEB.Controllers
         {
             try
             {
-                var query = _productService.GetAllProductIQueryable(); 
+                var query = _productService.GetAllProductIQueryable();
                 query = query.Where(p => p.Quantity > 0);
                 if (!string.IsNullOrEmpty(search))
                 {
@@ -64,7 +64,7 @@ namespace IMSWEB.Controllers
                     .Take(pageSize)
                     .ToList();
 
-                
+
                 return Json(new
                 {
                     recordsTotal = totalRecords,
@@ -78,6 +78,41 @@ namespace IMSWEB.Controllers
             }
         }
 
+
+
+
+        [HttpGet]
+        public JsonResult GetPOProducts(string search, int page = 1, int pageSize = 6)
+        {
+            try
+            {
+                var query = _productService.GetAllProductIQueryable();
+
+                if (!string.IsNullOrEmpty(search))
+                {
+                    query = query.Where(p => p.ProductName.Contains(search) || p.ProductCode.Contains(search));
+                }
+
+                int totalRecords = query.Count();
+                int skip = (page - 1) * pageSize;
+
+                var products = query
+                    .OrderBy(p => p.ProductName)
+                    .Skip(skip)
+                    .Take(pageSize)
+                    .ToList();
+
+                return Json(new
+                {
+                    recordsTotal = totalRecords,
+                    data = products
+                }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new { error = "Error: " + ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+        }
 
 
 
@@ -179,7 +214,7 @@ namespace IMSWEB.Controllers
             {
                 //string code = CheakAndIncrement(_miscellaneousService.GetUniqueKey(x => int.Parse(x.Code)));
                 var unitType = _ProductUnitTypeService.GetAll().FirstOrDefault();
-                return View(PopulateDropdown(new CreateProductViewModel {UnitType = (unitType == null ? 0 : unitType.ProUnitTypeID), ProductType = EnumProductType.NoBarcode }));
+                return View(PopulateDropdown(new CreateProductViewModel { UnitType = (unitType == null ? 0 : unitType.ProUnitTypeID), ProductType = EnumProductType.NoBarcode }));
             }
 
             if (newProduct != null)
@@ -254,7 +289,7 @@ namespace IMSWEB.Controllers
             return View("Create", PopulateDropdown(vmodel));
         }
 
-        
+
         [HttpPost]
         [Authorize]
         [Route("edit/returnUrl")]
@@ -272,7 +307,7 @@ namespace IMSWEB.Controllers
             {
                 Product DuplicateProduct = null;
                 int ProductID = Convert.ToInt32(newProduct.ProductId);
-                
+
                 if (formCollection["CategoryName"].ToLower().Equals("tiles"))
                     DuplicateProduct = _miscellaneousService.GetDuplicateEntry(p => p.ProductName == newProduct.ProductName && p.SizeID == newProduct.SizeID && p.CompanyID == newProduct.CompanyId && p.IDCode.Equals(newProduct.IDCode) && p.ProductID != ProductID);
                 else
@@ -314,7 +349,7 @@ namespace IMSWEB.Controllers
                 existingProduct.LimitedStkQty = newProduct.LimitedStkQty;
                 existingProduct.CompanyID = Convert.ToInt32(newProduct.CompanyId);
                 existingProduct.CategoryID = Convert.ToInt32(newProduct.CategoryId);
-            
+
                 if (newProduct.UnitType != existingProduct.ProUnitTypeID)
                 {
                     if (Result)
@@ -356,6 +391,7 @@ namespace IMSWEB.Controllers
 
         private void CheckAndAddModelError(CreateProductViewModel newProduct, FormCollection formCollection)
         {
+
             if (string.IsNullOrEmpty(formCollection["CompanyId"]))
                 ModelState.AddModelError("CompanyId", "Company is required");
             else
@@ -501,7 +537,18 @@ namespace IMSWEB.Controllers
         public JsonResult AddProduct(CreateProductViewModel newProduct, FormCollection formCollection)
         {
             newProduct.Code = _miscellaneousService.GetUniqueKey(x => int.Parse(x.Code));
+
             CheckAndAddModelError(newProduct, formCollection);
+
+            if (newProduct.Code != null)
+            {
+                if (ModelState.ContainsKey("Code"))
+                {
+                    ModelState.Remove("Code");
+                }
+            }
+
+
             if (!ModelState.IsValid)
                 return Json(new { result = false, msg = "Product save failed." }, JsonRequestBehavior.AllowGet);
             var existingProduct = _miscellaneousService.GetDuplicateEntry(p => p.ProductName == newProduct.ProductName);
