@@ -562,17 +562,38 @@ namespace IMSWEB.Controllers
             _productService.AddProduct(product);
             _productService.SaveProduct();
 
+            var productInfo = _productService.GetAllProductIQueryableById(product.ProductID).FirstOrDefault();
             //AddConcernsProducts(newProduct);
+            //var vmProduct = new
+            //{
+            //    ProductID = product.ProductID,
+            //    Code = product.Code,
+            //    ProductType = product.ProductType,
+            //    ProductName = product.ProductName,
+            //    MRP = product.MRP,
+            //    RP = product.RP,
+
+            //};
+
             var vmProduct = new
             {
-                ProductID = product.ProductID,
-                Code = product.Code,
-                ProductType = product.ProductType,
-                ProductName = product.ProductName,
-                MRP = product.MRP,
-                RP = product.RP
+                ProductID = productInfo.ProductID,
+                Code = newProduct.Code,
+                ProductCode = newProduct.Code,
+                ProductType = productInfo.ProductType,
+                ProductName = productInfo.ProductName,
+                MRP = productInfo.MRP,
+                RP = productInfo.RP,
+                CompanyName = productInfo.CompanyName,
+                CategoryName = productInfo.CategoryName,
+                SizeName = productInfo.SizeName,
+                ConvertValue = productInfo.ConvertValue > 0 ? productInfo.ConvertValue : 1,
+                ParentUnitName = productInfo.ParentUnitName,
+                ChildUnitName = productInfo.ChildUnitName,
+                ParentQuantity = 0,
+                ChildQuantity = 0
             };
-            return Json(new { result = true, msg = "Save successfull", data = vmProduct }, JsonRequestBehavior.AllowGet);
+            return Json(new { result = true, msg = "Save successfull", data = productInfo }, JsonRequestBehavior.AllowGet);
         }
 
     }

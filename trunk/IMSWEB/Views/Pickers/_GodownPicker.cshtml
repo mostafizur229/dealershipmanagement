@@ -1,100 +1,266 @@
 ﻿@model dynamic
-<div class="input-group">
-    <input type="text" class="input-sm form-control input-sm" id="GodownsCode" name="GodownsCode" value="@ViewBag.GodownsCode" readonly="readonly">
-    <span class="input-group-btn">
-        <button type="button" class="btn btn-sm btn-info" data-toggle="modal" data-target="#GodownsModal"><i class="fa fa-plus-circle" aria-hidden="true"></i>&nbsp;Pick</button>
-    </span>
-    <input type="text" class="input-sm form-control input-sm" id="GodownsName" name="GodownsName" value="@ViewBag.GodownsName" readonly="readonly">
-    <input type="hidden" class="input-sm form-control input-sm" id="GodownsId" name="GodownsId" value="@ViewBag.GodownsId" readonly="readonly">
-</div>
 
-<!-- Modal -->
-<div class="modal fade bs-example-modal-lg" id="GodownsModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-    <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h5 class="modal-title" id="myModalLabel">Existing Godowns</h5>
-            </div>
-            <div class="modal-body">
-                <div id="Godownstoolbar">
-                    @Html.ActionLink("Create new", "Create", "Godown", routeValues: null, htmlAttributes: new { @class = "btn btn-primary btn-sm", target = "_blank" })
-                    <span class="text-warning">&nbsp;(Requires reload current page to get new item)</span>
-                </div>
-                <table id="GodownsTable"
-                       data-toolbar="#Godownstoolbar"
-                       data-toggle="table"
-                       data-search="true"
-                       data-click-to-select="true"
-                       data-single-select="true"
-                       data-detail-view="true"
-                       data-pagination="true"
-                       data-id-field="name"
-                       data-page-list="[10, 25, 50, 100, ALL]"
-                       data-page-size="6"
-                       class="table table-responsive table-bordered table-striped" cellspacing="0" width="100%">
-                    <thead>
-                        <tr>
-                            <th data-field="id" class="hidden">
-                            </th>
-                            <th data-checkbox="true">
-                            </th>
-                            <th>
-                                Sl
-                            </th>
-                            <th data-field="code"
-                                data-sortable="true">
-                                Code
-                            </th>
-                            <th data-field="name"
-                                data-sorter="sorter"
-                                data-sortable="true">
-                                Name
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @{
-                            int count = 1;
-                            foreach (var item in Model)
-                            {
-                                <tr>
-                                    <td class="hidden">
-                                        @item.Id
-                                    </td>
-                                    <td></td>
-                                    <td>
-                                        @count
-                                    </td>
-                                    <td>
-                                        @item.Code
-                                    </td>
-                                    <td>
-                                        @item.Name
-                                    </td>
-                                </tr>
-                                count++;
-                            }
-                        }
-                    </tbody>
-                </table>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-sm btn-primary" data-dismiss="modal">Close</button>
-            </div>
+<style>
+    /* Modern Godown Picker Styles for New Theme */
+    .dropdown-wrapper {
+        position: relative;
+        width: 100%;
+        font-family: 'Inter', 'Segoe UI', sans-serif;
+    }
+
+    .custom-dropdown {
+        padding: 6px 12px;
+        border: 1px solid #ced4da;
+        background: #fff;
+        cursor: pointer;
+        border-radius: 4px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        height: 38px; /* Theme input height */
+        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    }
+
+        .custom-dropdown:hover {
+            border-color: #6278fe;
+        }
+
+        .custom-dropdown span {
+            font-size: 13px;
+            color: #495057;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+    .dropdown-list {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 0 0 8px 8px;
+        max-height: 400px;
+        z-index: 1060;
+        display: none;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        margin-top: 2px;
+    }
+
+    .search-box {
+        padding: 10px;
+        background: #f8f9fa;
+        border-bottom: 1px solid #eee;
+    }
+
+        .search-box input {
+            width: 100%;
+            height: 35px;
+            padding: 5px 15px;
+            border: 1px solid #ced4da;
+            border-radius: 20px;
+            font-size: 13px;
+            outline: none;
+        }
+
+            .search-box input:focus {
+                border-color: #6278fe;
+                box-shadow: 0 0 0 0.2rem rgba(98, 120, 254, 0.25);
+            }
+
+    #godownDropdownItems {
+        max-height: 300px;
+        overflow-y: auto;
+    }
+
+    /* Godown Item Layout Matching Product Picker Layout */
+    .dropdown-item-custom {
+        padding: 12px 15px;
+        border-bottom: 1px solid #f8f9fa;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+
+        .dropdown-item-custom:hover {
+            background: #f0f4ff;
+        }
+
+    .godown-title-row {
+        font-size: 14px;
+        font-weight: 700;
+        color: #2c3e50;
+        margin-bottom: 4px;
+        display: block;
+    }
+
+    .godown-meta-row {
+        font-size: 11px;
+        color: #7f8c8d;
+    }
+
+    .godown-code-badge {
+        background: #ebf5fb;
+        color: #2980b9;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-weight: 600;
+        font-size: 11px;
+        border: 1px solid #bcdff5;
+    }
+
+    #godownDropdownItems::-webkit-scrollbar {
+        width: 5px;
+    }
+
+    #godownDropdownItems::-webkit-scrollbar-thumb {
+        background: #ced4da;
+        border-radius: 10px;
+    }
+</style>
+
+@{
+    string currentGodownLabel = "Click to select Godown / Warehouse";
+    if (ViewBag.GodownsName != null)
+    {
+        currentGodownLabel = string.Format("{0} ({1})", ViewBag.GodownsName, ViewBag.GodownsCode);
+    }
+}
+
+<!-- Hidden Fields for Form Post/Data Binding -->
+<input type="hidden" id="GodownsId" name="GodownsId" value="@ViewBag.GodownsId" />
+<input type="hidden" id="GodownsCode" name="GodownsCode" value="@ViewBag.GodownsCode" />
+<input type="hidden" id="GodownsName" name="GodownsName" value="@ViewBag.GodownsName" />
+
+<!-- Modern Custom UI Component -->
+<div class="dropdown-wrapper">
+    <div id="godownDropdownTrigger" class="custom-dropdown shadow-sm">
+        <span id="godownDropdownLabel">@currentGodownLabel</span>
+        <i class="mdi mdi-chevron-down font-size-18 text-muted"></i>
+    </div>
+    <div id="godownDropdownList" class="dropdown-list">
+        <div class="search-box">
+            <input type="text" id="godownSearchInput" placeholder="Search by godown name or code..." autocomplete="off" />
         </div>
+        <div id="godownDropdownItems"></div>
     </div>
 </div>
-<script>
-    var $table = $('#GodownsTable');
-    $table.on('check.bs.table', function (e, row) {
-        $('#GodownsCode').val($.trim(row.code));
-        $('#GodownsName').val($.trim(row.name));
-        $('#GodownsId').val($.trim(row.id));
-    });
-    $table.on('uncheck.bs.table', function (e, row) {
-        $('#GodownsCode').val('');
-        $('#GodownsName').val('');
-        $('#GodownsId').val('');
-    });
+
+<script type="text/javascript">
+    (function () {
+        // Elements Selection
+        const trigger = document.getElementById('godownDropdownTrigger');
+        const list = document.getElementById('godownDropdownList');
+        const itemsContainer = document.getElementById('godownDropdownItems');
+        const label = document.getElementById('godownDropdownLabel');
+        const searchInput = document.getElementById('godownSearchInput');
+
+        let page = 1;
+        const pageSize = 10;
+        let loading = false;
+        let hasMore = true;
+        let searchTerm = '';
+
+        // Open/Close Dropdown Logic
+        trigger.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const isVisible = list.style.display === 'block';
+            list.style.display = isVisible ? 'none' : 'block';
+            if (!isVisible) {
+                searchInput.focus();
+                if (itemsContainer.children.length === 0) loadGodowns(true);
+            }
+        });
+
+        // Search Input Functionality
+        searchInput.addEventListener('input', () => {
+            searchTerm = searchInput.value.trim();
+            page = 1;
+            hasMore = true;
+            loadGodowns(true);
+        });
+
+        // Infinite Scroll Handler
+        itemsContainer.addEventListener('scroll', () => {
+            if (itemsContainer.scrollTop + itemsContainer.clientHeight >= itemsContainer.scrollHeight - 15) {
+                if (!loading && hasMore) {
+                    page++;
+                    loadGodowns();
+                }
+            }
+        });
+
+        // Fetch Godowns Data from Backend API
+        async function loadGodowns(reset = false) {
+            if (loading) return;
+            loading = true;
+
+            try {             
+                const response = await fetch(`/Godown/GetGodowns?search=${encodeURIComponent(searchTerm)}&page=${page}&pageSize=${pageSize}`);
+                const result = await response.json();
+
+                if (reset) itemsContainer.innerHTML = '';
+
+                if (result.data && result.data.length > 0) {
+                    result.data.forEach(g => {
+                        const div = document.createElement('div');
+                        div.className = 'dropdown-item-custom';
+
+                        // Extracting safely properties (Handles lowercase and uppercase camel cases)
+                        const gName = g.GodownName || g.Name || g.name || '';
+                        const gCode = g.GodownCode || g.Code || g.code || '';
+
+                        // Render Item Structure matching Screenshot_13 design template
+                        div.innerHTML = `
+                            <div class="godown-title-row text-uppercase">${gName}</div>
+                            <div class="godown-meta-row">
+                                Code: <span class="godown-code-badge">${gCode}</span>
+                            </div>
+                        `;
+
+                        // Item Click Event
+                        div.addEventListener('click', () => {
+                            selectGodown(g);
+                            list.style.display = 'none';
+                        });
+                        itemsContainer.appendChild(div);
+                    });
+
+                    // Check if more records exist
+                    hasMore = (page * pageSize) < result.recordsTotal;
+                } else if (reset) {
+                    itemsContainer.innerHTML = '<div class="p-4 text-center text-muted">No godowns found</div>';
+                }
+            } catch (err) {
+                console.error("Godown Fetching Error:", err);
+            } finally {
+                loading = false;
+            }
+        }
+
+        // Handle Selected Godown Object Data to View Elements
+        function selectGodown(g) {
+            const id = g.GodownID || g.Id || g.id;
+            const code = g.GodownCode || g.Code || g.code || '';
+            const name = g.GodownName || g.Name || g.name || '';
+
+            // 1. Assign Data To Hidden Inputs
+            document.getElementById('GodownsId').value = id;
+            document.getElementById('GodownsCode').value = code;
+            document.getElementById('GodownsName').value = name;
+
+            // 2. Change Trigger Display Label Text
+            label.textContent = `${name} (${code})`;
+
+            // 3. Fallback jQuery Event Trigger for Master-Detail calculations if needed
+            if (window.jQuery) {
+                window.jQuery('#GodownsId').trigger('change');
+            }
+        }
+
+        // Close Dropdown when Clicking Outside the wrapper element
+        document.addEventListener('click', e => {
+            if (!e.target.closest('.dropdown-wrapper')) list.style.display = 'none';
+        });
+    })();
 </script>

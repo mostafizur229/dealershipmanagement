@@ -1,4 +1,13 @@
-﻿<style>
+﻿@using IMSWEB.Model
+@model PurchaseOrderViewModel
+
+@{
+    string actionName = ViewContext.RouteData.Values["action"].ToString();
+    ViewBag.Title = actionName + " Purchase Order";
+}
+
+<style>
+    /* Professional Layout Adjustments */
     .col-md-4 {
         padding-right: 0px !important;
     }
@@ -6,10 +15,22 @@
     .col-md-8 {
         padding-left: 0px !important;
     }
-</style>
 
-<style>
-    /* Wrapper jate form-control er moto dekhay */
+    .form-horizontal .control-label {
+        text-align: left;
+        font-weight: bold;
+    }
+
+    .fix-width-picker {
+        padding-right: 5px !important;
+    }
+
+    .btn-action-align {
+        padding-left: 5px !important;
+        margin-top: 2px;
+    }
+
+    /* Custom Dropdown Wrapper */
     .dropdown-wrapper {
         position: relative;
         width: 100%;
@@ -21,7 +42,7 @@
         border: 1px solid #ccc;
         border-radius: 4px;
         padding: 6px 12px;
-        height: 34px; /* Bootstrap 3 default input height */
+        height: 34px;
         cursor: pointer;
         display: flex;
         justify-content: space-between;
@@ -33,12 +54,12 @@
             border-color: #66afe9;
         }
 
-    /* Dropdown List jate overlap na kore niche thake */
+    /* Dropdown List Management */
     .dropdown-list {
         position: absolute;
         top: 100%;
         left: 0;
-        z-index: 2000; /* Z-index bariye dewa hoyeche jate overlap na kore */
+        z-index: 2000;
         display: none;
         float: left;
         min-width: 100%;
@@ -67,7 +88,7 @@
             width: 100%;
         }
 
-    #dropdownItems {
+    #dropdownItems, #productDropdownItems {
         max-height: 200px;
         overflow-y: auto;
     }
@@ -82,860 +103,12 @@
             background-color: #f5f5f5;
         }
 
-    /* Icon thik rakhar jonno */
     .dropdown-trigger-icon {
         color: #555;
         font-size: 12px;
     }
-</style>
-@using IMSWEB.Model
-@model PurchaseOrderViewModel
 
-@{
-    string actionName = ViewContext.RouteData.Values["action"].ToString();
-    ViewBag.Title = actionName + " Purchase Order";
-}
-@*<h4 class="inline-header">@(ViewBag.Title + ".")</h4>*@
-<hr />
-@using (Html.BeginForm(actionName, "PurchaseOrder", new { ReturnUrl = ViewBag.ReturnUrl, IsDO = false }, FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
-{
-    @Html.AntiForgeryToken()
-    @Html.HiddenFor(m => m.PODetail.GodownID);
-    @Html.HiddenFor(m => m.PODetail.ColorId);
-    @Html.HiddenFor(m => m.PODetail.PPOffer);
-    @Html.HiddenFor(m => m.PurchaseOrder.IsDamagePO)
-
-
-    <div class="row">
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header bg-transparent border-bottom">
-                    <h5 class="header-title mb-0"><i class="mdi mdi-cart-plus mr-2 text-primary"></i>Purchase Order Entry</h5>
-                </div>
-                <div class="card-body">
-                    <!-- Supplier Section -->
-                    <div class="form-group row mb-3">
-                        @Html.LabelFor(m => m.PurchaseOrder.SupplierId, new { @class = "col-md-3 col-form-label font-weight-bold" })
-                        <div class="col-md-6">
-                            <div class="full-width-picker shadow-sm rounded">
-                                @{Html.RenderAction("RenderPicker", "Picker", new { pickerType = PickerType.SupplierNew, id = (Model != null && !string.IsNullOrEmpty(Model.PurchaseOrder.SupplierId)) ? Model.PurchaseOrder.SupplierId : "0" });}
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <button type="button" class="btn btn-primary btn-sm btn-block h-100" data-toggle="modal" data-target="#SuppliersModal">
-                                <i class="mdi mdi-plus-circle mr-1"></i> Add Supplier
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Product Section -->
-                    <div class="form-group row mb-4">
-                        @Html.LabelFor(m => m.PODetail.ProductId, new { @class = "col-md-3 col-form-label font-weight-bold" })
-                        <div class="col-md-6">
-                            <div class="full-width-picker shadow-sm rounded">
-                                @{Html.RenderAction("RenderPicker", "Picker", new { pickerType = PickerType.ProductNew, id = (Model != null && !string.IsNullOrEmpty(Model.PODetail.ProductId)) ? Model.PODetail.ProductId : "0" });}
-                            </div>
-                            @Html.ValidationMessageFor(m => m.PODetail.ProductId, "", new { @class = "text-danger small" })
-                        </div>
-                        <div class="col-md-3">
-                            <button id="btnAddProduct" type="button" class="btn btn-info btn-sm btn-block h-100 text-white">
-                                <i class="mdi mdi-package-variant-plus mr-1"></i> Add Product
-                            </button>
-                        </div>
-                    </div>
-
-                    <hr class="my-4" />
-
-                    <!-- Quantity & Rate Section -->
-                    <div class="row">
-                        <div class="col-md-6 border-right">
-                            <div class="form-group mb-3">
-                                @Html.LabelFor(m => m.PODetail.ParentQuantity, new { @class = "small font-weight-bold text-muted", id = "lblParentUnit" })
-                                @Html.EditorFor(m => m.PODetail.ParentQuantity, new { htmlAttributes = new { @class = "form-control form-control-sm text-right", type = "number", step = "0.01", tabindex = 1, placeholder = "0.00" } })
-                                @Html.ValidationMessageFor(m => m.PODetail.ParentQuantity, "", new { @class = "text-danger small" })
-                            </div>
-
-                            <div id="divChildQuantity" style="display:none" class="form-group mb-3">
-                                @Html.LabelFor(m => m.PODetail.ChildQuantity, new { @class = "small font-weight-bold text-muted", id = "lblChildUnit" })
-                                @Html.EditorFor(m => m.PODetail.ChildQuantity, new { htmlAttributes = new { @class = "form-control form-control-sm text-right", type = "number", step = "0.01", tabindex = 1, placeholder = "0.00" } })
-                                @Html.ValidationMessageFor(m => m.PODetail.ChildQuantity, "", new { @class = "text-danger small" })
-                            </div>
-
-                            <div class="form-group mb-3">
-                                @Html.LabelFor(m => m.PODetail.MRPRateParent, new { @class = "small font-weight-bold text-muted", id = "lblMRPParent" })
-                                @Html.EditorFor(m => m.PODetail.MRPRateParent, new { htmlAttributes = new { @class = "form-control form-control-sm text-right", type = "number", step = "0.01", tabindex = 2, placeholder = "0.00" } })
-                                @Html.ValidationMessageFor(m => m.PODetail.MRPRateParent, "", new { @class = "text-danger small" })
-                            </div>
-
-                            <div style="display:none">
-                                <div class="form-group" id="divUnitPrice">
-                                    @Html.LabelFor(m => m.PODetail.MRPRate, new { @class = "small font-weight-bold", id = "lblMRP" })
-                                    @Html.EditorFor(m => m.PODetail.MRPRate, new { htmlAttributes = new { @class = "form-control form-control-sm text-right", type = "number", step = "0.01" } })
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-md-6">
-                            <div class="form-group mb-3">
-                                @Html.LabelFor(m => m.PODetail.SalesRate, new { @class = "small font-weight-bold text-muted" })
-                                @Html.EditorFor(m => m.PODetail.SalesRate, new { htmlAttributes = new { @class = "form-control form-control-sm text-right", type = "number", step = "0.01", tabindex = 6, placeholder = "0.00" } })
-                                @Html.ValidationMessageFor(m => m.PODetail.SalesRate, "", new { @class = "text-danger small" })
-                            </div>
-
-                            <div class="form-group mb-4">
-                                @Html.LabelFor(m => m.PODetail.TAmount, new { @class = "small font-weight-bold text-primary" })
-                                @Html.EditorFor(m => m.PODetail.TAmount, new { htmlAttributes = new { @class = "form-control form-control-sm text-right bg-light font-weight-bold", type = "number", step = "0.01", @readonly = "readonly" } })
-                            </div>
-
-                            <!-- Hidden Fields Managed by Script -->
-                            <div style="display:none">
-                                @Html.EditorFor(m => m.PODetail.UnitType)
-                                @Html.EditorFor(m => m.PODetail.TempChildUnitType)
-                                @Html.EditorFor(m => m.PODetail.Quantity)
-                                @Html.EditorFor(m => m.PODetail.SizeName)
-                            </div>
-
-                            <div class="text-right pt-2">
-                                <button type="submit" name="addButton" value="Add to order" class="btn btn-success btn-sm px-4 shadow">
-                                    <i class="mdi mdi-plus-box mr-1"></i> Add to List
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-
-        <!-- Summary & Order Info Section -->
-        <div class="col-md-6">
-            <div class="card shadow-sm border-0">
-                <div class="card-header bg-soft-primary border-bottom-0">
-                    <h5 class="header-title mb-0 font-size-14 text-primary">
-                        <i class="mdi mdi-information-outline mr-1"></i> Order Information
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-6 border-right">
-                            <div class="form-group mb-2">
-                                @Html.LabelFor(m => m.PurchaseOrder.CurrentDue, new { @class = "small font-weight-bold text-muted mb-1" })
-                                @Html.EditorFor(m => m.PurchaseOrder.CurrentDue, new { htmlAttributes = new { @class = "form-control form-control-sm text-right bg-soft-danger font-weight-bold text-danger", @readonly = "readonly" } })
-                            </div>
-
-                            <div class="form-group mb-2">
-                                @Html.LabelFor(m => m.PODetail.UnitPrice, new { @class = "small font-weight-bold text-muted mb-1" })
-                                @Html.HiddenFor(m => m.PODetail.UnitPrice)
-                                <input type="number" name="tmpUnitPrice" id="tmpUnitPrice" class="form-control form-control-sm text-right bg-light" readonly />
-                            </div>
-
-                            <div class="form-group mb-0">
-                                @Html.LabelFor(m => m.PurchaseOrder.GrandTotal, new { @class = "small font-weight-bold text-muted mb-1" })
-                                @Html.EditorFor(m => m.PurchaseOrder.GrandTotal, new { htmlAttributes = new { @class = "form-control form-control-sm text-right font-weight-bold bg-soft-primary text-primary", @readonly = "readonly" } })
-                            </div>
-                        </div>
-
-                        <div class="col-md-6">
-                            <div class="form-group mb-2">
-                                @Html.LabelFor(m => m.PurchaseOrder.ChallanNo, new { @class = "small font-weight-bold text-muted mb-1" })
-                                @Html.EditorFor(m => m.PurchaseOrder.ChallanNo, new { htmlAttributes = new { @class = "form-control form-control-sm", placeholder = "Enter Challan No" } })
-                                @Html.ValidationMessageFor(m => m.PurchaseOrder.ChallanNo, "", new { @class = "text-danger small" })
-                            </div>
-
-                            <div class="form-group mb-2">
-                                @Html.LabelFor(m => m.PurchaseOrder.OrderDate, new { @class = "small font-weight-bold text-muted mb-1" })
-                                <div class="input-group input-group-sm date-picker" id="OrderDateContainer">
-                                    <input type='text' class="form-control" name='PurchaseOrder.OrderDate' id="OrderDate" /> <!-- id এবং name ঠিক করুন -->
-                                    <div class="input-group-append">
-                                        <span class="input-group-text"><i class="mdi mdi-calendar-month"></i></span>
-                                    </div>
-                                </div>
-                                @Html.ValidationMessageFor(m => m.PurchaseOrder.OrderDate, "", new { @class = "text-danger small" })
-                            </div>
-
-                            <div class="form-group mb-0">
-                                @Html.LabelFor(m => m.PurchaseOrder.TotalAmount, new { @class = "small font-weight-bold text-muted mb-1" })
-                                @Html.EditorFor(m => m.PurchaseOrder.TotalAmount, new { htmlAttributes = new { @class = "form-control form-control-sm text-right bg-light font-weight-bold", @readonly = "readonly" } })
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-
-            <div class="card shadow-sm border-0">
-                <div class="card-header bg-soft-info border-bottom-0">
-                    <h5 class="header-title mb-0 font-size-14 text-info">
-                        <i class="mdi mdi-warehouse mr-1"></i> Storage & Area
-                    </h5>
-                </div>
-
-                <!-- Warehouse & Additional Info Section -->
-                <div class="card-body">
-                    <div class="form-group mb-3">
-                        @Html.LabelFor(m => m.PODetail.GodownID, new { @class = "small font-weight-bold text-muted mb-1" })
-                        <div class="shadow-sm rounded">
-                            @{Html.RenderAction("RenderPicker", "Picker", new { pickerType = PickerType.Godown, id = (Model != null && !string.IsNullOrEmpty(Model.PODetail.GodownID)) ? Model.PODetail.GodownID : "0" });}
-                        </div>
-                        @Html.ValidationMessageFor(m => m.PODetail.GodownID, "", new { @class = "text-danger small" })
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-6" id="RatePerAreadiv" style="display:none">
-                            <div class="form-group mb-2">
-                                @Html.LabelFor(m => m.PODetail.RatePerArea, new { @class = "small font-weight-bold text-muted mb-1" })
-                                @Html.EditorFor(m => m.PODetail.RatePerArea, new { htmlAttributes = new { @class = "form-control form-control-sm text-right", type = "number", step = "0.01", tabindex = 2 } })
-                            </div>
-                        </div>
-
-                        <div class="col-md-6" id="divUnitPrice" style="display:none">
-                            <div class="form-group mb-2">
-                                @Html.LabelFor(m => m.PODetail.MRPRate, new { @class = "small font-weight-bold text-muted mb-1", id = "lblMRP" })
-                                @Html.EditorFor(m => m.PODetail.MRPRate, new { htmlAttributes = new { @class = "form-control form-control-sm text-right", type = "number", step = "0.01", tabindex = 2 } })
-                            </div>
-                        </div>
-
-                        <div class="col-md-6" id="TotalAreadiv" style="display:none">
-                            <div class="form-group mb-2">
-                                @Html.LabelFor(m => m.PODetail.TotalArea, new { @class = "small font-weight-bold text-muted mb-1" })
-                                @Html.EditorFor(m => m.PODetail.TotalArea, new { htmlAttributes = new { @class = "form-control form-control-sm text-right bg-light", type = "number", step = "0.01", @readonly = "readonly" } })
-                            </div>
-                        </div>
-
-                        <div class="col-md-6">
-                            <div class="form-group mb-2" style="display:none">
-                                @Html.LabelFor(m => m.PODetail.ConvertValue, new { @class = "small font-weight-bold text-muted mb-1", id = "lblConvertValue" })
-                                @Html.EditorFor(m => m.PODetail.ConvertValue, new { htmlAttributes = new { @class = "form-control form-control-sm text-right", @readonly = "readonly" } })
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Category Hidden Field -->
-                    <div style="display: none">
-                        @Html.LabelFor(m => m.PODetail.Category, new { @class = "control-label", id = "lblSize" })
-                        @Html.EditorFor(m => m.PODetail.Category, new { htmlAttributes = new { @class = "form-control text-right", @readonly = "readonly" } })
-                    </div>
-
-                    <div class="alert bg-soft-info border-0 mb-0 mt-2 p-2">
-                        <p class="mb-0 small text-info"><i class="mdi mdi-alert-circle-outline mr-1"></i> Additional details are automatically calculated based on selection.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-
-
-    </div>
-
-
-
-
-
-
-    <div class="row">
-        <!-- Left Column: Item List Table -->
-        <div class="col-xl-7">
-            <div class="card shadow-sm border-0">
-                <div class="card-header bg-transparent border-bottom">
-                    <h5 class="header-title mb-0">
-                        <i class="mdi mdi-format-list-bulleted mr-1 text-primary"></i> Order Items
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table id="productTable"
-                               data-toggle="table"
-                               data-height="300"
-                               class="table table-centered table-nowrap mb-0 table-hover table-bordered">
-                            <thead class="thead-light">
-                                <tr>
-                                    <th style="width: 50px;">Sl</th>
-                                    <th>@Html.DisplayNameFor(model => model.PODetail.ProductName)</th>
-                                    <th>@Html.DisplayNameFor(model => model.PODetail.Category)</th>
-                                    <th>Unit</th>
-                                    <th>Size</th>
-                                    <th class="text-right">Qty</th>
-                                    <th class="text-right">Rate</th>
-                                    <th class="text-right">Total</th>
-                                    <th class="text-center">Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @{
-                                    int c = 1;
-                                    foreach (var item in Model.PODetails)
-                                    {
-                                        if (item.Status == EnumStatus.Updated || item.Status == EnumStatus.Deleted) { continue; }
-                                        var qty = Math.Round((Convert.ToDecimal(item.Quantity) / Convert.ToDecimal(item.ConvertValue)), 2);
-                                        var unitPrice = Math.Round((Convert.ToDecimal(item.UnitPrice) * Convert.ToDecimal(item.ConvertValue)), 2);
-
-                                        <tr>
-                                            <td>@c</td>
-                                            <td class="font-weight-bold">@item.ProductName</td>
-                                            <td><span class="badge badge-soft-info">@item.Category</span></td>
-                                            <td>@item.UnitType</td>
-                                            <td>@item.SizeName</td>
-                                            <td class="text-right">@qty</td>
-                                            <td class="text-right">@unitPrice</td>
-                                            <td class="text-right font-weight-bold text-primary">@item.TAmount</td>
-                                            <td class="text-center">
-                                                <div class="btn-group">
-                                                    <a href="@Url.Action("EditFromView", "PurchaseOrder", new { id = item.ProductId, cid = item.ColorId, previousAction = actionName.ToLower(), IsDO = false })" class="btn btn-outline-info btn-sm">
-                                                        <i class="mdi mdi-pencil"></i>
-                                                    </a>
-                                                    <a href="@Url.Action("DeleteFromView", "PurchaseOrder", new { id = item.ProductId, cid = item.ColorId, previousAction = actionName.ToLower(), IsDO = false })" class="btn btn-outline-danger btn-sm" onclick="return confirm('Do you want to delete this item?');">
-                                                        <i class="mdi mdi-trash-can"></i>
-                                                    </a>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        c++;
-                                    }
-                                }
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Right Column: Calculation Summary -->
-        <div class="col-xl-5">
-            <div class="card shadow-sm border-0">
-                <div class="card-header bg-soft-primary border-bottom-0">
-                    <h5 class="header-title mb-0 text-primary">
-                        <i class="mdi mdi-calculator mr-1"></i> Payment Summary
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-6 border-right">
-                            <div class="form-group mb-2 totalDiscountPercentage">
-                                @Html.LabelFor(m => m.PurchaseOrder.TotalDiscountPercentage, new { @class = "small font-weight-bold text-muted mb-1" })
-                                @Html.EditorFor(m => m.PurchaseOrder.TotalDiscountPercentage, new { htmlAttributes = new { @class = "form-control form-control-sm text-right", type = "number", step = "0.01" } })
-                                @Html.HiddenFor(m => m.PurchaseOrder.PPDiscountAmount)
-                            </div>
-
-                            <div class="form-group mb-2 totalDiscountAmount">
-                                @Html.LabelFor(m => m.PurchaseOrder.TotalDiscountAmount, new { @class = "small font-weight-bold text-muted mb-1" })
-                                @Html.EditorFor(m => m.PurchaseOrder.TotalDiscountAmount, new { htmlAttributes = new { @class = "form-control form-control-sm text-right", type = "number", step = "0.01" } })
-                                @Html.HiddenFor(m => m.PurchaseOrder.tempFlatDiscountAmount)
-                            </div>
-
-                            <div class="form-group mb-2">
-                                @Html.LabelFor(m => m.PurchaseOrder.RecieveAmount, new { @class = "small font-weight-bold text-success mb-1" })
-                                @Html.EditorFor(m => m.PurchaseOrder.RecieveAmount, new { htmlAttributes = new { @class = "form-control form-control-sm text-right border-success", type = "number", step = "0.01" } })
-                            </div>
-
-                            <div class="form-group mb-0 remarks">
-                                @Html.LabelFor(m => m.PurchaseOrder.Remarks, new { @class = "small font-weight-bold text-muted mb-1" })
-                                @Html.EditorFor(m => m.PurchaseOrder.Remarks, new { htmlAttributes = new { @class = "form-control form-control-sm", placeholder = "Notes..." } })
-                            </div>
-                        </div>
-
-                        <div class="col-md-6">
-                            <div class="form-group mb-2 adjAmount">
-                                @Html.LabelFor(m => m.PurchaseOrder.AdjAmount, new { @class = "small font-weight-bold text-muted mb-1" })
-                                @Html.EditorFor(m => m.PurchaseOrder.AdjAmount, new { htmlAttributes = new { @class = "form-control form-control-sm text-right", type = "number", step = "0.01" } })
-                            </div>
-
-                            <div class="form-group mb-2 netDiscount">
-                                @Html.LabelFor(m => m.PurchaseOrder.NetDiscount, new { @class = "small font-weight-bold text-muted mb-1" })
-                                @Html.EditorFor(m => m.PurchaseOrder.NetDiscount, new { htmlAttributes = new { @class = "form-control form-control-sm text-right bg-light", @readonly = "readonly" } })
-                                @Html.HiddenFor(m => m.PurchaseOrder.tempNetDiscount)
-                            </div>
-
-                            <div class="form-group mb-2 PaymentDue">
-                                @Html.LabelFor(m => m.PurchaseOrder.PaymentDue, new { @class = "small font-weight-bold text-danger mb-1" })
-                                @Html.EditorFor(m => m.PurchaseOrder.PaymentDue, new { htmlAttributes = new { @class = "form-control form-control-sm text-right bg-soft-danger font-weight-bold text-danger", @readonly = "readonly" } })
-                            </div>
-
-                            <div class="form-group mb-3 LabourCost">
-                                @Html.LabelFor(m => m.PurchaseOrder.LabourCost, new { @class = "small font-weight-bold text-muted mb-1" })
-                                @Html.EditorFor(m => m.PurchaseOrder.LabourCost, new { htmlAttributes = new { @class = "form-control form-control-sm text-right", type = "number", step = "0.01" } })
-                            </div>
-
-                            <div class="text-right">
-                                <button type="button" class="btn btn-soft-info btn-sm mr-1 shadow-sm">
-                                    <i class="mdi mdi-eye-outline mr-1"></i> Preview
-                                </button>
-                                <button type="submit" name="submitButton" value="Save order" class="btn btn-primary btn-sm px-3 shadow">
-                                    <i class="mdi mdi-content-save-all mr-1"></i> Save Order
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-
-
-
-
-
-
-
-
-
-    <div class="row">
-        <div class="col-md-6">
-            <!-- IMEI / Barcode Entry Section -->
-            <div class="row" style="display:none" id="imeiEntryRow">
-                <div class="col-md-12">
-                    <div class="card shadow-sm border-0">
-                        <div class="card-header bg-soft-warning border-bottom-0">
-                            <h5 class="header-title mb-0 font-size-14 text-warning">
-                                <i class="mdi mdi-barcode-scan mr-1"></i> Product Identifiers (IMEI/Barcode)
-                            </h5>
-                        </div>
-                        <div class="card-body p-0">
-                            <!-- Padding 0 for seamless table -->
-                            <div class="table-responsive">
-                                <table id="productIdentifierTable"
-                                       data-toggle="table"
-                                       data-height="255"
-                                       class="table table-sm table-centered table-nowrap mb-0 table-hover">
-                                    <thead class="thead-light">
-                                        <tr>
-                                            <th style="width: 5%">Sl</th>
-                                            <th style="width: 25%">Product Name</th>
-                                            <th style="width: 30%">IMEI / Barcode</th>
-                                            <th style="width: 30%">Damage IMEI</th>
-                                            <th style="width: 10%" class="text-center">Action</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @{
-                                            int i = 1;
-                                            if (TempData["POProductDetails"] != null)
-                                            {
-                                                foreach (var item in (List<POProductDetail>)TempData["POProductDetails"])
-                                                {
-                                                    <tr>
-                                                        <td>@i</td>
-                                                        <td class="font-weight-medium">@Model.PODetail.ProductName</td>
-                                                        <td>
-                                                            <input type="text" class="form-control form-control-sm" value="@item.IMENO" name="@("IMEINo" + i.ToString())" placeholder="Scan Barcode" />
-                                                        </td>
-                                                        <td>
-                                                            <input type="text" class="form-control form-control-sm bg-light" value="@item.DIMENO" name="@("DIMEINo" + i.ToString())" id="@("DIMEINo" + i.ToString())" readonly />
-                                                        </td>
-                                                        <td class="text-center">
-                                                            @if (Model.PurchaseOrder.IsDamagePO)
-                                                            {
-                                                                <button type="button" id="@i" class="btn btn-soft-info btn-sm btnGetDamageProduct" title="Get Damage Product">
-                                                                    <i class="mdi mdi-information-outline"></i>
-                                                                </button>
-                                                            }
-                                                            else
-                                                            {
-                                                                <button type="button" id="@i" class="btn btn-soft-secondary btn-sm btnGetDamageProduct" title="Get Damage Product" disabled>
-                                                                    <i class="mdi mdi-information-outline"></i>
-                                                                </button>
-                                                            }
-                                                        </td>
-                                                    </tr>
-                                                    i++;
-                                                }
-                                            }
-                                        }
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                        <div class="card-footer bg-transparent border-top py-2">
-                            <small class="text-muted"><i class="mdi mdi-help-circle-outline mr-1"></i> Use barcode scanner for faster entry.</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Empty placeholder panel for future use (Matching New Theme) -->
-            <div class="row mt-3">
-                <div class="col-md-12">
-                    <div class="card border-0 shadow-none bg-transparent">
-                        <!-- If you need any summary here, add card-body -->
-                    </div>
-                </div>
-            </div>
-        </div>
-
-
-    </div>
-}
-
-
-<!-- Damage Product Details Modal -->
-<div class="modal fade" id="DamageProductDetailsModal" tabindex="-1" role="dialog" aria-labelledby="damageModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
-        <div class="modal-content border-0 shadow-lg">
-            <!-- Modal Header -->
-            <div class="modal-header bg-soft-danger border-bottom-0">
-                <h5 class="modal-title text-danger" id="damageModalLabel">
-                    <i class="mdi mdi-alert-octagon-outline mr-1"></i> Damage Return Product Details
-                </h5>
-                <button type="button" class="close text-danger" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-
-            <!-- Modal Body -->
-            <div class="modal-body p-4">
-                <div id="ProductDetailstoolbar" class="mb-3 d-flex align-items-center">
-                    <span class="badge badge-soft-warning p-2">
-                        <i class="mdi mdi-alert-outline mr-1"></i>
-                        Note: Requires reload of the current page to reflect new items.
-                    </span>
-                </div>
-
-                <div class="table-responsive" style="max-height:350px; overflow-y: auto;">
-                    <table id="DamageProductDetailsTable"
-                           data-toggle="table"
-                           data-search="true"
-                           data-click-to-select="true"
-                           data-single-select="true"
-                           data-pagination="true"
-                           data-page-size="6"
-                           class="table table-sm table-centered table-nowrap mb-0 table-hover border">
-                        <thead class="thead-light">
-                            <tr>
-                                <th style="width: 50px;">Sl</th>
-                                <th data-field="code" data-sortable="true">Code</th>
-                                <th data-field="name" data-sortable="true">Product Name</th>
-                                <th data-field="category" data-sortable="true">Category</th>
-                                <th data-field="imeNo" data-sortable="true">Company</th>
-                                <th data-field="colorname" data-sortable="true">Color</th>
-                                <th data-field="mrpRate" data-sortable="true">IMEI/Barcode</th>
-                            </tr>
-                        </thead>
-                        <tbody class="font-size-13">
-                            <!-- Dynamic data will be injected here via JS -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- Modal Footer -->
-            <div class="modal-footer bg-light">
-                <button type="button" class="btn btn-secondary btn-sm px-4" data-dismiss="modal">
-                    <i class="mdi mdi-close-circle-outline mr-1"></i> Close
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
-
-
-<!-- Modal for Adding New Supplier -->
-<!-- Modal for Adding New Supplier -->
-<div class="modal fade" id="SuppliersModal" tabindex="-1" role="dialog" aria-labelledby="supplierModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-md modal-dialog-centered" role="document">
-        <div class="modal-content border-0 shadow-lg">
-            <!-- Modal Header -->
-            <div class="modal-header bg-soft-primary border-bottom-0">
-                <h5 class="modal-title text-primary" id="supplierModalLabel">
-                    <i class="mdi mdi-truck-delivery-outline mr-1"></i> Add New Supplier
-                </h5>
-                <button type="button" class="close text-primary" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-
-            <!-- Modal Body -->
-            <div class="modal-body p-4">
-                <form id="ajaxSupplierForm">
-                    <!-- Supplier Name -->
-                    <div class="form-group row mb-3">
-                        <label class="col-md-4 col-form-label-sm font-weight-bold text-muted">Supplier Name</label>
-                        <div class="col-md-8">
-                            <input type="text" id="mSupplierName" name="Name" class="form-control form-control-sm" placeholder="Enter supplier name" required />
-                        </div>
-                    </div>
-
-                    <!-- Contact No -->
-                    <div class="form-group row mb-3">
-                        <label class="col-md-4 col-form-label-sm font-weight-bold text-muted">Contact No</label>
-                        <div class="col-md-8">
-                            <input type="text" id="mSupplierContact" name="ContactNo" class="form-control form-control-sm" placeholder="e.g. 017xxxxxxxx" required />
-                        </div>
-                    </div>
-
-                    <!-- Address -->
-                    <div class="form-group row mb-3">
-                        <label class="col-md-4 col-form-label-sm font-weight-bold text-muted">Address</label>
-                        <div class="col-md-8">
-                            <textarea id="mAddress" name="Address" class="form-control form-control-sm" rows="2" placeholder="Full address..."></textarea>
-                        </div>
-                    </div>
-
-                    <!-- Opening Due -->
-                    <div class="form-group row mb-3">
-                        <label class="col-md-4 col-form-label-sm font-weight-bold text-muted">Opening Due</label>
-                        <div class="col-md-8">
-                            <div class="input-group input-group-sm">
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text">৳</span>
-                                </div>
-                                <input type="number" id="mOpeningDue" name="OpeningDue" class="form-control form-control-sm text-right" value="0" />
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Remarks -->
-                    <div class="form-group row mb-3">
-                        <label class="col-md-4 col-form-label-sm font-weight-bold text-muted">Remarks</label>
-                        <div class="col-md-8">
-                            <textarea id="mRemarks" name="Remarks" class="form-control form-control-sm" rows="1" placeholder="Short note..."></textarea>
-                        </div>
-                    </div>
-
-                    <hr class="my-4" />
-
-                    <!-- Checkbox (Modern Style) -->
-                    <div class="form-group row mb-0">
-                        <div class="col-md-8 offset-md-4">
-                            <div class="custom-control custom-checkbox">
-                                <input type="checkbox" class="custom-control-input" id="mIsBoth" name="IsBoth" value="true">
-                                <label class="custom-control-label font-weight-bold text-primary" for="mIsBoth" style="cursor:pointer;">
-                                    Also a Customer?
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-                </form>
-            </div>
-
-            <!-- Modal Footer -->
-            <div class="modal-footer bg-light border-top-0">
-                <button type="button" class="btn btn-secondary btn-sm px-4" data-dismiss="modal">
-                    <i class="mdi mdi-close-circle-outline mr-1"></i> Cancel
-                </button>
-                <button type="button" id="btnSaveSupplierAjax" class="btn btn-primary btn-sm px-4 shadow-sm">
-                    <i class="mdi mdi-content-save-outline mr-1"></i> Save Supplier
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
-@*<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />*@
-
-
-<!-- Modal for Adding New Product -->
-<div id="newProductAddModal" class="modal fade" role="dialog" aria-labelledby="addNewHeader" aria-hidden="true">
-    <div class="modal-dialog modal-md modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg">
-            <!-- Modal Header -->
-            <div class="modal-header bg-soft-info border-bottom-0">
-                <h5 class="modal-title text-info" id="addNewHeader">
-                    <i class="mdi mdi-cart-plus mr-1"></i> Add New Product
-                </h5>
-                <button type="button" class="close text-info" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-
-            <!-- Modal Body -->
-            <div class="modal-body p-4">
-                <div class="form-horizontal">
-                    <!-- Product Name -->
-                    <div class="form-group row mb-3">
-                        <label class="col-md-3 col-form-label-sm font-weight-bold text-muted">Product Name</label>
-                        <div class="col-md-9">
-                            @Html.Editor("ProductName", new { htmlAttributes = new { @class = "form-control form-control-sm", placeholder = "Enter product name", id = "mProductName" } })
-                        </div>
-                    </div>
-
-                    <!-- Company -->
-                    <div class="form-group row mb-3">
-                        <label class="col-md-3 col-form-label-sm font-weight-bold text-muted">Company</label>
-                        <div class="col-md-9">
-                            <div class="input-group input-group-sm shadow-sm">
-                                @Html.Hidden("CompanyId")
-                                @Html.Editor("CompanyName", new { htmlAttributes = new { @class = "form-control form-control-sm", placeholder = "Select company" } })
-                                <div class="input-group-append">
-                                    <button id="btnAddCompany" type="button" class="btn btn-info" title="Add Company">
-                                        <i class="mdi mdi-plus"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Category -->
-                    <div class="form-group row mb-3">
-                        <label class="col-md-3 col-form-label-sm font-weight-bold text-muted">Category</label>
-                        <div class="col-md-9">
-                            <div class="input-group input-group-sm shadow-sm">
-                                @Html.Hidden("CategoryId")
-                                @Html.Editor("CategoryName", new { htmlAttributes = new { @class = "form-control form-control-sm", placeholder = "Select category" } })
-                                <div class="input-group-append">
-                                    <button id="btnAddCategory" type="button" class="btn btn-info">
-                                        <i class="mdi mdi-plus"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Size -->
-                    <div class="form-group row mb-3">
-                        <label class="col-md-3 col-form-label-sm font-weight-bold text-muted">Size</label>
-                        <div class="col-md-9">
-                            <div class="input-group input-group-sm shadow-sm">
-                                @Html.Hidden("SizeID")
-                                @Html.Editor("SizeName", new { htmlAttributes = new { @class = "form-control form-control-sm", placeholder = "Select size" } })
-                                <div class="input-group-append">
-                                    <button id="btnAddSize" type="button" class="btn btn-info">
-                                        <i class="mdi mdi-plus"></i>
-                                    </button>
-                                </div>
-                            </div>
-                            @Html.ValidationMessage("SizeID", "", new { @class = "text-danger small" })
-                        </div>
-                    </div>
-
-                    <!-- Unit Type -->
-                    <div class="form-group row mb-3">
-                        <label class="col-md-3 col-form-label-sm font-weight-bold text-muted">Unit Type</label>
-                        <div class="col-md-9">
-                            <div class="input-group input-group-sm shadow-sm">
-                                @Html.Hidden("UnitType")
-                                @Html.Editor("UnitTypeName", new { htmlAttributes = new { @class = "form-control form-control-sm", placeholder = "Select unit type" } })
-                                <div class="input-group-append">
-                                    <button id="btnAddUnitType" type="button" class="btn btn-info">
-                                        <i class="mdi mdi-plus"></i>
-                                    </button>
-                                </div>
-                            </div>
-                            @Html.ValidationMessage("UnitType", "", new { @class = "text-danger small" })
-                        </div>
-                    </div>
-
-                    <hr class="my-4" />
-
-                    <!-- Rates Row -->
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group mb-3">
-                                <label class="small font-weight-bold text-muted mb-1">Purchase Rate</label>
-                                <div class="input-group input-group-sm">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text bg-light border-right-0">৳</span>
-                                    </div>
-                                    <input type="number" id="mRP" class="form-control form-control-sm text-right" placeholder="0.00" />
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group mb-3">
-                                <label class="small font-weight-bold text-muted mb-1">MRP Rate</label>
-                                <div class="input-group input-group-sm">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text bg-light border-right-0">৳</span>
-                                    </div>
-                                    <input type="number" id="mMRP" class="form-control form-control-sm text-right" placeholder="0.00" />
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Qty & Type Row -->
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group mb-3">
-                                <label class="small font-weight-bold text-muted mb-1">Low Stock Qty</label>
-                                <input type="number" id="mLimitedStkQty" class="form-control form-control-sm text-right" placeholder="Min Qty" />
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group mb-3">
-                                <label class="small font-weight-bold text-muted mb-1">Product Type</label>
-                                @Html.DropDownList("ProductType", new SelectList(Enum.GetValues(typeof(EnumProductType)).Cast<EnumProductType>().Select(x => new { ID = (int)x, Name = x.ToString() }).ToList(), "ID", "Name", (int)EnumProductType.NoBarcode), new { @class = "form-control form-control-sm shadow-sm" })
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Modal Footer -->
-            <div class="modal-footer bg-light border-top-0">
-                <button type="button" class="btn btn-secondary btn-sm px-4" data-dismiss="modal">
-                    <i class="mdi mdi-close-circle-outline mr-1"></i> Cancel
-                </button>
-                <button type="button" class="btn btn-primary btn-sm px-4 shadow-sm" id="btnNewSaveProduct">
-                    <i class="mdi mdi-content-save-outline mr-1"></i> Save Product
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
-
-
-<!-- Modal for Quick Entry (Company/Category/Size etc.) -->
-<div id="newEntryModal" class="modal fade" role="dialog" aria-labelledby="addEntryNewHeader" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered shadow-lg">
-        <div class="modal-content border-0">
-            <!-- Modal Header -->
-            <div class="modal-header bg-soft-primary border-bottom-0">
-                <h5 class="modal-title text-primary" id="addEntryNewHeader">
-                    <i class="mdi mdi-plus-box-outline mr-1"></i> Add New Entry
-                </h5>
-                <button type="button" class="close text-primary" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-
-            <!-- Modal Body -->
-            <div class="modal-body p-4">
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="form-group row mb-3">
-                            <label id="lblEntryName" class="col-md-3 col-form-label-sm font-weight-bold text-muted text-right">Name:</label>
-                            <div class="col-md-9">
-                                <input type="text" class="form-control form-control-sm shadow-sm" autofocus id="newName" placeholder="Enter name" />
-                                <input type="hidden" id="entryType" />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Product Category Section (Conditional) -->
-                <div class="row" id="divPCategory" style="display:none">
-                    <div class="col-md-12">
-                        <div class="form-group row mb-0">
-                            @Html.Label("PCategoryID", new { @class = "col-md-3 col-form-label-sm font-weight-bold text-muted text-right" })
-                            <div class="col-md-9">
-                                @Html.Hidden("PCategoryID")
-                                @Html.Editor("PCategoryName", new { htmlAttributes = new { @class = "form-control form-control-sm shadow-sm", placeholder = "Select category" } })
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Modal Footer -->
-            <div class="modal-footer bg-light border-top-0">
-                <button type="button" class="btn btn-secondary btn-sm px-4" data-dismiss="modal">
-                    <i class="mdi mdi-close-circle-outline mr-1"></i> Close
-                </button>
-                <button type="button" class="btn btn-primary btn-sm px-4 shadow-sm" id="btnAddCompanyCategory">
-                    <i class="mdi mdi-check-circle-outline mr-1"></i> Add Now
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script src="~/Scripts/productConfig.js"></script>
-
-
-<style>
-    /* Professional Styling overrides */
+    /* Modal Controls & Select2 Custom Overrides */
     #newProductAddModal .modal-content {
         border-radius: 8px;
         border: none;
@@ -956,22 +129,11 @@
     }
 
     #newProductAddModal .form-group {
-        margin-bottom: 18px; /* Better vertical spacing */
-    }
-
-    #newProductAddModal .control-label {
-        font-weight: 500;
-        color: #555;
-        padding-top: 7px;
-    }
-
-    .input-group-addon-btn {
-        padding: 0;
-        border: none;
+        margin-bottom: 18px;
     }
 
     .input-group .btn-info {
-        height: 30px; /* input-sm height matches */
+        height: 30px;
         border-radius: 0 4px 4px 0;
     }
 
@@ -981,14 +143,13 @@
         outline: 0;
     }
 
-    .modal-footer {
-        background-color: #f8f9fa;
-        border-top: 1px solid #eee;
-        padding: 12px 25px;
+    .ui-autocomplete {
+        z-index: 99999999 !important;
+        max-height: 200px;
+        overflow-y: auto;
+        background-color: #fff;
+        border: 1px solid #ccc;
     }
-</style>
-
-<style>
 
     .select2-container--default .select2-selection--single {
         height: 30px !important;
@@ -1004,955 +165,6 @@
     .select2-container--default .select2-selection--single .select2-selection__arrow {
         height: 28px !important;
     }
-</style>
-
-<!-- Select2 JS (jQuery এর নিচে থাকতে হবে) -->
-@*<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>*@
-
-
-<script>
-
-
-  $("#btnSaveSupplierAjax").click(function () {
-    var supplierData = {
-        Name: $("#mSupplierName").val(),
-        ContactNo: $("#mSupplierContact").val(),
-        OpeningDue: $("#mOpeningDue").val() || 0,
-        Address: $("#mAddress").val(),
-        Remarks: $("#mRemarks").val(),
-        IsBoth: $("#mIsBoth").is(":checked") ? 1 : 0
-    };
-
-    $.ajax({
-        type: "POST",
-        url: "/supplier/CreateSupplierAjax",
-        data: supplierData,
-        success: function (response) {
-            if (response.Result) {
-                toastr.success(response.ErrorMsg);
-                $('#SuppliersModal').modal('hide');
-
-                // --- Picker field update logic ---
-                var s = response.Supplier;
-                $('#SuppliersId').val(s.Id);
-                $('#SuppliersCode').val(s.Code);
-                $('#SuppliersName').val(s.Name);
-                $('[id*="CurrentDue"]').val(s.TotalDue);
-
-
-                // Dropdown label update
-                $('#dropdownLabel').text(s.Name + " (" + s.Code + ")");
-
-                updateFields(s);
-
-                loadSuppliers(true);
-                // Form reset
-                $("#ajaxSupplierForm")[0].reset();
-            } else {
-                toastr.error(response.ErrorMsg);
-            }
-        },
-        error: function () {
-            toastr.error("Server error occurred.");
-        }
-    });
-});
-
-
-    $(document).ready(function () {
-        $(window).keydown(function (event) {
-            if (event.keyCode == 10 || event.keyCode == 13) {
-                event.preventDefault();
-                return false;
-            }
-        });
-    });
-
-    // pc or kg
-
-    $(document).ready(function () {
-        var UnitType = $('#PODetail_UnitType').val();
-        var CUnitType = $('#PODetail_TempChildUnitType').val();
-        /* alert(UnitT);*/
-        if (UnitType != null && UnitType !=="") {
-
-            if (UnitType.toLowerCase() == "pcs") {
-                //alert('fired');
-                $("#divUnitPrice").hide();
-                $("#divChildQuantity").hide();
-            }
-            else {
-                $("#lblParentUnit").text($.trim(UnitType));
-                //alert(UnitType);
-                $("#lblChildUnit").text($.trim(CUnitType));
-                //$("#lblChildUnit").text("gm");
-                //alert(CUnitType);
-                $("#divUnitPrice").show();
-                $("#divChildQuantity").show();
-            }
-
-        }
-
-
-});
-
-
-
-
-
-
-    @*$('#OrderDate').datetimepicker({
-        @{
-                if (Model == null || Model.PurchaseOrder.OrderDate == null) {
-                    @:defaultDate: moment(),
-                                                                                                                                            }
-                else
-                {
-            @:defaultDate: '@(Convert.ToDateTime(Model.PurchaseOrder.OrderDate).ToString("dd-MMM-yyyy"))',
-                                                                                                                                    }
-            @:format: 'DD-MMM-YYYY',
-            @:maxDate: moment()
-                                                                                                                                            }
-    });*@
-
-
-    //************************************************************
-    //Get Damage return products for picker
-    //************************************************************
-
-    $('#ProductsModal').on('hidden.bs.modal', function () {
-        $("#PODetail_Quantity").trigger("input");
-    });
-
-    //$('#ColorsModal').on('hidden.bs.modal', function () {
-    //    GetDamageReturnIMEI();
-    //});
-
-    var _DIMEINo = "";
-    $(document).on("click", ".btnGetDamageProduct", function () {
-
-        //alert(this.id)
-        _DIMEINo = "#DIMEINo" + this.id;
-        GetDamageReturnIMEI();
-        $('#DamageProductDetailsModal').modal('toggle');
-
-    });
-
-    function GetDamageReturnIMEI() {
-        var ProducctID = $("#ProductsId").val();
-        if (ProducctID == "" || ProducctID == un) {
-            toastr.info("Please Select Product.")
-            return;
-        }
-        //var ColorID = $("#ColorsId").val();
-        var ColorID = $("#PODetail_ColorId").val();
-        if (ColorID == "" || ColorID == undefined) {
-            toastr.info("Please Select Color.")
-            return;
-        }
-        $.ajax({
-            url: "/PurchaseOrder/GetDamageReturnIMEI",
-            type: "GET",
-            data: { "ProductID": ProducctID, "ColorID": ColorID },
-            contentType: "application/json; charset=utf-8",
-            dataType: "json",
-            success: function (data) {
-                if (data.Status == true) {
-                    PopulateDamageProductDetailsTable(data);
-                }
-
-            },
-            error: function (err) {
-                console.log(err);
-            }
-        })
-    }
-
-    //Generate damage product picker
-    function PopulateDamageProductDetailsTable(data) {
-
-        var $table = $("#DamageProductDetailsTable >tbody");
-        $table.empty();
-        var counter = 1;
-        data.Data.forEach(function (item) {
-            var $row = $('<tr/>');
-            $row.append('<td><input type="checkbox" class="chkbxProduct" name="chkbxProduct" id="chkbxProduct" value="' + item.IMENO + '"/></td><td>' + counter + '</td><td>' + item.ProductCode + '</td><td>' + item.ProductName + '</td><td>' + item.CategoryName + '</td><td>' + item.CompanyName + '</td><td>' + item.ColorName + '</td><td>' + item.IMENO + '</td>');
-            $table.append($row);
-            counter++;
-        });
-    }
-
-
-    //damage picker product select event
-    $(document).on('change', 'input.chkbxProduct', function () {
-        $('input.chkbxProduct').not(this).prop('checked', false);
-        SelectProductDetails(this.value);
-        checkDuplicateDIMEINo();
-        $('#DamageProductDetailsModal').modal('toggle');
-    });
-
-
-    //for damage Product
-    function SelectProductDetails(IMENo) {
-        //alert(ProductId);
-        if (IMENo == "") {
-            ClearDamageProductDetails();
-            return;
-        }
-        $(_DIMEINo).val(IMENo);
-
-
-    }
-
-    function ClearDamageProductDetails() {
-        $(DIMEINo).val("");
-    }
-
-
-    //************************************************************
-    //End generate Damage Picker
-    //************************************************************
-
-
-    $("#PurchaseOrder_IsDamagePO").on("change", function () {
-        if (this.checked) {
-            $(".btnGetDamageProduct").prop("disabled", false);
-        }
-        else {
-            $(".btnGetDamageProduct").prop("disabled", true);
-        }
-    });
-
-    $("#PODetail_Quantity").on("input", function () {
-        var purchaseRate = $("#PODetail_UnitPrice").val();
-        var TAmount = (parseInt($(this).val()) * parseFloat(purchaseRate));
-        $("#PODetail_TAmount").val(TAmount);
-
-        var productName = $('#ProductsName').val();
-        if (productName == '') {
-            toastr['error']('Please pick a product first.');
-            return;
-        }
-
-        var ProductType = $('#ProductsType').val();
-        var Quantity = $("#PODetail_Quantity").val();
-        $("#productIdentifierTable > tbody > tr.no-records-found").html('');
-        if (ProductType == "1" || ProductType == "3")//barcode=1, Autobarcode=3
-            createProductIdentifierTableRows(Quantity);
-        else if (ProductType == "2") //NoBarcode
-        {
-            createProductIdentifierTableRows(1);
-            $("#IMEINo1").val("No Barcode");
-            //$("#IMEINo1").attr("disabled",true);
-        }
-
-        //var newRow = $("<tr>");
-        //var cols = "";
-
-        //for (var counter = 1; counter <= $(this).val(); counter++) {
-        //    newRow = $("<tr>");
-        //    cols = "";
-        //    cols += '<td width="9.97%">' + counter + '</td>';
-        //    cols += '<td width="26.84%">' + productName + '</td>';
-        //    cols += '<td width="63.18%"><input type="text" class="form-control input-sm input-sm" name="IMEINo' + counter + '"/></td>';
-        //    newRow.append(cols);
-        //    $("#productIdentifierTable").append(newRow);
-        //}
-    });
-
-    function createProductIdentifierTableRows(quantity) {
-
-        var counterLimit = parseInt(quantity);
-        var preCount = 0;
-        var productName = $('#ProductsName').val();
-        var newRow = '';
-        var cols = '';
-        var ProductType = parseInt($('#ProductsType').val());
-
-        $("#productIdentifierTable tr").each(function (count, row) {
-            var $row = $(row);
-            if (!$row) return;
-            var $inputs = $row.find('input[name^="IMEINo"]');
-            if (!$inputs) return;
-            //For Nobarcode and Existing barcode don't remove imei
-            if (ProductType == 1 || ProductType == 2) {
-                $inputs.each(function (count, input) {
-                    var val = $(input).val();
-                    if (val == '') {
-                        $(this).parents('tr').remove();
-                    }
-                    else if (val == "No Barcode") {
-                        $(this).parents('tr').remove();
-                    }
-                    else {
-                        preCount = parseInt($(this).parent().siblings(":first").text());
-                    }
-
-                    // $(this).parents('tr').remove();
-                });
-            }
-            else {
-                $inputs.each(function (count, input) {
-                    var val = $(input).val();
-                    $(this).parents('tr').remove();
-                });
-            }
-
-        });
-
-        var IsDamage = $("#PurchaseOrder_IsDamagePO").prop("checked") == true ? true : false;
-
-        if (ProductType == 1 || ProductType == 2) //barcode=1,Nobarcode=2
-        {
-            for (var counter = (preCount + 1) ; counter <= counterLimit; counter++) {
-                newRow = $("<tr>");
-                cols = "";
-                cols += '<td width="5%">' + counter + '</td>';
-                cols += '<td width="26.84%">' + productName + '</td>';
-                cols += '<td width="30%"><input type="text" class="form-control input-sm input-sm" onblur="checkDuplicateIMEINo()" oninput="moveCursorToNextInput(this)" name="IMEINo' + counter + '" id="IMEINo' + counter + '"/></td>';
-                if (IsDamage == true) {
-                    cols += '<td width="50%"><input type="text" readonly class="form-control input-sm input-sm" onblur="checkDuplicateDIMEINo()" oninput="moveCursorToNextInputForDamage(this)" name="DIMEINo' + counter + '" id="DIMEINo' + counter + '"/></td>';
-                    cols += '<td width="20%"><button type="button" id=' + counter + ' class="btn btn-xs btn-info btnGetDamageProduct" title="Get Damage Product"><i class="fa fa-info-circle"></i></button></td>';
-                }
-                else {
-                    cols += '<td width="50%"><input type="text" readonly class="form-control input-sm input-sm" onblur="checkDuplicateDIMEINo()" oninput="moveCursorToNextInputForDamage(this)" name="DIMEINo' + counter + '" id="DIMEINo' + counter + '"/></td>';
-                    cols += '<td width="20%"><button type="button" id=' + counter + ' class="btn btn-xs btn-info btnGetDamageProduct" title="Get Damage Product" disabled><i class="fa fa-info-circle"></i></button></td>';
-                }
-                newRow.append(cols);
-                $("#productIdentifierTable").append(newRow);
-            }
-        }
-        else if (ProductType == 3)//auto barcode =3
-        {
-
-            $.ajax({
-                url: "/PurchaseOrder/GetUniqueBarCode",
-                type: "GET",
-                data: { 'MaxSize': 7, 'Quantity': quantity },
-                dataType: "json",
-                success: function (data) {
-                    for (var counter = (preCount + 1) ; counter <= counterLimit; counter++) {
-                        newRow = $("<tr>");
-                        cols = "";
-                        cols += '<td width="9.97%">' + counter + '</td>';
-                        cols += '<td width="26.84%">' + productName + '</td>';
-                        cols += '<td width="63.18%"><input type="text" class="form-control input-sm input-sm" name="IMEINo' + counter + '" id="IMEINo' + counter + '" value="' + data[counter - 1] + '" /></td>';
-                        if (IsDamage == true) {
-                            cols += '<td width="50%"><input type="text" class="form-control input-sm input-sm" onblur="checkDuplicateDIMEINo()" oninput="moveCursorToNextInputForDamage(this)" name="DIMEINo' + counter + '" id="DIMEINo' + counter + '"/></td>';
-                        }
-                        else {
-                            cols += '<td width="50%"><input type="text" readonly class="form-control input-sm input-sm"  oninput="moveCursorToNextInputForDamage(this)" name="DIMEINo' + counter + '" id="DIMEINo' + counter + '"/></td>';
-                        }
-                        newRow.append(cols);
-                        $("#productIdentifierTable").append(newRow);
-                    }
-                },
-                error: function (err) {
-
-                }
-            });
-        }
-
-
-    }
-
-
-    function moveCursorToNextInput(x) {
-        if (x.value == "" || x.value == NaN) {
-            return;
-        }
-        @if(User.Identity.GetConcernId() == 5 || User.Identity.GetConcernId() == 6 || User.Identity.GetConcernId() == 1)
-        {
-            @:return;
-                                                                                                                        }
-        setTimeout(function () {
-            $inputs = $(x).parents('tr').next('tr').find('input[name^="IMEINo"]');
-            $inputs.each(function (count, input) {
-                $(input).focus();
-            });
-        }, 500);
-    }
-
-    function moveCursorToNextInputForDamage(x) {
-        if (x.value == "" || x.value == NaN) {
-            return;
-        }
-        @if(User.Identity.GetConcernId() == 5 || User.Identity.GetConcernId() == 6 || User.Identity.GetConcernId() == 1)
-    {
-        @:return;
-                                                                                                    }
-        setTimeout(function () {
-            $inputs = $(x).parents('tr').next('tr').find('input[name^="DIMEINo"]');
-            $inputs.each(function (count, input) {
-                $(input).focus();
-            });
-        }, 500);
-    }
-
-    function checkDuplicateIMEINo() {
-        var previousVal = '';
-        $inputs = $('#productIdentifierTable').find('input[name^="IMEINo"]');
-        $inputs.each(function (count, input) {
-            if ($(input).val() != '' && $(input).val().toLowerCase() == previousVal.toLowerCase()) {
-                toastr['error']('Duplicate IMEI/Barcode found');
-                $(input).val('');
-                $(input).focus();
-                return;
-            }
-            previousVal = $(input).val();
-        });
-    }
-
-    function checkDuplicateDIMEINo() {
-        var previousVal = '';
-        $inputs = $('#productIdentifierTable').find('input[name^="DIMEINo"]');
-        $inputs.each(function (count, input) {
-            if ($(input).val() != '' && $(input).val().toLowerCase() == previousVal.toLowerCase()) {
-                toastr['error']('Duplicate IMEI/Barcode found');
-                $(input).val('');
-                $(input).focus();
-                return;
-            }
-            previousVal = $(input).val();
-        });
-    }
-    //**************************
-    //Per Product Event start
-    //**************************
-
-    $("#PODetail_MRPRateParent").on("input", function () {
-        var ConvertValue = getDefaultFloatIfEmpty($("#PODetail_ConvertValue").val());
-        if (ConvertValue != 0) {
-            var mrpRateParent = getDefaultFloatIfEmpty($(this).val());
-            var mrpRate = (mrpRateParent / ConvertValue);
-
-            $("#PODetail_MRPRate").val(mrpRate).trigger('input');
-        }
-
-    });
-
-
-    $("#PODetail_MRPRate").on("input", function () {
-        var quantity = getDefaultFloatIfEmpty($("#PODetail_Quantity").val());
-        var mrpRate = getDefaultFloatIfEmpty($(this).val());
-        var total = (quantity * mrpRate);
-        var ConvertValue = getDefaultFloatIfEmpty($("#PODetail_ConvertValue").val());
-
-        var percentage = getDefaultFloatIfEmpty($("#PODetail_PPDisPercentage").val());
-        var PPDamount = (((mrpRate) * percentage) / 100);
-        total = total - (PPDamount * quantity);
-        var UnitPrice = (mrpRate - PPDamount);
-
-        var ExPercentage = getDefaultFloatIfEmpty($("#PODetail_ExtraPPDISPer").val());
-        var ExPPDamount = (((UnitPrice) * ExPercentage) / 100);
-        total = total - (ExPPDamount * quantity);
-        UnitPrice = (UnitPrice - ExPPDamount);
-
-        var PPOffer = getDefaultFloatIfEmpty($("#PODetail_PPOffer").val());
-        UnitPrice = (UnitPrice - PPOffer);
-        total = total - (PPOffer * quantity);
-        total = total;
-        mrpRate = mrpRate;
-        $("#PODetail_TAmount").val(getDefaultFloatIfEmpty(total));
-        $("#PODetail_PPDiscountAmount").val(PPDamount);
-        $("#PODetail_ExtraPPDISAmt").val(ExPPDamount);
-        $("#PODetail_UnitPrice").val(UnitPrice);
-        $("#PODetail_CRSalesRate3Month").val(mrpRate);
-       /* $("#PODetail_SalesRate").val(mrpRate);*/
-    });
-
-    $("#PODetail_PPDisPercentage").on("input", function () {
-        var percentage = getDefaultFloatIfEmpty($(this).val());
-        var quantity = getDefaultFloatIfEmpty($("#PODetail_Quantity").val());
-        var mrpRate = getDefaultFloatIfEmpty($("#PODetail_MRPRate").val());
-
-        var PPDamount = (((mrpRate * percentage) / 100));
-        $("#PODetail_PPDiscountAmount").val(PPDamount);
-        var UnitPrice = mrpRate - PPDamount;
-        var total = (quantity * mrpRate);
-        total = total - (PPDamount * quantity);
-
-        var ExPercentage = getDefaultFloatIfEmpty($("#PODetail_ExtraPPDISPer").val());
-        var ExPPDamount = (((UnitPrice) * ExPercentage) / 100);
-        total = total - (ExPPDamount * quantity);
-        UnitPrice = UnitPrice - ExPPDamount;
-
-        var PPOffer = getDefaultFloatIfEmpty($("#PODetail_PPOffer").val());
-        UnitPrice = UnitPrice - PPOffer;
-        total = total - (PPOffer * quantity);
-
-        $("#PODetail_ExtraPPDISAmt").val(ExPPDamount);
-
-        $("#PODetail_UnitPrice").val((UnitPrice));
-        total = total;
-        $("#PODetail_TAmount").val(getDefaultFloatIfEmpty(total));
-    });
-
-    $("#PODetail_PPDiscountAmount").on("input", function () {
-        var PPDamount = getDefaultFloatIfEmpty($(this).val());
-        var quantity = getDefaultFloatIfEmpty($("#PODetail_Quantity").val());
-        var mrpRate = getDefaultFloatIfEmpty($("#PODetail_MRPRate").val());
-
-        var percentage = getDefaultFloatIfEmpty(((100 * PPDamount) / (quantity * mrpRate)) * quantity);
-        $("#PODetail_PPDisPercentage").val(percentage);
-        var UnitPrice = mrpRate - PPDamount;
-        var total = (quantity * mrpRate);
-        total = total - (PPDamount * quantity);
-
-        var PPOffer = getDefaultFloatIfEmpty($("#PODetail_PPOffer").val());
-        UnitPrice = UnitPrice - PPOffer;
-        total = total - (PPOffer * quantity);
-
-        var ExPercentage = getDefaultFloatIfEmpty($("#PODetail_ExtraPPDISPer").val());
-        var ExPPDamount = (((UnitPrice) * ExPercentage) / 100);
-        total = total - (ExPPDamount * quantity);
-        UnitPrice = UnitPrice - ExPPDamount;
-        $("#PODetail_ExtraPPDISAmt").val(ExPPDamount);
-
-        $("#PODetail_UnitPrice").val((UnitPrice));
-
-        total = total;
-        $("#PODetail_TAmount").val(getDefaultFloatIfEmpty(total));
-
-    });
-
-    $("#PODetail_ExtraPPDISPer").on("input", function () {
-        var percentage = getDefaultFloatIfEmpty($("#PODetail_PPDisPercentage").val());
-        var quantity = getDefaultFloatIfEmpty($("#PODetail_Quantity").val());
-        var mrpRate = getDefaultFloatIfEmpty($("#PODetail_MRPRate").val());
-        var PPDamount = getDefaultFloatIfEmpty($("#PODetail_PPDiscountAmount").val()); //((((quantity * mrpRate) * percentage) / 100) / quantity);
-        // $("#PODetail_PPDiscountAmount").val(PPDamount);
-        var UnitPrice = mrpRate - PPDamount;
-        var total = (quantity * mrpRate);
-        total = total - (PPDamount * quantity);
-
-        var ExPercentage = getDefaultFloatIfEmpty($("#PODetail_ExtraPPDISPer").val());
-        var ExPPDamount = (((UnitPrice) * ExPercentage) / 100);
-        total = total - (ExPPDamount * quantity);
-        UnitPrice = UnitPrice - ExPPDamount;
-
-        var PPOffer = getDefaultFloatIfEmpty($("#PODetail_PPOffer").val());
-        UnitPrice = UnitPrice - PPOffer;
-        total = total - (PPOffer * quantity);
-
-
-        $("#PODetail_ExtraPPDISAmt").val(ExPPDamount);
-        $("#PODetail_UnitPrice").val((UnitPrice));
-        total = total;
-        $("#PODetail_TAmount").val(getDefaultFloatIfEmpty(total));
-    });
-
-    $("#PODetail_ExtraPPDISAmt").on("input", function () {
-        var PPDamount = getDefaultFloatIfEmpty($("#PODetail_PPDiscountAmount").val());
-        var quantity = getDefaultFloatIfEmpty($("#PODetail_Quantity").val());
-        var mrpRate = getDefaultFloatIfEmpty($("#PODetail_MRPRate").val());
-
-        //var percentage =getDefaultFloatIfEmpty( $("#PODetail_PPDisPercentage").val(percentage)); //getDefaultFloatIfEmpty(((100 * PPDamount) / (quantity * mrpRate)) * quantity);
-        //$("#PODetail_PPDisPercentage").val(percentage);
-        var UnitPrice = mrpRate - PPDamount;
-        var total = (quantity * mrpRate);
-        total = total - (PPDamount * quantity);
-
-        var ExPPDamount = getDefaultFloatIfEmpty($(this).val());
-        var ExPercentage = getDefaultFloatIfEmpty(((100 * ExPPDamount) / (quantity * UnitPrice)) * quantity);
-        total = total - (ExPPDamount * quantity);
-        UnitPrice = UnitPrice - ExPPDamount;
-
-        $("#PODetail_ExtraPPDISPer").val(ExPercentage);
-
-        var PPOffer = getDefaultFloatIfEmpty($("#PODetail_PPOffer").val());
-        UnitPrice = UnitPrice - PPOffer;
-        total = total - (PPOffer * quantity);
-        total = total;
-        $("#PODetail_UnitPrice").val((UnitPrice));
-
-
-        $("#PODetail_TAmount").val(getDefaultFloatIfEmpty(total));
-
-    });
-
-    $("#PODetail_PPOffer").on("input", function () {
-        var quantity = getDefaultFloatIfEmpty($("#PODetail_Quantity").val());
-        var mrpRate = getDefaultFloatIfEmpty($("#PODetail_MRPRate").val());
-        var total = (quantity * mrpRate);
-
-        var percentage = getDefaultFloatIfEmpty($("#PODetail_PPDisPercentage").val());
-        var PPDamount = (((mrpRate) * percentage) / 100);
-        total = total - (PPDamount * quantity);
-        var UnitPrice = mrpRate - PPDamount;
-
-        var ExPercentage = getDefaultFloatIfEmpty($("#PODetail_ExtraPPDISPer").val());
-        var ExPPDamount = (((UnitPrice) * ExPercentage) / 100);
-        total = total - (ExPPDamount * quantity);
-        UnitPrice = UnitPrice - ExPPDamount;
-
-        var PPOffer = getDefaultFloatIfEmpty($("#PODetail_PPOffer").val());
-        UnitPrice = UnitPrice - PPOffer;
-        total = total - (PPOffer * quantity);
-
-
-        total = total;
-        $("#PODetail_TAmount").val(getDefaultFloatIfEmpty(total));
-        $("#PODetail_UnitPrice").val((UnitPrice));
-
-    });
-
-
-    $("#PODetail_ParentQuantity").on('input', function () {
-        CalculateTotalQty();
-        CalculateTotalArea();
-        CalcTotalPrice();
-    });
-
-    $("#PODetail_ChildQuantity").on('input', function () {
-        CalculateTotalQty();
-        CalculateTotalArea();
-        CalcTotalPrice();
-    });
-
-    function CalculateTotalQty() {
-        var ConvertValue = getDefaultFloatIfEmpty($("#PODetail_ConvertValue").val());
-        var ChildQty = getDefaultFloatIfEmpty($("#PODetail_ChildQuantity").val());
-        var ParentQty = getDefaultFloatIfEmpty($("#PODetail_ParentQuantity").val());
-        var TotalQty = parseFloat((ConvertValue * ParentQty) + ChildQty);
-        $("#PODetail_Quantity").val(TotalQty).trigger('input');
-    }
-
-    // ===============================Calculate Total Price==================================
-
-    //function CalcTotalPrice() {
-    //    var unitPrice = getDefaultFloatIfEmpty($('#PODetail_MRPRateParent').val());
-    //    var perUnitQty = getDefaultFloatIfEmpty($('#PODetail_ConvertValue').val());
-    //    var tQty = getDefaultFloatIfEmpty($('#PODetail_Quantity').val());
-
-    //    var tAmount = (unitPrice / perUnitQty) * tQty;
-    //    $('#PODetail_TAmount').val(getDefaultFloatIfEmpty(tAmount.toFixed(3) // modified line
-    //    ));
-
-    //}
-
-    function CalcTotalPrice() {
-        var unitPrice = getDefaultFloatIfEmpty($('#PODetail_MRPRateParent').val());
-        var perUnitQty = getDefaultFloatIfEmpty($('#PODetail_ConvertValue').val());
-        var tQty = getDefaultFloatIfEmpty($('#PODetail_Quantity').val());
-        //alert(tQty);
-
-        var tAmount = ((unitPrice / perUnitQty) * tQty).toFixed(3);
-
-        // Check if the decimal part is less than 0.15
-        //var decimalPart = tAmount % 1;
-        //var roundedAmount = Math.abs(decimalPart - 0.20) < 0.0001 ? Math.round(tAmount) : tAmount;
-
-        // Display the result with three decimal places or rounded value
-        $('#PODetail_TAmount').val(getDefaultFloatIfEmpty(tAmount));
-    }
-
-
-
-
-
-
-    $("#PODetail_RatePerArea").on('input', function () {
-        CalculateTotalArea();
-    });
-
-    function CalculateTotalArea() {
-        var SizeName = $("#PODetail_SizeName").val();
-        var spSize = SizeName.split('x');
-        var CategoryName = $('#CategoryName').val();
-        if (CategoryName == "Tiles") {
-            var TotalQty = $("#PODetail_Quantity").val();
-            //var SqMPerPCS = ((parseFloat(spSize[0] * spSize[1])) / 10000); //sq m
-            var AreaPerCarton = $("#PODetail_AreaPerCarton").val();
-            var ConvertValue = getDefaultFloatIfEmpty($("#PODetail_ConvertValue").val());
-            var SqFtPerPcs = parseFloat(AreaPerCarton / ConvertValue);//sq ft
-            var TotalAreaSqft = parseFloat((SqFtPerPcs * TotalQty)); //sq ft
-            $("#PODetail_TotalArea").val(TotalAreaSqft);
-            var RatePerSqFt = getDefaultFloatIfEmpty($("#PODetail_RatePerArea").val()); //rate per sq ft
-            var RatePerPcs = parseFloat(SqFtPerPcs * RatePerSqFt);
-            $("#PODetail_MRPRate").val(RatePerPcs).trigger('input');
-            // var AreaPerCarton = parseFloat(ConvertValue * SqFtPerPcs);
-            //$("#PODetail_AreaPerCarton").val(AreaPerCarton).trigger('input');
-        }
-    }
-
-    //**************************
-    //Per Product Event end
-    //**************************
-
-
-
-
-    //Flat discount Percentage
-    $("#PurchaseOrder_TotalDiscountPercentage").on("input", function () {
-        var totalPercentage = getDefaultFloatIfEmpty($(this).val());
-        var totalAmount = getDefaultFloatIfEmpty($("#PurchaseOrder_GrandTotal").val());
-        var totalDiscountAmount = getDefaultFloatIfEmpty((totalAmount * totalPercentage) / 100).toFixed(2);
-        $("#PurchaseOrder_TotalDiscountAmount").val(totalDiscountAmount);
-        calculateVariousValue(totalDiscountAmount, totalAmount);
-    });
-
-    //Flat discount Amount
-    $("#PurchaseOrder_TotalDiscountAmount").on("input", function () {
-        var totalDiscountAmount = getDefaultFloatIfEmpty($(this).val());
-        var totalAmount = getDefaultFloatIfEmpty($("#PurchaseOrder_GrandTotal").val());
-        var totalPercentage = getDefaultFloatIfEmpty((100 * totalDiscountAmount) / totalAmount).toFixed(2);
-
-        $("#PurchaseOrder_TotalDiscountPercentage").val(totalPercentage);
-        calculateVariousValue(totalDiscountAmount, totalAmount);
-    });
-
-
-    $("#PurchaseOrder_LabourCost").on("input", function () {
-        var totalAmount = getDefaultFloatIfEmpty($("#PurchaseOrder_GrandTotal").val());
-        var totalDiscountAmount = getDefaultFloatIfEmpty($("#PurchaseOrder_TotalDiscountAmount").val());
-        calculateVariousValue(totalDiscountAmount, totalAmount);
-    });
-
-    function calculateVariousValue(flatDiscountAmt, grandtotalAmount) {
-        var resultFromSysinfo = '@ViewBag.IsLabourCostDeduct';
-        //alert(resultFromSysinfo);
-        //var discountAmount = getDefaultFloatIfEmpty($("#PurchaseOrder_PPDiscountAmount").val());
-        var tempFlatDisAmt = getDefaultFloatIfEmpty($("#PurchaseOrder_tempFlatDiscountAmount").val());
-        var tempNetDisAmt = getDefaultFloatIfEmpty($("#PurchaseOrder_tempNetDiscount").val());
-        var updatedflatDiscountAmount = parseFloat(flatDiscountAmt) - parseFloat(tempFlatDisAmt);
-        var labourCost = getDefaultFloatIfEmpty($("#PurchaseOrder_LabourCost").val());
-        var recieveAmount = getDefaultFloatIfEmpty($("#PurchaseOrder_RecieveAmount").val());
-        var adjAmount = getDefaultFloatIfEmpty($("#PurchaseOrder_AdjAmount").val());
-        //var dueAmount = getDefaultFloatIfEmpty($("#PurchaseOrder_CurrentDue").val());
-        var updateNetDisAmt = tempNetDisAmt + updatedflatDiscountAmount;
-        $("#PurchaseOrder_NetDiscount").val(getDefaultFloatIfEmpty(updateNetDisAmt).toFixed(2));
-
-        if (resultFromSysinfo === "True") {
-            $("#PurchaseOrder_TotalAmount").val((getDefaultFloatIfEmpty(grandtotalAmount - (updateNetDisAmt + adjAmount)) - labourCost).toFixed(2));
-            $("#PurchaseOrder_PaymentDue").val(getDefaultFloatIfEmpty((getDefaultFloatIfEmpty(grandtotalAmount - (updateNetDisAmt + adjAmount)) - labourCost) - recieveAmount).toFixed(2));
-        }
-        else {
-            $("#PurchaseOrder_TotalAmount").val((getDefaultFloatIfEmpty(grandtotalAmount - (updateNetDisAmt + adjAmount)) + labourCost).toFixed(2));
-            $("#PurchaseOrder_PaymentDue").val(getDefaultFloatIfEmpty((getDefaultFloatIfEmpty(grandtotalAmount - (updateNetDisAmt + adjAmount)) + labourCost) - recieveAmount).toFixed(2));
-        }
-        //$("#PurchaseOrder_TotalAmount").val((getDefaultFloatIfEmpty(grandtotalAmount - (updateNetDisAmt + adjAmount)) + labourCost).toFixed(2));
-        //$("#PurchaseOrder_PaymentDue").val(getDefaultFloatIfEmpty((getDefaultFloatIfEmpty(grandtotalAmount - (updateNetDisAmt + adjAmount)) + labourCost) - recieveAmount).toFixed(2));
-    }
-
-    $("#PurchaseOrder_RecieveAmount").on("input", function () {
-        var totalAmount = getDefaultFloatIfEmpty($("#PurchaseOrder_GrandTotal").val());
-        var totalDiscountAmount = getDefaultFloatIfEmpty($("#PurchaseOrder_TotalDiscountAmount").val());
-        calculateVariousValue(totalDiscountAmount, totalAmount);
-    });
-
-    $("#PurchaseOrder_AdjAmount").on("input", function () {
-        var totalAmount = getDefaultFloatIfEmpty($("#PurchaseOrder_GrandTotal").val());
-        var totalDiscountAmount = getDefaultFloatIfEmpty($("#PurchaseOrder_TotalDiscountAmount").val());
-        calculateVariousValue(totalDiscountAmount, totalAmount);
-    });
-
-
-
-</script>
-
-
-
-<script>
-
-
-    $(document).ready(function () {
-
-        $("#btnNewSaveProduct").click(function () {
-
-            var productData = {
-
-                ProductName: $("#ProductName").val(),
-                CompanyId: $("#CompanyId").val(),
-                CategoryId: $("#CategoryId").val(),
-                SizeID: $("#SizeID").val(),
-
-                SizeName: $("#SizeName").val(),
-                CompanyName: $("#CompanyName").val(),
-                CategoryName: $("#CategoryName").val(),
-
-                IDCode: $("#IDCode").val(),
-
-                UnitType: $("#UnitType").val(),
-
-                RP: $("#mRP").val() || 0,
-
-                MRP: $("#mMRP").val() || 0,
-
-                LimitedStkQty: $("#mLimitedStkQty").val() || 0,
-
-                ProductType: $("#ProductType").val(),
-
-                BundleQty: 0,
-
-                ServiceWarrentyMonth: "0 Month(s)",
-
-                SparePartsWarrentyMonth: "0 Month(s)"
-            };
-
-            console.log(productData);
-
-            if (!productData.ProductName ||
-                !productData.CompanyId ||
-                !productData.CategoryId ||
-                !productData.UnitType) {
-
-                toastr.warning("Please fill Name, Company, Category and Unit.");
-                return;
-            }
-
-            $.ajax({
-
-                type: "POST",
-
-                url: "/product/AddProduct",
-
-                data: productData,
-
-                success: function (response) {
-
-                    if (response.result) {
-
-                        toastr.success(response.msg);
-
-                        var p = response.data;
-
-                        $('#ProductsId').val(p.ProductID);
-                        $('#ProductsCode').val(p.Code);
-                        $('#ProductsName').val(p.ProductName);
-                        $('#ProductsType').val(p.ProductType);
-
-                        $('#PODetail_MRPRateParent')
-                            .val(p.RP)
-                            .trigger("input");
-
-                        $('#PODetail_SalesRate')
-                            .val(p.MRP)
-                            .trigger("input");
-
-                        if (typeof loadProducts === "function") {
-                            loadProducts(true);
-                        }
-
-                        $('#newProductAddModal').modal('hide');
-
-                    } else {
-
-                        toastr.error(response.msg);
-                    }
-                },
-
-                error: function (xhr) {
-
-                    console.log(xhr);
-
-                    toastr.error("An error occurred while saving the product.");
-                }
-            });
-
-        });
-
-    });
-</script>
-
-
-@section scripts {
-    <!-- CSS and JS Libraries -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/css/bootstrap-datetimepicker.min.css" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/js/bootstrap-datetimepicker.min.js"></script>
-
-    <script type="text/javascript">
-        $(document).ready(function () {
-            // Date Picker Initialization
-            var dateOptions = {
-                format: 'DD-MMM-YYYY',
-                showTodayButton: true,
-                allowInputToggle: true,
-                maxDate: moment(), 
-                icons: {
-                    time: 'mdi mdi-clock',
-                    date: 'mdi mdi-calendar',
-                    up: 'mdi mdi-chevron-up',
-                    down: 'mdi mdi-chevron-down',
-                    previous: 'mdi mdi-chevron-left',
-                    next: 'mdi mdi-chevron-right'
-                }
-            };
-
-            
-            $('#OrderDateContainer').datetimepicker(dateOptions);
-
-        
-            @{
-                if (Model != null && Model.PurchaseOrder.OrderDate != null)
-                {
-                    <text>
-                    $('#OrderDateContainer').data("DateTimePicker").date('@(Convert.ToDateTime(Model.PurchaseOrder.OrderDate).ToString("dd-MMM-yyyy"))');
-                    </text>
-                }
-                else {
-                    <text>
-                    $('#OrderDateContainer').data("DateTimePicker").date(moment());
-                    </text>
-                }
-            }
-        });
-    </script>
-}
-
-<!-- Select2 JS -->
-<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-
-<style>
-    /* Autocomplete list jate modal er upore thake */
-    .ui-autocomplete {
-        z-index: 99999999 !important;
-        max-height: 200px;
-        overflow-y: auto;
-        background-color: #fff;
-        border: 1px solid #ccc;
-    }
-
-    .col-md-4 {
-        padding-right: 0px !important;
-    }
-
-    .col-md-8 {
-        padding-left: 0px !important;
-    }
-
-
-
-
-    .form-horizontal .control-label {
-        text-align: left;
-        font-weight: bold;
-    }
-
-
-    .fix-width-picker {
-        padding-right: 5px !important;
-    }
-
-    .btn-action-align {
-        padding-left: 5px !important;
-        margin-top: 2px;
-    }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     #productDropdownList {
         position: absolute;
@@ -1966,10 +178,1236 @@
         border-radius: 4px;
         box-shadow: 0 6px 12px rgba(0,0,0,.175);
     }
-
-    #productDropdownItems {
-        max-height: 250px;
-        overflow-y: auto;
-    }
 </style>
 
+
+<!-- Top Breadcrumb Section Box -->
+<div class="page-title-box">
+    <div class="container-fluid">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h4 class="page-title mb-1">@actionName Purchase Order</h4>
+                <ol class="breadcrumb m-0">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index", "Home")">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index", "PurchaseOrder")">Purchase Orders</a></li>
+                    <li class="breadcrumb-item active">@actionName</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="page-content-wrapper">
+    <div class="container-fluid">
+        @using (Html.BeginForm(actionName, "PurchaseOrder", new { ReturnUrl = ViewBag.ReturnUrl, IsDO = false }, FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.HiddenFor(m => m.PODetail.GodownID)
+            @Html.HiddenFor(m => m.PODetail.ColorId)
+            @Html.HiddenFor(m => m.PODetail.PPOffer)
+            @Html.HiddenFor(m => m.PurchaseOrder.IsDamagePO)
+
+            <div class="row">
+                <!-- Left Block: Purchase Entry Form -->
+                <div class="col-md-6">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-header bg-transparent border-bottom">
+                            <h5 class="header-title mb-0"><i class="mdi mdi-cart-plus mr-2 text-primary"></i>Purchase Order Entry</h5>
+                        </div>
+                        <div class="card-body">
+                            <!-- Supplier Section -->
+                            <div class="form-group row mb-3">
+                                @Html.LabelFor(m => m.PurchaseOrder.SupplierId, new { @class = "col-md-3 col-form-label font-weight-bold" })
+                                <div class="col-md-6">
+                                    <div class="full-width-picker shadow-sm rounded">
+                                        @{Html.RenderAction("RenderPicker", "Picker", new { pickerType = PickerType.SupplierNew, id = (Model != null && !string.IsNullOrEmpty(Model.PurchaseOrder.SupplierId)) ? Model.PurchaseOrder.SupplierId : "0" });}
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <button type="button" class="btn btn-primary btn-sm btn-block h-100" data-toggle="modal" data-target="#SuppliersModal">
+                                        <i class="mdi mdi-plus-circle mr-1"></i> Add Supplier
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Product Section -->
+                            <div class="form-group row mb-4">
+                                @Html.LabelFor(m => m.PODetail.ProductId, new { @class = "col-md-3 col-form-label font-weight-bold" })
+                                <div class="col-md-6">
+                                    <div class="full-width-picker shadow-sm rounded">
+                                        @{Html.RenderAction("RenderPicker", "Picker", new { pickerType = PickerType.ProductNew, id = (Model != null && !string.IsNullOrEmpty(Model.PODetail.ProductId)) ? Model.PODetail.ProductId : "0" });}
+                                    </div>
+                                    @Html.ValidationMessageFor(m => m.PODetail.ProductId, "", new { @class = "text-danger small" })
+                                </div>
+                                <div class="col-md-3">
+                                    <button id="btnAddProduct" type="button" class="btn btn-info btn-sm btn-block h-100 text-white">
+                                        <i class="mdi mdi-package-variant-plus mr-1"></i> Add Product
+                                    </button>
+                                </div>
+                            </div>
+
+                            <hr class="my-4" />
+
+                            <!-- Quantity & Rate Section -->
+                            <div class="row">
+                                <div class="col-md-6 border-right">
+                                    <div class="form-group mb-3">
+                                        @Html.LabelFor(m => m.PODetail.ParentQuantity, new { @class = "small font-weight-bold text-muted", id = "lblParentUnit" })
+                                        @Html.EditorFor(m => m.PODetail.ParentQuantity, new { htmlAttributes = new { @class = "form-control form-control-sm text-right", type = "number", step = "0.01", tabindex = 1, placeholder = "0.00" } })
+                                        @Html.ValidationMessageFor(m => m.PODetail.ParentQuantity, "", new { @class = "text-danger small" })
+                                    </div>
+
+                                    <div id="divChildQuantity" style="display:none" class="form-group mb-3">
+                                        @Html.LabelFor(m => m.PODetail.ChildQuantity, new { @class = "small font-weight-bold text-muted", id = "lblChildUnit" })
+                                        @Html.EditorFor(m => m.PODetail.ChildQuantity, new { htmlAttributes = new { @class = "form-control form-control-sm text-right", type = "number", step = "0.01", tabindex = 1, placeholder = "0.00" } })
+                                        @Html.ValidationMessageFor(m => m.PODetail.ChildQuantity, "", new { @class = "text-danger small" })
+                                    </div>
+
+                                    <div class="form-group mb-3">
+                                        @Html.LabelFor(m => m.PODetail.MRPRateParent, new { @class = "small font-weight-bold text-muted", id = "lblMRPParent" })
+                                        @Html.EditorFor(m => m.PODetail.MRPRateParent, new { htmlAttributes = new { @class = "form-control form-control-sm text-right", type = "number", step = "0.01", tabindex = 2, placeholder = "0.00" } })
+                                        @Html.ValidationMessageFor(m => m.PODetail.MRPRateParent, "", new { @class = "text-danger small" })
+                                    </div>
+
+                                    <div style="display:none">
+                                        <div class="form-group" id="divUnitPrice">
+                                            @Html.LabelFor(m => m.PODetail.MRPRate, new { @class = "small font-weight-bold", id = "lblMRP" })
+                                            @Html.EditorFor(m => m.PODetail.MRPRate, new { htmlAttributes = new { @class = "form-control form-control-sm text-right", type = "number", step = "0.01" } })
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        @Html.LabelFor(m => m.PODetail.SalesRate, new { @class = "small font-weight-bold text-muted" })
+                                        @Html.EditorFor(m => m.PODetail.SalesRate, new { htmlAttributes = new { @class = "form-control form-control-sm text-right", type = "number", step = "0.01", tabindex = 6, placeholder = "0.00" } })
+                                        @Html.ValidationMessageFor(m => m.PODetail.SalesRate, "", new { @class = "text-danger small" })
+                                    </div>
+
+                                    <div class="form-group mb-4">
+                                        @Html.LabelFor(m => m.PODetail.TAmount, new { @class = "small font-weight-bold text-primary" })
+                                        @Html.EditorFor(m => m.PODetail.TAmount, new { htmlAttributes = new { @class = "form-control form-control-sm text-right bg-light font-weight-bold", type = "number", step = "0.01", @readonly = "readonly" } })
+                                    </div>
+
+                                    <!-- Hidden Fields -->
+                                    <div style="display:none">
+                                        @Html.EditorFor(m => m.PODetail.UnitType)
+                                        @Html.EditorFor(m => m.PODetail.TempChildUnitType)
+                                        @Html.EditorFor(m => m.PODetail.Quantity)
+                                        @Html.EditorFor(m => m.PODetail.SizeName)
+                                    </div>
+
+                                    <div class="text-right pt-2">
+                                        <button type="submit" name="addButton" value="Add to order" class="btn btn-success btn-sm px-4 shadow">
+                                            <i class="mdi mdi-plus-box mr-1"></i> Add to List
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Block: Order Info & Metadata -->
+                <div class="col-md-6">
+                    <div class="card shadow-sm border-0 mb-3">
+                        <div class="card-header bg-soft-primary border-bottom-0">
+                            <h5 class="header-title mb-0 font-size-14 text-primary">
+                                <i class="mdi mdi-information-outline mr-1"></i> Order Information
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6 border-right">
+                                    <div class="form-group mb-2">
+                                        @Html.LabelFor(m => m.PurchaseOrder.CurrentDue, new { @class = "small font-weight-bold text-muted mb-1" })
+                                        @Html.EditorFor(m => m.PurchaseOrder.CurrentDue, new { htmlAttributes = new { @class = "form-control form-control-sm text-right bg-soft-danger font-weight-bold text-danger", @readonly = "readonly" } })
+                                    </div>
+
+                                    <div class="form-group mb-2">
+                                        @Html.LabelFor(m => m.PODetail.UnitPrice, new { @class = "small font-weight-bold text-muted mb-1" })
+                                        @Html.HiddenFor(m => m.PODetail.UnitPrice)
+                                        <input type="number" name="tmpUnitPrice" id="tmpUnitPrice" class="form-control form-control-sm text-right bg-light" readonly />
+                                    </div>
+
+                                    <div class="form-group mb-0">
+                                        @Html.LabelFor(m => m.PurchaseOrder.GrandTotal, new { @class = "small font-weight-bold text-muted mb-1" })
+                                        @Html.EditorFor(m => m.PurchaseOrder.GrandTotal, new { htmlAttributes = new { @class = "form-control form-control-sm text-right font-weight-bold bg-soft-primary text-primary", @readonly = "readonly" } })
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="form-group mb-2">
+                                        @Html.LabelFor(m => m.PurchaseOrder.ChallanNo, new { @class = "small font-weight-bold text-muted mb-1" })
+                                        @Html.EditorFor(m => m.PurchaseOrder.ChallanNo, new { htmlAttributes = new { @class = "form-control form-control-sm", placeholder = "Enter Challan No" } })
+                                        @Html.ValidationMessageFor(m => m.PurchaseOrder.ChallanNo, "", new { @class = "text-danger small" })
+                                    </div>
+
+                                    <div class="form-group mb-2">
+                                        @Html.LabelFor(m => m.PurchaseOrder.OrderDate, new { @class = "small font-weight-bold text-muted mb-1" })
+                                        <div class="input-group input-group-sm date-picker" id="OrderDateContainer">
+                                            <input type='text' class="form-control" name='PurchaseOrder.OrderDate' id="OrderDate" />
+                                            <div class="input-group-append">
+                                                <span class="input-group-text"><i class="mdi mdi-calendar-month"></i></span>
+                                            </div>
+                                        </div>
+                                        @Html.ValidationMessageFor(m => m.PurchaseOrder.OrderDate, "", new { @class = "text-danger small" })
+                                    </div>
+
+                                    <div class="form-group mb-0">
+                                        @Html.LabelFor(m => m.PurchaseOrder.TotalAmount, new { @class = "small font-weight-bold text-muted mb-1" })
+                                        @Html.EditorFor(m => m.PurchaseOrder.TotalAmount, new { htmlAttributes = new { @class = "form-control form-control-sm text-right bg-light font-weight-bold", @readonly = "readonly" } })
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card shadow-sm border-0">
+                        <div class="card-header bg-soft-info border-bottom-0">
+                            <h5 class="header-title mb-0 font-size-14 text-info">
+                                <i class="mdi mdi-warehouse mr-1"></i> Storage & Area
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-group mb-3">
+                                @Html.LabelFor(m => m.PODetail.GodownID, new { @class = "small font-weight-bold text-muted mb-1" })
+                                <div class="shadow-sm rounded">
+                                    @{Html.RenderAction("RenderPicker", "Picker", new { pickerType = PickerType.Godown, id = (Model != null && !string.IsNullOrEmpty(Model.PODetail.GodownID)) ? Model.PODetail.GodownID : "0" });}
+                                </div>
+                                @Html.ValidationMessageFor(m => m.PODetail.GodownID, "", new { @class = "text-danger small" })
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6" id="RatePerAreadiv" style="display:none">
+                                    <div class="form-group mb-2">
+                                        @Html.LabelFor(m => m.PODetail.RatePerArea, new { @class = "small font-weight-bold text-muted mb-1" })
+                                        @Html.EditorFor(m => m.PODetail.RatePerArea, new { htmlAttributes = new { @class = "form-control form-control-sm text-right", type = "number", step = "0.01", tabindex = 2 } })
+                                    </div>
+                                </div>
+                                <div class="col-md-6" id="divUnitPrice" style="display:none">
+                                    <div class="form-group mb-2">
+                                        @Html.LabelFor(m => m.PODetail.MRPRate, new { @class = "small font-weight-bold text-muted mb-1", id = "lblMRP" })
+                                        @Html.EditorFor(m => m.PODetail.MRPRate, new { htmlAttributes = new { @class = "form-control form-control-sm text-right", type = "number", step = "0.01", tabindex = 2 } })
+                                    </div>
+                                </div>
+                                <div class="col-md-6" id="TotalAreadiv" style="display:none">
+                                    <div class="form-group mb-2">
+                                        @Html.LabelFor(m => m.PODetail.TotalArea, new { @class = "small font-weight-bold text-muted mb-1" })
+                                        @Html.EditorFor(m => m.PODetail.TotalArea, new { htmlAttributes = new { @class = "form-control form-control-sm text-right bg-light", type = "number", step = "0.01", @readonly = "readonly" } })
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group mb-2" style="display:none">
+                                        @Html.LabelFor(m => m.PODetail.ConvertValue, new { @class = "small font-weight-bold text-muted mb-1", id = "lblConvertValue" })
+                                        @Html.EditorFor(m => m.PODetail.ConvertValue, new { htmlAttributes = new { @class = "form-control form-control-sm text-right", @readonly = "readonly" } })
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div style="display: none">
+                                @Html.LabelFor(m => m.PODetail.Category, new { @class = "control-label", id = "lblSize" })
+                                @Html.EditorFor(m => m.PODetail.Category, new { htmlAttributes = new { @class = "form-control text-right", @readonly = "readonly" } })
+                            </div>
+
+                            <div class="alert bg-soft-info border-0 mb-0 mt-2 p-2">
+                                <p class="mb-0 small text-info"><i class="mdi mdi-alert-circle-outline mr-1"></i> Additional details are automatically calculated based on selection.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lower Section: Table List & Payment Summary -->
+            <div class="row mt-4">
+                <div class="col-xl-7">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-header bg-transparent border-bottom">
+                            <h5 class="header-title mb-0">
+                                <i class="mdi mdi-format-list-bulleted mr-1 text-primary"></i> Order Items
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table id="productTable"
+                                       data-toggle="table"
+                                       data-search="true"
+                                       data-search-align="left"
+                                       data-height="300"
+                                       class="table table-centered table-nowrap mb-0 table-hover table-bordered">
+                                    <thead class="thead-light">
+                                        <tr>
+                                            <th style="width: 50px;">Sl</th>
+                                            <th>@Html.DisplayNameFor(model => model.PODetail.ProductName)</th>
+                                            <th>@Html.DisplayNameFor(model => model.PODetail.Category)</th>
+                                            <th>Unit</th>
+                                            <th>Size</th>
+                                            <th class="text-right">Qty</th>
+                                            <th class="text-right">Rate</th>
+                                            <th class="text-right">Total</th>
+                                            <th class="text-center" style="width: 90px;">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @{
+                                            int c = 1;
+                                            foreach (var item in Model.PODetails)
+                                            {
+                                                if (item.Status == EnumStatus.Updated || item.Status == EnumStatus.Deleted) { continue; }
+                                                var qty = Math.Round((Convert.ToDecimal(item.Quantity) / Convert.ToDecimal(item.ConvertValue)), 2);
+                                                var unitPrice = Math.Round((Convert.ToDecimal(item.UnitPrice) * Convert.ToDecimal(item.ConvertValue)), 2);
+
+                                                <tr>
+                                                    <td>@c</td>
+                                                    <td class="font-weight-bold">@item.ProductName</td>
+                                                    <td><span class="badge badge-soft-info">@item.Category</span></td>
+                                                    <td>@item.UnitType</td>
+                                                    <td>@item.SizeName</td>
+                                                    <td class="text-right">@qty</td>
+                                                    <td class="text-right">@unitPrice</td>
+                                                    <td class="text-right font-weight-bold text-primary">@item.TAmount</td>
+                                                    <td class="text-center">
+                                                        <div class="btn-group">
+                                                            <a href="@Url.Action("EditFromView", "PurchaseOrder", new { id = item.ProductId, cid = item.ColorId, previousAction = actionName.ToLower(), IsDO = false })" class="btn btn-outline-info btn-sm">
+                                                                <i class="mdi mdi-pencil"></i>
+                                                            </a>
+                                                            <a href="@Url.Action("DeleteFromView", "PurchaseOrder", new { id = item.ProductId, cid = item.ColorId, previousAction = actionName.ToLower(), IsDO = false })" class="btn btn-outline-danger btn-sm" onclick="return confirm('Do you want to delete this item?');">
+                                                                <i class="mdi mdi-trash-can"></i>
+                                                            </a>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                c++;
+                                            }
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-5">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-header bg-soft-primary border-bottom-0">
+                            <h5 class="header-title mb-0 text-primary">
+                                <i class="mdi mdi-calculator mr-1"></i> Payment Summary
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6 border-right">
+                                    <div class="form-group mb-2 totalDiscountPercentage">
+                                        @Html.LabelFor(m => m.PurchaseOrder.TotalDiscountPercentage, new { @class = "small font-weight-bold text-muted mb-1" })
+                                        @Html.EditorFor(m => m.PurchaseOrder.TotalDiscountPercentage, new { htmlAttributes = new { @class = "form-control form-control-sm text-right", type = "number", step = "0.01" } })
+                                        @Html.HiddenFor(m => m.PurchaseOrder.PPDiscountAmount)
+                                    </div>
+
+                                    <div class="form-group mb-2 totalDiscountAmount">
+                                        @Html.LabelFor(m => m.PurchaseOrder.TotalDiscountAmount, new { @class = "small font-weight-bold text-muted mb-1" })
+                                        @Html.EditorFor(m => m.PurchaseOrder.TotalDiscountAmount, new { htmlAttributes = new { @class = "form-control form-control-sm text-right", type = "number", step = "0.01" } })
+                                        @Html.HiddenFor(m => m.PurchaseOrder.tempFlatDiscountAmount)
+                                    </div>
+
+                                    <div class="form-group mb-2">
+                                        @Html.LabelFor(m => m.PurchaseOrder.RecieveAmount, new { @class = "small font-weight-bold text-success mb-1" })
+                                        @Html.EditorFor(m => m.PurchaseOrder.RecieveAmount, new { htmlAttributes = new { @class = "form-control form-control-sm text-right border-success", type = "number", step = "0.01" } })
+                                    </div>
+
+                                    <div class="form-group mb-0 remarks">
+                                        @Html.LabelFor(m => m.PurchaseOrder.Remarks, new { @class = "small font-weight-bold text-muted mb-1" })
+                                        @Html.EditorFor(m => m.PurchaseOrder.Remarks, new { htmlAttributes = new { @class = "form-control form-control-sm", placeholder = "Notes..." } })
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="form-group mb-2 adjAmount">
+                                        @Html.LabelFor(m => m.PurchaseOrder.AdjAmount, new { @class = "small font-weight-bold text-muted mb-1" })
+                                        @Html.EditorFor(m => m.PurchaseOrder.AdjAmount, new { htmlAttributes = new { @class = "form-control form-control-sm text-right", type = "number", step = "0.01" } })
+                                    </div>
+
+                                    <div class="form-group mb-2 netDiscount">
+                                        @Html.LabelFor(m => m.PurchaseOrder.NetDiscount, new { @class = "small font-weight-bold text-muted mb-1" })
+                                        @Html.EditorFor(m => m.PurchaseOrder.NetDiscount, new { htmlAttributes = new { @class = "form-control form-control-sm text-right bg-light", @readonly = "readonly" } })
+                                        @Html.HiddenFor(m => m.PurchaseOrder.tempNetDiscount)
+                                    </div>
+
+                                    <div class="form-group mb-2 PaymentDue">
+                                        @Html.LabelFor(m => m.PurchaseOrder.PaymentDue, new { @class = "small font-weight-bold text-danger mb-1" })
+                                        @Html.EditorFor(m => m.PurchaseOrder.PaymentDue, new { htmlAttributes = new { @class = "form-control form-control-sm text-right bg-soft-danger font-weight-bold text-danger", @readonly = "readonly" } })
+                                    </div>
+
+                                    <div class="form-group mb-3 LabourCost">
+                                        @Html.LabelFor(m => m.PurchaseOrder.LabourCost, new { @class = "small font-weight-bold text-muted mb-1" })
+                                        @Html.EditorFor(m => m.PurchaseOrder.LabourCost, new { htmlAttributes = new { @class = "form-control form-control-sm text-right", type = "number", step = "0.01" } })
+                                    </div>
+
+                                    <div class="text-right">
+                                        <button type="button" class="btn btn-soft-info btn-sm mr-1 shadow-sm">
+                                            <i class="mdi mdi-eye-outline mr-1"></i> Preview
+                                        </button>
+                                        <button type="submit" name="submitButton" value="Save order" class="btn btn-primary btn-sm px-3 shadow">
+                                            <i class="mdi mdi-content-save-all mr-1"></i> Save Order
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Barcode Identifiers Hidden-Row -->
+            <div class="row mt-3">
+                <div class="col-md-6">
+                    <div class="row" style="display:none" id="imeiEntryRow">
+                        <div class="col-md-12">
+                            <div class="card shadow-sm border-0">
+                                <div class="card-header bg-soft-warning border-bottom-0">
+                                    <h5 class="header-title mb-0 font-size-14 text-warning">
+                                        <i class="mdi mdi-barcode-scan mr-1"></i> Product Identifiers (IMEI/Barcode)
+                                    </h5>
+                                </div>
+                                <div class="card-body p-0">
+                                    <div class="table-responsive">
+                                        <table id="productIdentifierTable" data-toggle="table" data-height="255" class="table table-sm table-centered table-nowrap mb-0 table-hover">
+                                            <thead class="thead-light">
+                                                <tr>
+                                                    <th style="width: 5%">Sl</th>
+                                                    <th style="width: 25%">Product Name</th>
+                                                    <th style="width: 30%">IMEI / Barcode</th>
+                                                    <th style="width: 30%">Damage IMEI</th>
+                                                    <th style="width: 10%" class="text-center">Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @{
+                                                    int i = 1;
+                                                    if (TempData["POProductDetails"] != null)
+                                                    {
+                                                        foreach (var item in (List<POProductDetail>)TempData["POProductDetails"])
+                                                        {
+                                                            <tr>
+                                                                <td>@i</td>
+                                                                <td class="font-weight-medium">@Model.PODetail.ProductName</td>
+                                                                <td>
+                                                                    <input type="text" class="form-control form-control-sm" value="@item.IMENO" name="@("IMEINo" + i)" placeholder="Scan Barcode" />
+                                                                </td>
+                                                                <td>
+                                                                    <input type="text" class="form-control form-control-sm bg-light" value="@item.DIMENO" name="@("DIMEINo" + i)" id="@("DIMEINo" + i)" readonly />
+                                                                </td>
+                                                                <td class="text-center">
+                                                                    @if (Model.PurchaseOrder.IsDamagePO)
+                                                                    {
+                                                                        <button type="button" id="@i" class="btn btn-soft-info btn-sm btnGetDamageProduct" title="Get Damage Product">
+                                                                            <i class="mdi mdi-information-outline"></i>
+                                                                        </button>
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        <button type="button" id="@i" class="btn btn-soft-secondary btn-sm btnGetDamageProduct" title="Get Damage Product" disabled>
+                                                                            <i class="mdi mdi-information-outline"></i>
+                                                                        </button>
+                                                                    }
+                                                                </td>
+                                                            </tr>
+                                                            i++;
+                                                        }
+                                                    }
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div class="card-footer bg-transparent border-top py-2">
+                                    <small class="text-muted"><i class="mdi mdi-help-circle-outline mr-1"></i> Use barcode scanner for faster entry.</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- ======================= MODAL WINDOWS ======================= -->
+<!-- 1. Damage Product Details Modal -->
+<div class="modal fade" id="DamageProductDetailsModal" tabindex="-1" role="dialog" aria-labelledby="damageModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-soft-danger border-bottom-0">
+                <h5 class="modal-title text-danger" id="damageModalLabel">
+                    <i class="mdi mdi-alert-octagon-outline mr-1"></i> Damage Return Product Details
+                </h5>
+                <button type="button" class="close text-danger" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body p-4">
+                <div id="ProductDetailstoolbar" class="mb-3 d-flex align-items-center">
+                    <span class="badge badge-soft-warning p-2">
+                        <i class="mdi mdi-alert-outline mr-1"></i> Note: Requires reload of the current page to reflect new items.
+                    </span>
+                </div>
+                <div class="table-responsive" style="max-height:350px; overflow-y: auto;">
+                    <table id="DamageProductDetailsTable" data-toggle="table" data-search="true" data-search-align="left" data-click-to-select="true" data-single-select="true" data-pagination="true" data-page-size="6" class="table table-sm table-centered table-nowrap mb-0 table-hover border">
+                        <thead class="thead-light">
+                            <tr>
+                                <th style="width: 50px;">Sl</th>
+                                <th data-field="code" data-sortable="true">Code</th>
+                                <th data-field="name" data-sortable="true">Product Name</th>
+                                <th data-field="category" data-sortable="true">Category</th>
+                                <th data-field="imeNo" data-sortable="true">Company</th>
+                                <th data-field="colorname" data-sortable="true">Color</th>
+                                <th data-field="mrpRate" data-sortable="true">IMEI/Barcode</th>
+                            </tr>
+                        </thead>
+                        <tbody class="font-size-13"></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-secondary btn-sm px-4" data-dismiss="modal">
+                    <i class="mdi mdi-close-circle-outline mr-1"></i> Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 2. Modal for Adding New Supplier -->
+<div class="modal fade" id="SuppliersModal" tabindex="-1" role="dialog" aria-labelledby="supplierModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-md modal-dialog-centered" role="document">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-soft-primary border-bottom-0">
+                <h5 class="modal-title text-primary" id="supplierModalLabel">
+                    <i class="mdi mdi-truck-delivery-outline mr-1"></i> Add New Supplier
+                </h5>
+                <button type="button" class="close text-primary" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body p-4">
+                <form id="ajaxSupplierForm">
+                    <div class="form-group row mb-3">
+                        <label class="col-md-4 col-form-label-sm font-weight-bold text-muted">Supplier Name</label>
+                        <div class="col-md-8">
+                            <input type="text" id="mSupplierName" name="Name" class="form-control form-control-sm" placeholder="Enter supplier name" required />
+                        </div>
+                    </div>
+                    <div class="form-group row mb-3">
+                        <label class="col-md-4 col-form-label-sm font-weight-bold text-muted">Contact No</label>
+                        <div class="col-md-8">
+                            <input type="text" id="mSupplierContact" name="ContactNo" class="form-control form-control-sm" placeholder="e.g. 017xxxxxxxx" required />
+                        </div>
+                    </div>
+                    <div class="form-group row mb-3">
+                        <label class="col-md-4 col-form-label-sm font-weight-bold text-muted">Address</label>
+                        <div class="col-md-8">
+                            <textarea id="mAddress" name="Address" class="form-control form-control-sm" rows="2" placeholder="Full address..."></textarea>
+                        </div>
+                    </div>
+                    <div class="form-group row mb-3">
+                        <label class="col-md-4 col-form-label-sm font-weight-bold text-muted">Opening Due</label>
+                        <div class="col-md-8">
+                            <div class="input-group input-group-sm">
+                                <div class="input-group-prepend"><span class="input-group-text">৳</span></div>
+                                <input type="number" id="mOpeningDue" name="OpeningDue" class="form-control form-control-sm text-right" value="0" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group row mb-3">
+                        <label class="col-md-4 col-form-label-sm font-weight-bold text-muted">Remarks</label>
+                        <div class="col-md-8">
+                            <textarea id="mRemarks" name="Remarks" class="form-control form-control-sm" rows="1" placeholder="Short note..."></textarea>
+                        </div>
+                    </div>
+                    <hr class="my-4" />
+                    <div class="form-group row mb-0">
+                        <div class="col-md-8 offset-md-4">
+                            <div class="custom-control custom-checkbox">
+                                <input type="checkbox" class="custom-control-input" id="mIsBoth" name="IsBoth" value="true">
+                                <label class="custom-control-label font-weight-bold text-primary" for="mIsBoth" style="cursor:pointer;">Also a Customer?</label>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer bg-light border-top-0">
+                <button type="button" class="btn btn-secondary btn-sm px-4" data-dismiss="modal">
+                    <i class="mdi mdi-close-circle-outline mr-1"></i> Cancel
+                </button>
+                <button type="button" id="btnSaveSupplierAjax" class="btn btn-primary btn-sm px-4 shadow-sm">
+                    <i class="mdi mdi-content-save-outline mr-1"></i> Save Supplier
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 3. Modal for Adding New Product -->
+<div id="newProductAddModal" class="modal fade" role="dialog" aria-labelledby="addNewHeader" aria-hidden="true">
+    <div class="modal-dialog modal-md modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-soft-info border-bottom-0">
+                <h5 class="modal-title text-info" id="addNewHeader"><i class="mdi mdi-cart-plus mr-1"></i> Add New Product</h5>
+                <button type="button" class="close text-info" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="form-horizontal">
+                    <div class="form-group row mb-3">
+                        <label class="col-md-3 col-form-label-sm font-weight-bold text-muted">Product Name</label>
+                        <div class="col-md-9">
+                            @Html.Editor("ProductName", new { htmlAttributes = new { @class = "form-control form-control-sm", placeholder = "Enter product name", id = "mProductName" } })
+                        </div>
+                    </div>
+                    <div class="form-group row mb-3">
+                        <label class="col-md-3 col-form-label-sm font-weight-bold text-muted">Company</label>
+                        <div class="col-md-9">
+                            <div class="input-group input-group-sm shadow-sm">
+                                @Html.Hidden("CompanyId")
+                                @Html.Editor("CompanyName", new { htmlAttributes = new { @class = "form-control form-control-sm", placeholder = "Select company" } })
+                                <div class="input-group-append">
+                                    <button id="btnAddCompany" type="button" class="btn btn-info" title="Add Company"><i class="mdi mdi-plus"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group row mb-3">
+                        <label class="col-md-3 col-form-label-sm font-weight-bold text-muted">Category</label>
+                        <div class="col-md-9">
+                            <div class="input-group input-group-sm shadow-sm">
+                                @Html.Hidden("CategoryId")
+                                @Html.Editor("CategoryName", new { htmlAttributes = new { @class = "form-control form-control-sm", placeholder = "Select category" } })
+                                <div class="input-group-append">
+                                    <button id="btnAddCategory" type="button" class="btn btn-info"><i class="mdi mdi-plus"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group row mb-3">
+                        <label class="col-md-3 col-form-label-sm font-weight-bold text-muted">Size</label>
+                        <div class="col-md-9">
+                            <div class="input-group input-group-sm shadow-sm">
+                                @Html.Hidden("SizeID")
+                                @Html.Editor("SizeName", new { htmlAttributes = new { @class = "form-control form-control-sm", placeholder = "Select size" } })
+                                <div class="input-group-append">
+                                    <button id="btnAddSize" type="button" class="btn btn-info"><i class="mdi mdi-plus"></i></button>
+                                </div>
+                            </div>
+                            @Html.ValidationMessage("SizeID", "", new { @class = "text-danger small" })
+                        </div>
+                    </div>
+                    <div class="form-group row mb-3">
+                        <label class="col-md-3 col-form-label-sm font-weight-bold text-muted">Unit Type</label>
+                        <div class="col-md-9">
+                            <div class="input-group input-group-sm shadow-sm">
+                                @Html.Hidden("UnitType")
+                                @Html.Editor("UnitTypeName", new { htmlAttributes = new { @class = "form-control form-control-sm", placeholder = "Select unit type" } })
+                                <div class="input-group-append">
+                                    <button id="btnAddUnitType" type="button" class="btn btn-info"><i class="mdi mdi-plus"></i></button>
+                                </div>
+                            </div>
+                            @Html.ValidationMessage("UnitType", "", new { @class = "text-danger small" })
+                        </div>
+                    </div>
+                    <hr class="my-4" />
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label class="small font-weight-bold text-muted mb-1">Purchase Rate</label>
+                                <div class="input-group input-group-sm">
+                                    <div class="input-group-prepend"><span class="input-group-text bg-light border-right-0">৳</span></div>
+                                    <input type="number" id="mRP" class="form-control form-control-sm text-right" placeholder="0.00" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label class="small font-weight-bold text-muted mb-1">MRP Rate</label>
+                                <div class="input-group input-group-sm">
+                                    <div class="input-group-prepend"><span class="input-group-text bg-light border-right-0">৳</span></div>
+                                    <input type="number" id="mMRP" class="form-control form-control-sm text-right" placeholder="0.00" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label class="small font-weight-bold text-muted mb-1">Low Stock Qty</label>
+                                <input type="number" id="mLimitedStkQty" class="form-control form-control-sm text-right" placeholder="Min Qty" />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label class="small font-weight-bold text-muted mb-1">Product Type</label>
+                                @Html.DropDownList("ProductType", new SelectList(Enum.GetValues(typeof(EnumProductType)).Cast<EnumProductType>().Select(x => new { ID = (int)x, Name = x.ToString() }).ToList(), "ID", "Name", (int)EnumProductType.NoBarcode), new { @class = "form-control form-control-sm shadow-sm" })
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer bg-light border-top-0">
+                <button type="button" class="btn btn-secondary btn-sm px-4" data-dismiss="modal"><i class="mdi mdi-close-circle-outline mr-1"></i> Cancel</button>
+                <button type="button" class="btn btn-primary btn-sm px-4 shadow-sm" id="btnNewSaveProduct"><i class="mdi mdi-content-save-outline mr-1"></i> Save Product</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 4. Modal for Quick Entry (Company/Category/Size etc.) -->
+<div id="newEntryModal" class="modal fade" role="dialog" aria-labelledby="addEntryNewHeader" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered shadow-lg">
+        <div class="modal-content border-0">
+            <div class="modal-header bg-soft-primary border-bottom-0">
+                <h5 class="modal-title text-primary" id="addEntryNewHeader"><i class="mdi mdi-plus-box-outline mr-1"></i> Add New Entry</h5>
+                <button type="button" class="close text-primary" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group row mb-3">
+                            <label id="lblEntryName" class="col-md-3 col-form-label-sm font-weight-bold text-muted text-right">Name:</label>
+                            <div class="col-md-9">
+                                <input type="text" class="form-control form-control-sm shadow-sm" autofocus id="newName" placeholder="Enter name" />
+                                <input type="hidden" id="entryType" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row" id="divPCategory" style="display:none">
+                    <div class="col-md-12">
+                        <div class="form-group row mb-0">
+                            @Html.Label("PCategoryID", new { @class = "col-md-3 col-form-label-sm font-weight-bold text-muted text-right" })
+                            <div class="col-md-9">
+                                @Html.Hidden("PCategoryID")
+                                @Html.Editor("PCategoryName", new { htmlAttributes = new { @class = "form-control form-control-sm shadow-sm", placeholder = "Select category" } })
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer bg-light border-top-0">
+                <button type="button" class="btn btn-secondary btn-sm px-4" data-dismiss="modal"><i class="mdi mdi-close-circle-outline mr-1"></i> Close</button>
+                <button type="button" class="btn btn-primary btn-sm px-4 shadow-sm" id="btnAddCompanyCategory"><i class="mdi mdi-check-circle-outline mr-1"></i> Add Now</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="~/Scripts/productConfig.js"></script>
+
+@section scripts {
+    <!-- CSS and JS Libraries -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/css/bootstrap-datetimepicker.min.css" />
+    <link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.18.3/dist/bootstrap-table.min.css">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/js/bootstrap-datetimepicker.min.js"></script>
+    <script src="https://unpkg.com/bootstrap-table@1.18.3/dist/bootstrap-table.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            // Prevent Enter key form submission
+            $(window).keydown(function (event) {
+                if (event.keyCode == 10 || event.keyCode == 13) {
+                    event.preventDefault();
+                    return false;
+                }
+            });
+
+            // Date Picker Initialization
+            var dateOptions = {
+                format: 'DD-MMM-YYYY',
+                showTodayButton: true,
+                allowInputToggle: true,
+                maxDate: moment(),
+                icons: {
+                    time: 'mdi mdi-clock',
+                    date: 'mdi mdi-calendar',
+                    up: 'mdi mdi-chevron-up',
+                    down: 'mdi mdi-chevron-down',
+                    previous: 'mdi mdi-chevron-left',
+                    next: 'mdi mdi-chevron-right'
+                }
+            };
+
+            $('#OrderDateContainer').datetimepicker(dateOptions);
+
+            @if (Model != null && Model.PurchaseOrder.OrderDate != null)
+            {
+                <text>
+                $('#OrderDateContainer').data("DateTimePicker").date('@(Convert.ToDateTime(Model.PurchaseOrder.OrderDate).ToString("dd-MMM-yyyy"))');
+                </text>
+            }
+            else
+            {
+                <text>
+                $('#OrderDateContainer').data("DateTimePicker").date(moment());
+                </text>
+            }
+
+            // Unit Type logic
+            var UnitType = $('#PODetail_UnitType').val();
+            var CUnitType = $('#PODetail_TempChildUnitType').val();
+            if (UnitType != null && UnitType !== "") {
+                if (UnitType.toLowerCase() == "pcs") {
+                    $("#divUnitPrice").hide();
+                    $("#divChildQuantity").hide();
+                } else {
+                    $("#lblParentUnit").text($.trim(UnitType));
+                    $("#lblChildUnit").text($.trim(CUnitType));
+                    $("#divUnitPrice").show();
+                    $("#divChildQuantity").show();
+                }
+            }
+        });
+
+        // Ajax Supplier Create
+        $("#btnSaveSupplierAjax").click(function () {
+            var supplierData = {
+                Name: $("#mSupplierName").val(),
+                ContactNo: $("#mSupplierContact").val(),
+                OpeningDue: $("#mOpeningDue").val() || 0,
+                Address: $("#mAddress").val(),
+                Remarks: $("#mRemarks").val(),
+                IsBoth: $("#mIsBoth").is(":checked") ? 1 : 0
+            };
+
+            $.ajax({
+                type: "POST",
+                url: "/supplier/CreateSupplierAjax",
+                data: supplierData,
+                success: function (response) {
+                    if (response.Result) {
+                        toastr.success(response.ErrorMsg);
+                        $('#SuppliersModal').modal('hide');
+
+                        var s = response.Supplier;
+                        $('#SuppliersId').val(s.Id);
+                        $('#SuppliersCode').val(s.Code);
+                        $('#SuppliersName').val(s.Name);
+                        $('[id*="CurrentDue"]').val(s.TotalDue);
+                        $('#dropdownLabel').text(s.Name + " (" + s.Code + ")");
+
+                        if(typeof updateFields === "function") updateFields(s);
+                        if(typeof loadSuppliers === "function") loadSuppliers(true);
+                        $("#ajaxSupplierForm")[0].reset();
+                    } else {
+                        toastr.error(response.ErrorMsg);
+                    }
+                },
+                error: function () {
+                    toastr.error("Server error occurred.");
+                }
+            });
+        });
+
+        // Damage Return IMEIs Logic
+        $('#ProductsModal').on('hidden.bs.modal', function () {
+            $("#PODetail_Quantity").trigger("input");
+        });
+
+        var _DIMEINo = "";
+        $(document).on("click", ".btnGetDamageProduct", function () {
+            _DIMEINo = "#DIMEINo" + this.id;
+            GetDamageReturnIMEI();
+            $('#DamageProductDetailsModal').modal('toggle');
+        });
+
+        function GetDamageReturnIMEI() {
+            var ProducctID = $("#ProductsId").val();
+            if (ProducctID == "" || ProducctID == undefined) {
+                toastr.info("Please Select Product.");
+                return;
+            }
+            var ColorID = $("#PODetail_ColorId").val();
+            if (ColorID == "" || ColorID == undefined) {
+                toastr.info("Please Select Color.");
+                return;
+            }
+            $.ajax({
+                url: "/PurchaseOrder/GetDamageReturnIMEI",
+                type: "GET",
+                data: { "ProductID": ProducctID, "ColorID": ColorID },
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (data) {
+                    if (data.Status == true) {
+                        PopulateDamageProductDetailsTable(data);
+                    }
+                },
+                error: function (err) {
+                    console.log(err);
+                }
+            });
+        }
+
+        function PopulateDamageProductDetailsTable(data) {
+            var $table = $("#DamageProductDetailsTable >tbody");
+            $table.empty();
+            var counter = 1;
+            data.Data.forEach(function (item) {
+                var $row = $('<tr/>');
+                $row.append('<td><input type="checkbox" class="chkbxProduct" name="chkbxProduct" value="' + item.IMENO + '"/></td><td>' + counter + '</td><td>' + item.ProductCode + '</td><td>' + item.ProductName + '</td><td>' + item.CategoryName + '</td><td>' + item.CompanyName + '</td><td>' + item.ColorName + '</td><td>' + item.IMENO + '</td>');
+                $table.append($row);
+                counter++;
+            });
+        }
+
+        $(document).on('change', 'input.chkbxProduct', function () {
+            $('input.chkbxProduct').not(this).prop('checked', false);
+            if(this.value) {
+                $(_DIMEINo).val(this.value);
+            } else {
+                $(_DIMEINo).val("");
+            }
+            checkDuplicateDIMEINo();
+            $('#DamageProductDetailsModal').modal('toggle');
+        });
+
+        $("#PurchaseOrder_IsDamagePO").on("change", function () {
+            $(".btnGetDamageProduct").prop("disabled", !this.checked);
+        });
+
+        // Quantity Input Event & Row Generation
+        $("#PODetail_Quantity").on("input", function () {
+            var purchaseRate = $("#PODetail_UnitPrice").val();
+            var TAmount = (parseInt($(this).val()) * parseFloat(purchaseRate));
+            $("#PODetail_TAmount").val(TAmount);
+
+            var productName = $('#ProductsName').val();
+            if (productName == '') {
+                toastr['error']('Please pick a product first.');
+                return;
+            }
+
+            var ProductType = $('#ProductsType').val();
+            var Quantity = $("#PODetail_Quantity").val();
+            $("#productIdentifierTable > tbody > tr.no-records-found").html('');
+            if (ProductType == "1" || ProductType == "3")
+                createProductIdentifierTableRows(Quantity);
+            else if (ProductType == "2") {
+                createProductIdentifierTableRows(1);
+                $("#IMEINo1").val("No Barcode");
+            }
+        });
+
+        function createProductIdentifierTableRows(quantity) {
+            var counterLimit = parseInt(quantity);
+            var preCount = 0;
+            var productName = $('#ProductsName').val();
+            var newRow = '';
+            var cols = '';
+            var ProductType = parseInt($('#ProductsType').val());
+
+            $("#productIdentifierTable tr").each(function (count, row) {
+                var $row = $(row);
+                if (!$row) return;
+                var $inputs = $row.find('input[name^="IMEINo"]');
+                if (!$inputs) return;
+                if (ProductType == 1 || ProductType == 2) {
+                    $inputs.each(function (count, input) {
+                        var val = $(input).val();
+                        if (val == '' || val == "No Barcode") {
+                            $(this).parents('tr').remove();
+                        } else {
+                            preCount = parseInt($(this).parent().siblings(":first").text());
+                        }
+                    });
+                } else {
+                    $inputs.each(function (count, input) {
+                        $(this).parents('tr').remove();
+                    });
+                }
+            });
+
+            var IsDamage = $("#PurchaseOrder_IsDamagePO").prop("checked") == true;
+
+            if (ProductType == 1 || ProductType == 2) {
+                for (var counter = (preCount + 1) ; counter <= counterLimit; counter++) {
+                    newRow = $("<tr>");
+                    cols = "";
+                    cols += '<td width="5%">' + counter + '</td>';
+                    cols += '<td width="26.84%">' + productName + '</td>';
+                    cols += '<td width="30%"><input type="text" class="form-control input-sm" onblur="checkDuplicateIMEINo()" oninput="moveCursorToNextInput(this)" name="IMEINo' + counter + '" id="IMEINo' + counter + '"/></td>';
+                    cols += '<td width="50%"><input type="text" readonly class="form-control input-sm" onblur="checkDuplicateDIMEINo()" oninput="moveCursorToNextInputForDamage(this)" name="DIMEINo' + counter + '" id="DIMEINo' + counter + '"/></td>';
+                    cols += '<td width="20%"><button type="button" id=' + counter + ' class="btn btn-xs btn-info btnGetDamageProduct" title="Get Damage Product" ' + (IsDamage ? '' : 'disabled') + '><i class="mdi mdi-information-outline"></i></button></td>';
+                    newRow.append(cols);
+                    $("#productIdentifierTable").append(newRow);
+                }
+            } else if (ProductType == 3) {
+                $.ajax({
+                    url: "/PurchaseOrder/GetUniqueBarCode",
+                    type: "GET",
+                    data: { 'MaxSize': 7, 'Quantity': quantity },
+                    dataType: "json",
+                    success: function (data) {
+                        for (var counter = (preCount + 1) ; counter <= counterLimit; counter++) {
+                            newRow = $("<tr>");
+                            cols = "";
+                            cols += '<td width="9.97%">' + counter + '</td>';
+                            cols += '<td width="26.84%">' + productName + '</td>';
+                            cols += '<td width="63.18%"><input type="text" class="form-control input-sm" name="IMEINo' + counter + '" id="IMEINo' + counter + '" value="' + data[counter - 1] + '" /></td>';
+                            cols += '<td width="50%"><input type="text" ' + (IsDamage ? '' : 'readonly') + ' class="form-control input-sm" onblur="checkDuplicateDIMEINo()" oninput="moveCursorToNextInputForDamage(this)" name="DIMEINo' + counter + '" id="DIMEINo' + counter + '"/></td>';
+                            newRow.append(cols);
+                            $("#productIdentifierTable").append(newRow);
+                        }
+                    }
+                });
+            }
+        }
+
+        function moveCursorToNextInput(x) {
+            if (!x.value) return;
+            @if(User.Identity.IsAuthenticated && (User.Identity.Name == "5" || User.Identity.Name == "6" || User.Identity.Name == "1")) { <text> return; </text> }
+            setTimeout(function () {
+                var $inputs = $(x).parents('tr').next('tr').find('input[name^="IMEINo"]');
+                $inputs.each(function (count, input) { $(input).focus(); });
+            }, 500);
+        }
+
+        function moveCursorToNextInputForDamage(x) {
+            if (!x.value) return;
+            @if(User.Identity.IsAuthenticated && (User.Identity.Name == "5" || User.Identity.Name == "6" || User.Identity.Name == "1")) { <text> return; </text> }
+            setTimeout(function () {
+                var $inputs = $(x).parents('tr').next('tr').find('input[name^="DIMEINo"]');
+                $inputs.each(function (count, input) { $(input).focus(); });
+            }, 500);
+        }
+
+        function checkDuplicateIMEINo() {
+            var previousVal = '';
+            var $inputs = $('#productIdentifierTable').find('input[name^="IMEINo"]');
+            $inputs.each(function (count, input) {
+                if ($(input).val() != '' && $(input).val().toLowerCase() == previousVal.toLowerCase()) {
+                    toastr['error']('Duplicate IMEI/Barcode found');
+                    $(input).val('').focus();
+                    return false;
+                }
+                previousVal = $(input).val();
+            });
+        }
+
+        function checkDuplicateDIMEINo() {
+            var previousVal = '';
+            var $inputs = $('#productIdentifierTable').find('input[name^="DIMEINo"]');
+            $inputs.each(function (count, input) {
+                if ($(input).val() != '' && $(input).val().toLowerCase() == previousVal.toLowerCase()) {
+                    toastr['error']('Duplicate IMEI/Barcode found');
+                    $(input).val('').focus();
+                    return false;
+                }
+                previousVal = $(input).val();
+            });
+        }
+
+        // Price Calculations Core Logic
+        function getDefaultFloatIfEmpty(val) { return parseFloat(val) || 0; }
+
+        $("#PODetail_MRPRateParent").on("input", function () {
+            var ConvertValue = getDefaultFloatIfEmpty($("#PODetail_ConvertValue").val());
+            if (ConvertValue != 0) {
+                var mrpRateParent = getDefaultFloatIfEmpty($(this).val());
+                $("#PODetail_MRPRate").val(mrpRateParent / ConvertValue).trigger('input');
+            }
+        });
+
+        $("#PODetail_MRPRate").on("input", function () {
+            var quantity = getDefaultFloatIfEmpty($("#PODetail_Quantity").val());
+            var mrpRate = getDefaultFloatIfEmpty($(this).val());
+            var total = (quantity * mrpRate);
+
+            var percentage = getDefaultFloatIfEmpty($("#PODetail_PPDisPercentage").val());
+            var PPDamount = ((mrpRate * percentage) / 100);
+            total -= (PPDamount * quantity);
+            var UnitPrice = (mrpRate - PPDamount);
+
+            var ExPercentage = getDefaultFloatIfEmpty($("#PODetail_ExtraPPDISPer").val());
+            var ExPPDamount = ((UnitPrice * ExPercentage) / 100);
+            total -= (ExPPDamount * quantity);
+            UnitPrice = (UnitPrice - ExPPDamount);
+
+            var PPOffer = getDefaultFloatIfEmpty($("#PODetail_PPOffer").val());
+            UnitPrice -= PPOffer;
+            total -= (PPOffer * quantity);
+
+            $("#PODetail_TAmount").val(getDefaultFloatIfEmpty(total));
+            $("#PODetail_PPDiscountAmount").val(PPDamount);
+            $("#PODetail_ExtraPPDISAmt").val(ExPPDamount);
+            $("#PODetail_UnitPrice").val(UnitPrice);
+            $("#PODetail_CRSalesRate3Month").val(mrpRate);
+        });
+
+        $("#PODetail_PPDisPercentage").on("input", function () {
+            var percentage = getDefaultFloatIfEmpty($(this).val());
+            var quantity = getDefaultFloatIfEmpty($("#PODetail_Quantity").val());
+            var mrpRate = getDefaultFloatIfEmpty($("#PODetail_MRPRate").val());
+
+            var PPDamount = ((mrpRate * percentage) / 100);
+            $("#PODetail_PPDiscountAmount").val(PPDamount);
+            var UnitPrice = mrpRate - PPDamount;
+            var total = (quantity * mrpRate) - (PPDamount * quantity);
+
+            var ExPercentage = getDefaultFloatIfEmpty($("#PODetail_ExtraPPDISPer").val());
+            var ExPPDamount = ((UnitPrice * ExPercentage) / 100);
+            total -= (ExPPDamount * quantity);
+            UnitPrice -= ExPPDamount;
+
+            var PPOffer = getDefaultFloatIfEmpty($("#PODetail_PPOffer").val());
+            UnitPrice -= PPOffer;
+            total -= (PPOffer * quantity);
+
+            $("#PODetail_ExtraPPDISAmt").val(ExPPDamount);
+            $("#PODetail_UnitPrice").val(UnitPrice);
+            $("#PODetail_TAmount").val(getDefaultFloatIfEmpty(total));
+        });
+
+        $("#PODetail_PPDiscountAmount").on("input", function () {
+            var PPDamount = getDefaultFloatIfEmpty($(this).val());
+            var quantity = getDefaultFloatIfEmpty($("#PODetail_Quantity").val());
+            var mrpRate = getDefaultFloatIfEmpty($("#PODetail_MRPRate").val());
+
+            var percentage = getDefaultFloatIfEmpty(((100 * PPDamount) / (quantity * mrpRate)) * quantity);
+            $("#PODetail_PPDisPercentage").val(percentage);
+            var UnitPrice = mrpRate - PPDamount;
+            var total = (quantity * mrpRate) - (PPDamount * quantity);
+
+            var PPOffer = getDefaultFloatIfEmpty($("#PODetail_PPOffer").val());
+            UnitPrice -= PPOffer;
+            total -= (PPOffer * quantity);
+
+            var ExPercentage = getDefaultFloatIfEmpty($("#PODetail_ExtraPPDISPer").val());
+            var ExPPDamount = ((UnitPrice * ExPercentage) / 100);
+            total -= (ExPPDamount * quantity);
+            UnitPrice -= ExPPDamount;
+
+            $("#PODetail_ExtraPPDISAmt").val(ExPPDamount);
+            $("#PODetail_UnitPrice").val(UnitPrice);
+            $("#PODetail_TAmount").val(getDefaultFloatIfEmpty(total));
+        });
+
+        // Event triggers for quantities
+        $("#PODetail_ParentQuantity, #PODetail_ChildQuantity").on('input', function () {
+            var ConvertValue = getDefaultFloatIfEmpty($("#PODetail_ConvertValue").val());
+            var ChildQty = getDefaultFloatIfEmpty($("#PODetail_ChildQuantity").val());
+            var ParentQty = getDefaultFloatIfEmpty($("#PODetail_ParentQuantity").val());
+            var TotalQty = parseFloat((ConvertValue * ParentQty) + ChildQty);
+            $("#PODetail_Quantity").val(TotalQty).trigger('input');
+
+            // Recalculate Area & Total
+            var SizeName = $("#PODetail_SizeName").val() || "0x0";
+            var spSize = SizeName.split('x');
+            if ($('#CategoryName').val() == "Tiles") {
+                var AreaPerCarton = $("#PODetail_AreaPerCarton").val();
+                var SqFtPerPcs = parseFloat(AreaPerCarton / ConvertValue);
+                var TotalAreaSqft = parseFloat((SqFtPerPcs * TotalQty));
+                $("#PODetail_TotalArea").val(TotalAreaSqft);
+                var RatePerSqFt = getDefaultFloatIfEmpty($("#PODetail_RatePerArea").val());
+                $("#PODetail_MRPRate").val(SqFtPerPcs * RatePerSqFt).trigger('input');
+            }
+
+            var unitPrice = getDefaultFloatIfEmpty($('#PODetail_MRPRateParent').val());
+            var tAmount = ((unitPrice / (ConvertValue || 1)) * TotalQty).toFixed(3);
+            $('#PODetail_TAmount').val(getDefaultFloatIfEmpty(tAmount));
+        });
+
+        // Payment Flat discount logic
+        $("#PurchaseOrder_TotalDiscountPercentage").on("input", function () {
+            var totalPercentage = getDefaultFloatIfEmpty($(this).val());
+            var totalAmount = getDefaultFloatIfEmpty($("#PurchaseOrder_GrandTotal").val());
+            var totalDiscountAmount = getDefaultFloatIfEmpty((totalAmount * totalPercentage) / 100).toFixed(2);
+            $("#PurchaseOrder_TotalDiscountAmount").val(totalDiscountAmount);
+            calculateVariousValue(totalDiscountAmount, totalAmount);
+        });
+
+        $("#PurchaseOrder_TotalDiscountAmount").on("input", function () {
+            var totalDiscountAmount = getDefaultFloatIfEmpty($(this).val());
+            var totalAmount = getDefaultFloatIfEmpty($("#PurchaseOrder_GrandTotal").val());
+            var totalPercentage = getDefaultFloatIfEmpty((100 * totalDiscountAmount) / totalAmount).toFixed(2);
+            $("#PurchaseOrder_TotalDiscountPercentage").val(totalPercentage);
+            calculateVariousValue(totalDiscountAmount, totalAmount);
+        });
+
+        $("#PurchaseOrder_LabourCost, #PurchaseOrder_RecieveAmount, #PurchaseOrder_AdjAmount").on("input", function () {
+            calculateVariousValue(getDefaultFloatIfEmpty($("#PurchaseOrder_TotalDiscountAmount").val()), getDefaultFloatIfEmpty($("#PurchaseOrder_GrandTotal").val()));
+        });
+
+        function calculateVariousValue(flatDiscountAmt, grandtotalAmount) {
+            var resultFromSysinfo = '@ViewBag.IsLabourCostDeduct';
+            var tempFlatDisAmt = getDefaultFloatIfEmpty($("#PurchaseOrder_tempFlatDiscountAmount").val());
+            var tempNetDisAmt = getDefaultFloatIfEmpty($("#PurchaseOrder_tempNetDiscount").val());
+            var updatedflatDiscountAmount = parseFloat(flatDiscountAmt) - tempFlatDisAmt;
+            var labourCost = getDefaultFloatIfEmpty($("#PurchaseOrder_LabourCost").val());
+            var recieveAmount = getDefaultFloatIfEmpty($("#PurchaseOrder_RecieveAmount").val());
+            var adjAmount = getDefaultFloatIfEmpty($("#PurchaseOrder_AdjAmount").val());
+            var updateNetDisAmt = tempNetDisAmt + updatedflatDiscountAmount;
+
+            $("#PurchaseOrder_NetDiscount").val(updateNetDisAmt.toFixed(2));
+
+            if (resultFromSysinfo === "True") {
+                $("#PurchaseOrder_TotalAmount").val((grandtotalAmount - (updateNetDisAmt + adjAmount) - labourCost).toFixed(2));
+                $("#PurchaseOrder_PaymentDue").val((grandtotalAmount - (updateNetDisAmt + adjAmount) - labourCost - recieveAmount).toFixed(2));
+            } else {
+                $("#PurchaseOrder_TotalAmount").val((grandtotalAmount - (updateNetDisAmt + adjAmount) + labourCost).toFixed(2));
+                $("#PurchaseOrder_PaymentDue").val((grandtotalAmount - (updateNetDisAmt + adjAmount) + labourCost - recieveAmount).toFixed(2));
+            }
+        }
+
+        // Product Modal Save Action
+        $("#btnNewSaveProduct").click(function () {
+            var productData = {
+                ProductName: $("#ProductName").val(),
+                CompanyId: $("#CompanyId").val(),
+                CategoryId: $("#CategoryId").val(),
+                SizeID: $("#SizeID").val(),
+                SizeName: $("#SizeName").val(),
+                CompanyName: $("#CompanyName").val(),
+                CategoryName: $("#CategoryName").val(),
+                IDCode: $("#IDCode").val(),
+                UnitType: $("#UnitType").val(),
+                RP: $("#mRP").val() || 0,
+                MRP: $("#mMRP").val() || 0,
+                LimitedStkQty: $("#mLimitedStkQty").val() || 0,
+                ProductType: $("#ProductType").val(),
+                BundleQty: 0,
+                ServiceWarrentyMonth: "0 Month(s)",
+                SparePartsWarrentyMonth: "0 Month(s)"
+            };
+
+            if (!productData.ProductName || !productData.CompanyId || !productData.CategoryId || !productData.UnitType) {
+                toastr.warning("Please fill Name, Company, Category and Unit.");
+                return;
+            }
+
+            $.ajax({
+                type: "POST",
+                url: "/product/AddProduct",
+                data: productData,
+                success: function (response) {
+                    if (response.result) {
+                        toastr.success(response.msg);
+                        var p = response.data;
+                        $('#ProductsId').val(p.ProductID);
+                        $('#ProductsCode').val(p.Code);
+                        $('#ProductsName').val(p.ProductName);
+                        $('#ProductsType').val(p.ProductType);
+                        $('#PODetail_MRPRateParent').val(p.RP).trigger("input");
+                        $('#PODetail_SalesRate').val(p.MRP).trigger("input");
+
+                        if (typeof loadProducts === "function") loadProducts(true);
+                        $('#newProductAddModal').modal('hide');
+                    } else {
+                        toastr.error(response.msg);
+                    }
+                },
+                error: function () {
+                    toastr.error("An error occurred while saving the product.");
+                }
+            });
+        });
+    </script>
+}

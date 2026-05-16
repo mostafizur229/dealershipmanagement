@@ -25,7 +25,6 @@
                 <div class="card shadow-sm">
                     <div class="card-body">
 
-                        @* ডেট ফিল্টার এবং ক্রিয়েট বাটন সেকশন *@
                         @using (Html.BeginForm("Index", "PurchaseOrder", FormMethod.Post, new { id = "searchForm" }))
                         {
                             <div class="row align-items-end mb-4">
@@ -65,7 +64,6 @@
 
                         <hr />
 
-                        @* কোম্পানি পেজের মতো সার্চ সম্বলিত টেবিল ডিজাইন *@
                         <div class="table-responsive">
                             <table id="purchaseOrderTable"
                                    data-toggle="table"
@@ -151,6 +149,7 @@
     <script type="text/javascript">
         $(document).ready(function () {
 
+            // ১. ডেট পিকার ইনিশিয়ালাইজেশন
             var dateOptions = {
                 format: 'DD-MMM-YYYY',
                 showTodayButton: true,
@@ -163,15 +162,63 @@
 
             $('#FromDateContainer').datetimepicker(dateOptions);
             $('#ToDateContainer').datetimepicker(dateOptions);
-       
+
+            // ২. ফিল্টার সাবমিট স্পিনার শো
             $('#searchForm').submit(function() {
                 $('#spinningIcon').show();
             });
-          
+
+            // ৩. কন্ডিশনাল রিপোর্ট AJAX কল হ্যান্ডলার (ক্লিন ও ফিক্সড)
             @{
-                if (TempData.ContainsKey("IsInvoiceReady") && Convert.ToBoolean(TempData["IsInvoiceReady"]))
+                if (TempData.ContainsKey("IsInvoiceReady") && Convert.ToBoolean(TempData["IsInvoiceReady"]) == true && (TempData.ContainsKey("IsPOSShow") && Convert.ToBoolean(TempData["IsPOSShow"]) == false))
                 {
-                    @:$.ajax({ url: "/Report/PurchaseInvoice", type: "GET", success: function (data) { $('#report').html(data); } });
+                    <text>
+                    $.ajax({
+                        url: "/Report/PurchaseInvoice",
+                        type: "GET",
+                        dataType: "html",
+                        success: function (data) {
+                            $('#report').html(data);
+                        },
+                        error: function (err) {
+                            console.error("Invoice Error: ", err);
+                        }
+                    });
+                    </text>
+                }
+
+                if (TempData.ContainsKey("IsInvoiceReadyById") && Convert.ToBoolean(TempData["IsInvoiceReadyById"]) == true && (TempData.ContainsKey("IsPOSShow") && Convert.ToBoolean(TempData["IsPOSShow"]) == false))
+                {
+                    <text>
+                    $.ajax({
+                        url: "/Report/PurchaseInvoiceById",
+                        type: "GET",
+                        dataType: "html",
+                        success: function (data) {
+                            $('#report').html(data);
+                        },
+                        error: function (err) {
+                            console.error("Invoice By ID Error: ", err);
+                        }
+                    });
+                    </text>
+                }
+
+                if (TempData.ContainsKey("IsPOSInvoiceReady") && Convert.ToBoolean(TempData["IsPOSInvoiceReady"]) == true && (TempData.ContainsKey("IsPOSShow") && Convert.ToBoolean(TempData["IsPOSShow"]) == true))
+                {
+                    <text>
+                    $.ajax({
+                        url: "/Report/PrintPOSInvoiceForPOById",
+                        type: "GET",
+                        dataType: "html",
+                        success: function (data) {
+                            $('#report').html(data);
+                        },
+                        error: function (err) {
+                            console.error("POS Invoice Error: ", err);
+                        }
+                    });
+                    </text>
                 }
             }
         });

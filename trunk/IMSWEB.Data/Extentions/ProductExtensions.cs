@@ -37,7 +37,7 @@ namespace IMSWEB.Data
                                    p.RP
                                }).ToListAsync();
 
-            return items.Select(x => new Tuple<int, string, string, decimal, string, string, string, Tuple<string, decimal, decimal,decimal, decimal>>
+            return items.Select(x => new Tuple<int, string, string, decimal, string, string, string, Tuple<string, decimal, decimal, decimal, decimal>>
                 (
                     x.ProductID,
                     x.ProductCode,
@@ -138,7 +138,7 @@ namespace IMSWEB.Data
                         new Tuple<string, string, string, string, string, string, int, Tuple<int, decimal, decimal, decimal, decimal, decimal, int>>
                             (x.CompressorWarrentyMonth,
                             x.PanelWarrentyMonth, x.MotorWarrentyMonth, x.SparePartsWarrentyMonth, x.ServiceWarrentyMonth, x.GodownName, x.UnitType,
-                            new Tuple<int, decimal, decimal, decimal, decimal, decimal,int>
+                            new Tuple<int, decimal, decimal, decimal, decimal, decimal, int>
                                 (
                                  x.SizeID, x.BundleQty, x.PurchaseCSft, x.SalesCSft, x.TotalSFT, x.AdvSRate, x.GodownId
                                 )
@@ -269,7 +269,7 @@ namespace IMSWEB.Data
                                Quantity = st != null ? st.Quantity : 0m,
                                ProductType = p.ProductType,
                                ChildUnitName = ut.UnitName,
-                               UnitType=p.ProUnitTypeID,
+                               UnitType = p.ProUnitTypeID,
                                ParentUnitName = ut.Description,
                                ConvertValue = p.BundleQty > 0 ? p.BundleQty : ut.ConvertValue,
                                BundleQty = p.BundleQty,
@@ -279,11 +279,63 @@ namespace IMSWEB.Data
                                MRP = p.MRP,
                                LimitedStkQty = p.LimitedStkQty,
                                RP = p.RP,
-                               ParentQuantity = (int)Math.Truncate((st != null ? st.Quantity : 0m) / (p.BundleQty > 0 ? p.BundleQty : ut.ConvertValue)), 
-                               ChildQuantity = (int)((st != null ? st.Quantity : 0m) % (p.BundleQty > 0 ? p.BundleQty : ut.ConvertValue)), 
+                               ParentQuantity = (int)Math.Truncate((st != null ? st.Quantity : 0m) / (p.BundleQty > 0 ? p.BundleQty : ut.ConvertValue)),
+                               ChildQuantity = (int)((st != null ? st.Quantity : 0m) % (p.BundleQty > 0 ? p.BundleQty : ut.ConvertValue)),
                            };
             return products;
         }
+
+
+
+        public static IQueryable<ProductWisePurchaseModel> GetAllProductIQueryableById(this IBaseRepository<Product> productRepository, int id,
+             IBaseRepository<Category> categoryRepository, IBaseRepository<Company> companyRepository,
+             IBaseRepository<Size> SizeRepository, IBaseRepository<Stock> StockRepository, IBaseRepository<Color> ColorRepository,
+            IBaseRepository<ProductUnitType> ProductUnitTypeRepository)
+        {
+            var products = from p in productRepository.All
+                           join ut in ProductUnitTypeRepository.All on p.ProUnitTypeID equals ut.ProUnitTypeID
+                           join com in companyRepository.All on p.CompanyID equals com.CompanyID
+                           join cat in categoryRepository.All on p.CategoryID equals cat.CategoryID
+                           join size in SizeRepository.All on p.SizeID equals size.SizeID
+                           join st in StockRepository.All on p.ProductID equals st.ProductID into lst
+
+                           from st in lst.DefaultIfEmpty()
+                           join col in ColorRepository.All on st.ColorID equals col.ColorID into lcol
+                           from col in lcol.DefaultIfEmpty()
+                           where p.ProductID == id
+                           select new ProductWisePurchaseModel
+                           {
+                               ProductID = p.ProductID,
+                               ProductCode = cat.Description.ToLower().Equals("tiles") ? p.IDCode : p.Code,
+                               ProductName = p.ProductName,
+                               CompanyName = com.Name,
+                               CompanyID = com.CompanyID,
+                               CategoryName = cat.Description,
+                               CategoryID = cat.CategoryID,
+                               //GodownID = st.GodownID,
+                               SizeID = size.SizeID,
+                               SizeName = size.Description,
+                               Quantity = st != null ? st.Quantity : 0m,
+                               ProductType = p.ProductType,
+                               ChildUnitName = ut.UnitName,
+                               UnitType = p.ProUnitTypeID,
+                               ParentUnitName = ut.Description,
+                               ConvertValue = p.BundleQty > 0 ? p.BundleQty : ut.ConvertValue,
+                               BundleQty = p.BundleQty,
+                               ColorName = col != null ? col.Name : string.Empty,
+                               PurchaseCSft = p.PurchaseCSft,
+                               SalesCSft = p.SalesCSft,
+                               MRP = p.MRP,
+                               LimitedStkQty = p.LimitedStkQty,
+                               RP = p.RP,
+                               ParentQuantity = (int)Math.Truncate((st != null ? st.Quantity : 0m) / (p.BundleQty > 0 ? p.BundleQty : ut.ConvertValue)),
+                               ChildQuantity = (int)((st != null ? st.Quantity : 0m) % (p.BundleQty > 0 ? p.BundleQty : ut.ConvertValue)),
+                           };
+            return products;
+        }
+
+
+
 
 
 
@@ -325,7 +377,7 @@ namespace IMSWEB.Data
                             join st in StockRepository.All on p.ProductID equals st.ProductID into lst
                             from st in lst.DefaultIfEmpty()
                             join ut in ProductUnitTypeRepository.All on p.ProUnitTypeID equals ut.ProUnitTypeID into utGroup
-                            from ut in utGroup.DefaultIfEmpty() 
+                            from ut in utGroup.DefaultIfEmpty()
                             group new { p, st, ut } by new { p.ProductID, p.ProductName, p.Company.Name, p.Size.Description, p.LimitedStkQty } into grouped
                             where grouped.Sum(x => x.st != null ? x.st.Quantity : 0) <= grouped.Key.LimitedStkQty
                             select new ProductWisePurchaseModel
@@ -351,7 +403,7 @@ namespace IMSWEB.Data
                                 UnitType = product.UnitType,
                                 ConvertValue = product.ConvertValue
                             })
-                            .AsQueryable(); 
+                            .AsQueryable();
 
             return products;
         }
@@ -421,15 +473,15 @@ namespace IMSWEB.Data
 
         public static IQueryable<ProductWisePurchaseModel> GetAllProductIQueryableForInv(this IBaseRepository<Product> productRepository,
              IBaseRepository<Category> categoryRepository, IBaseRepository<Company> companyRepository,
-             IBaseRepository<Size> SizeRepository, 
+             IBaseRepository<Size> SizeRepository,
             IBaseRepository<ProductUnitType> ProductUnitTypeRepository)
         {
             var products = from p in productRepository.All
                            join ut in ProductUnitTypeRepository.All on p.ProUnitTypeID equals ut.ProUnitTypeID
                            join com in companyRepository.All on p.CompanyID equals com.CompanyID
                            join cat in categoryRepository.All on p.CategoryID equals cat.CategoryID
-                           join size in SizeRepository.All on p.SizeID equals size.SizeID                          
-                         
+                           join size in SizeRepository.All on p.SizeID equals size.SizeID
+
                            select new ProductWisePurchaseModel
                            {
                                ProductID = p.ProductID,
@@ -840,17 +892,17 @@ namespace IMSWEB.Data
                               MRPRate = stock.LPPrice
 
                           }).GroupBy(x => new
-                         {
-                             x.ProductId,
-                             x.ProductName,
-                             x.ProductCode, /*x.Product.PWDiscount,*/
-                             x.PicturePath,
-                             x.CategoryName,
-                             x.CompanyName,
-                             ModelDescription = x.ModelName,
-                             x.GodownID,
-                             x.GodownName
-                         }).
+                          {
+                              x.ProductId,
+                              x.ProductName,
+                              x.ProductCode, /*x.Product.PWDiscount,*/
+                              x.PicturePath,
+                              x.CategoryName,
+                              x.CompanyName,
+                              ModelDescription = x.ModelName,
+                              x.GodownID,
+                              x.GodownName
+                          }).
               Select(x => new
               {
                   ProductId = x.Key.ProductId,
@@ -1099,13 +1151,13 @@ namespace IMSWEB.Data
                           join c in categoryRepository.All on p.CategoryID equals c.CategoryID
                           join com in companyRepository.All on p.CompanyID equals com.CompanyID
                           select new
-                              {
-                                  p.ProductID,
-                                  p.Code,
-                                  p.ProductName,
-                                  CategoryName = c.Description,
-                                  CompanyName = com.Name
-                              }).ToList();
+                          {
+                              p.ProductID,
+                              p.Code,
+                              p.ProductName,
+                              CategoryName = c.Description,
+                              CompanyName = com.Name
+                          }).ToList();
             return result.Select(i => new Tuple<int, string, string, string, string>(i.ProductID, i.Code, i.ProductName, i.CategoryName, i.CompanyName));
         }
 
@@ -1271,7 +1323,7 @@ IBaseRepository<Category> categoryRepository, IBaseRepository<Company> companyRe
               x.ProductId,
               x.ProductCode,
               x.ProductName,
-                //x.PWDiscount,
+              //x.PWDiscount,
               x.MRPRate,
               x.PicturePath,
               x.CategoryName,
@@ -1478,7 +1530,7 @@ IBaseRepository<Category> categoryRepository, IBaseRepository<Company> companyRe
                            IBaseRepository<Category> categoryRepository, IBaseRepository<Company> companyRepository, IBaseRepository<Color> colorRepository,
                            IBaseRepository<Stock> stockRepository, IBaseRepository<StockDetail> stockDetailRepository, IBaseRepository<SaleOffer> saleOfferRepository,
                            IBaseRepository<SOrder> salesOrderRepository, IBaseRepository<SOrderDetail> salesOrderDetailsRepository,
-                           IBaseRepository<Godown> godownRepository,  IBaseRepository<ProductUnitType> ProductUnitTypeRepository, IBaseRepository<Size> sizeRepository,
+                           IBaseRepository<Godown> godownRepository, IBaseRepository<ProductUnitType> ProductUnitTypeRepository, IBaseRepository<Size> sizeRepository,
                            int CustomerID, String IMEI)
         {
             IQueryable<StockDetail> StockDetails = null;
@@ -1509,7 +1561,7 @@ IBaseRepository<Category> categoryRepository, IBaseRepository<Company> companyRe
                                    StockDetailsId = sd.SDetailID,
                                    ConvertValue = unt.ConvertValue,
                                    UniDecription = unt.Description,
-                                   ProductUnitType = unt.UnitName,                                  
+                                   ProductUnitType = unt.UnitName,
                                    ProductCode = p.Code,
                                    ColorId = col.ColorID,
                                    ColorName = col.Name,
@@ -1611,10 +1663,10 @@ IBaseRepository<ProductUnitType> ProductUnitTypeRepository, int SDetailID)
                                CategoryID = cat.CategoryID,
                                ProductType = p.ProductType,
                                ConvertValue = p.ProductUnitType.ConvertValue,
-                               ParentUnitName  = p.ProductUnitType.Description,
+                               ParentUnitName = p.ProductUnitType.Description,
                                ChildUnitName = p.ProductUnitType.UnitName,
                                SizeName = p.Size.Description,
-                               
+
                            };
             return Products;
         }

@@ -13,8 +13,9 @@ namespace IMSWEB.Service
         void AddProduct(Product product);
         void UpdateProduct(Product product);
         void SaveProduct();
-        Task<IEnumerable<Tuple<int, string, string, decimal, string, string, string, Tuple<string, decimal, decimal, decimal,decimal>>>> GetAllProductAsync();
+        Task<IEnumerable<Tuple<int, string, string, decimal, string, string, string, Tuple<string, decimal, decimal, decimal, decimal>>>> GetAllProductAsync();
         IQueryable<ProductWisePurchaseModel> GetAllProductIQueryable();
+        IQueryable<ProductWisePurchaseModel> GetAllProductIQueryableById(int id);
         IQueryable<ProductWisePurchaseModel> GetAllProductIQueryableNew();
         IQueryable<ProductWisePurchaseModel> GetAllProductIQueryableForInv();
         IQueryable<ProductWisePurchaseModel> GetProductIQueryableForLStock();
@@ -36,15 +37,15 @@ namespace IMSWEB.Service
 
         Product GetProductById(int id);
 
-        
+
         void DeleteProduct(int id);
 
         //IEnumerable<Tuple<int, string, string,decimal, string, string, string, Tuple<decimal?, string, decimal, int, int, string, string>>> GetAllSalesProductFromDetailByCustomerID();
         //GetAllProductFromDetail
-        IEnumerable<Tuple<int, string, string, decimal, string, string, string, Tuple<decimal?, string, decimal, int, int, string, string, Tuple<string>>>> 
+        IEnumerable<Tuple<int, string, string, decimal, string, string, string, Tuple<decimal?, string, decimal, int, int, string, string, Tuple<string>>>>
             GetAllSalesProductFromDetailByCustomerID(int CustomerID);
-        IEnumerable<Tuple<int, string, string, decimal, string, string, string, Tuple<decimal?, string, decimal, int, int, string, string, Tuple<decimal, string, string, string, string, string, decimal,Tuple<string> >>>> GetAllProductFromDetailForCredit();
-        IEnumerable<Tuple<int,string, string, string, string>> GetProductDetails();
+        IEnumerable<Tuple<int, string, string, decimal, string, string, string, Tuple<decimal?, string, decimal, int, int, string, string, Tuple<decimal, string, string, string, string, string, decimal, Tuple<string>>>>> GetAllProductFromDetailForCredit();
+        IEnumerable<Tuple<int, string, string, string, string>> GetProductDetails();
 
         IEnumerable<ProductWisePurchaseModel> GetAllSalesProductByCustomerID(int CustomerID);
 

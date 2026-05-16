@@ -622,7 +622,7 @@ namespace IMSWEB.Controllers
 
         private void CheckAndAddModelErrorForAdd(PurchaseOrderViewModel newPurchaseOrder, FormCollection formCollection, bool IsDeliveryOrder)
         {
-            if (string.IsNullOrEmpty(formCollection["OrderDate"]))
+            if (string.IsNullOrEmpty(formCollection["PurchaseOrder.OrderDate"]))
                 ModelState.AddModelError("PurchaseOrder.OrderDate", "Purchase Date is required");
 
             if (string.IsNullOrEmpty(formCollection["SuppliersId"]))
@@ -953,7 +953,7 @@ namespace IMSWEB.Controllers
             purchaseOrder.PurchaseOrder.LabourCost = newPurchaseOrder.PurchaseOrder.LabourCost;
             purchaseOrder.PurchaseOrder.IsDamagePO = newPurchaseOrder.PurchaseOrder.IsDamagePO;
             purchaseOrder.PurchaseOrder.Remarks = newPurchaseOrder.PurchaseOrder.Remarks;
-            purchaseOrder.PurchaseOrder.OrderDate = formCollection["OrderDate"];
+            purchaseOrder.PurchaseOrder.OrderDate = formCollection["PurchaseOrder.OrderDate"];
             purchaseOrder.PurchaseOrder.SupplierId = formCollection["SuppliersId"];
             purchaseOrder.PurchaseOrder.TotalDue = (decimal.Parse(GetDefaultIfNull(formCollection["PurchaseOrder.CurrentDue"])) + decimal.Parse(purchaseOrder.PurchaseOrder.PaymentDue)).ToString();
             if (IsDeliveryOrder)
@@ -2205,6 +2205,7 @@ namespace IMSWEB.Controllers
         {
             TempData["POrderID"] = orderId;
             TempData["IsInvoiceReadyById"] = true;
+            TempData["IsPOSShow"] = false; 
             if (IsDO)
                 return RedirectToAction("DeliveryOrders");
             else

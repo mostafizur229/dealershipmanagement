@@ -133,5 +133,49 @@ namespace IMSWEB.Controllers
             AddToastMessage("", "Godown has been deleted successfully.", ToastType.Success);
             return RedirectToAction("Index");
         }
+
+
+
+
+        [HttpGet]
+        [Route("GetGodowns")]
+        public JsonResult GetGodowns(string search, int page = 1, int pageSize = 3)
+        {
+            try
+            {
+
+                var query = _godownService.GetAllGodown();
+
+                if (!string.IsNullOrEmpty(search))
+                {
+                    query = query.Where(c => c.Name.Contains(search) ||
+                                             c.Code.Contains(search));                }
+
+                int totalRecords = query.Count();
+
+                int skip = (page - 1) * pageSize;
+
+                var suppliers = query
+                    .OrderBy(s => s.GodownID)
+                    .Skip(skip)
+                    .Take(pageSize)
+                    .ToList();
+
+                var mappedGodowns= _mapper.Map<List<Godown>, List<CreateGodownViewModel>>(suppliers);
+
+                return Json(new
+                {
+
+                    recordsTotal = totalRecords,
+
+                    data = mappedGodowns,
+                    pageSize = pageSize
+                }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new { error = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+        }
     }
 }

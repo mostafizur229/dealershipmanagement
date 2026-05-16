@@ -87,12 +87,20 @@ namespace IMSWEB.Service
             decimal, string, string, string, Tuple<string, decimal, decimal, decimal, decimal>>>> GetAllProductAsync()
         {
             return await _productRepository.GetAllProductAsync(_categoryRepository,
-                _companyRepository,_SizeRepository);
+                _companyRepository, _SizeRepository);
         }
         public IQueryable<ProductWisePurchaseModel> GetAllProductIQueryable()
         {
             return _productRepository.GetAllProductIQueryable(_categoryRepository, _companyRepository, _SizeRepository, _stockRepository, _colorRepository, _ProductUnitTypeRepository);
         }
+
+        public IQueryable<ProductWisePurchaseModel> GetAllProductIQueryableById(int id)
+        {
+            return _productRepository.GetAllProductIQueryableById(id, _categoryRepository, _companyRepository, _SizeRepository, _stockRepository, _colorRepository, _ProductUnitTypeRepository);
+        }
+
+
+
 
         public IQueryable<ProductWisePurchaseModel> GetAllProductIQueryableNew()
         {
@@ -203,7 +211,7 @@ namespace IMSWEB.Service
         {
             return _productRepository.GetSalesDetailByCustomerIDNew(_categoryRepository,
                 _companyRepository, _colorRepository, _stockRepository, _stockDetailRepository, _saleOfferRepository, _SOrderRepository,
-                _SOrderDetailRepository, _godownRepository,_ProductUnitTypeRepository, _SizeRepository,CustomerID, IMEI);
+                _SOrderDetailRepository, _godownRepository, _ProductUnitTypeRepository, _SizeRepository, CustomerID, IMEI);
         }
 
 
@@ -215,7 +223,7 @@ namespace IMSWEB.Service
 
         public IQueryable<ProductWisePurchaseModel> GetProducts()
         {
-            return _productRepository.GetProducts(_categoryRepository, _companyRepository,_SizeRepository,_ProductUnitTypeRepository);
+            return _productRepository.GetProducts(_categoryRepository, _companyRepository, _SizeRepository, _ProductUnitTypeRepository);
         }
 
         public IEnumerable<Product> GetAllProducts()
