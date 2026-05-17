@@ -5,107 +5,319 @@
     Layout = "~/Views/Shared/_AdminLogin.cshtml";
 }
 
-<div class="row">
-    <div class="col-lg-12">
-        <div class="text-center mb-5">
-            @*<a href="@Url.Action("Index","Home")" class="logo"><img src="~/Content/assets/images/logo-main.png" height="24" alt="logo"></a>*@
-            <h5 class="font-size-16 text-white-50 mb-4"><strong style="color: #F79725">Dealer Ship</strong><span style="color: #8BC63E">Management</span> Admin Dashboard</h5>
-        </div>
-    </div>
-</div>
+<!-- Google Fonts (Premium Look) & FontAwesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-<div class="row justify-content-center">
+<style>
+    body {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        background: #f8fafc;
+        color: #1e293b;
+    }
 
-    <div class="col-xl-5 col-sm-8">
-        <div class="card">
-            @if (Model != null && !string.IsNullOrWhiteSpace(Model.ErrorMessage))
-            {
-                <div class="alert alert-danger" style="font-weight:bold">
-                    @Model.ErrorMessage
+    .login-container {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
+
+    .login-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 24px;
+        box-shadow: 0 20px 40px -15px rgba(15, 23, 42, 0.05);
+        overflow: hidden;
+        max-width: 1000px;
+        width: 100%;
+    }
+
+    /* Professional Branding Side */
+    .brand-section {
+        background: linear-gradient(145deg, #0f172a, #1e293b);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        padding: 55px;
+        color: #ffffff;
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* Subtle background pattern for premium vibe */
+    .brand-section::before {
+        content: '';
+        position: absolute;
+        top: 0; right: 0; bottom: 0; left: 0;
+        background: radial-gradient(circle at 80% 20%, rgba(247, 151, 37, 0.15) 0%, transparent 50%);
+        pointer-events: none;
+    }
+
+    .brand-badge {
+        background: rgba(255, 255, 255, 0.06);
+        color: #f8fafc;
+        padding: 8px 16px;
+        border-radius: 50px;
+        font-size: 13px;
+        font-weight: 500;
+        align-self: flex-start;
+        letter-spacing: 0.5px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(4px);
+    }
+
+    .brand-title {
+        font-size: 32px;
+        font-weight: 700;
+        line-height: 1.3;
+        letter-spacing: -0.5px;
+    }
+
+    .brand-desc {
+        font-size: 15px;
+        color: #94a3b8;
+        line-height: 1.7;
+        max-width: 90%;
+    }
+
+    /* Form Section */
+    .form-section {
+        padding: 60px 55px;
+    }
+
+    .form-title {
+        font-size: 26px;
+        font-weight: 700;
+        color: #0f172a;
+    }
+
+    .form-subtitle {
+        font-size: 14px;
+        color: #64748b;
+    }
+
+    .input-group-custom {
+        position: relative;
+        margin-bottom: 20px;
+    }
+
+    .input-group-custom .form-control {
+        border: 1px solid #cbd5e1;
+        border-radius: 12px;
+        padding: 15px 16px 15px 48px;
+        height: auto;
+        font-size: 14px;
+        transition: all 0.2s ease-in-out;
+        background-color: #ffffff;
+        color: #0f172a;
+    }
+
+    .input-group-custom .form-control:focus {
+        border-color: #F79725;
+        box-shadow: 0 0 0 4px rgba(247, 151, 37, 0.1);
+        background-color: #ffffff;
+    }
+
+    .input-group-custom i.field-icon {
+        position: absolute;
+        left: 18px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #94a3b8;
+        font-size: 16px;
+        transition: color 0.2s;
+        z-index: 5;
+    }
+
+    .input-group-custom .form-control:focus ~ i.field-icon {
+        color: #F79725;
+    }
+
+    .password-toggle {
+        position: absolute;
+        right: 18px;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        color: #94a3b8;
+        z-index: 10;
+        transition: color 0.2s;
+    }
+
+    .password-toggle:hover {
+        color: #475569;
+    }
+
+    .form-check-input:checked {
+        background-color: #F79725;
+        border-color: #F79725;
+    }
+
+    .btn-login {
+        background: #F79725;
+        border: none;
+        color: white;
+        padding: 14px;
+        font-size: 15px;
+        font-weight: 600;
+        border-radius: 12px;
+        transition: all 0.2s ease;
+    }
+
+    .btn-login:hover {
+        background: #e08216;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(247, 151, 37, 0.25);
+    }
+
+    .btn-login:active {
+        transform: translateY(0);
+    }
+
+    .alert-danger {
+        border-radius: 12px;
+        font-size: 14px;
+        border: none;
+        background-color: #fef2f2;
+        color: #991b1b;
+        border-left: 4px solid #ef4444;
+    }
+
+    /* Responsive fixes */
+    @@media (max-width: 768px) {
+        .form-section {
+            padding: 40px 24px;
+        }
+    }
+</style>
+
+<div class="container login-container">
+    <div class="card login-card">
+        <div class="row g-0">
+
+            <!-- Left Side: Professional Branding -->
+            <div class="col-md-6 brand-section d-none d-md-flex">
+                <div class="brand-badge">
+                    <i class="fa-solid fa-shield-halved me-1"></i> Admin Portal
                 </div>
-            }
-            <div class="card-body p-4">
-                <div class="p-2">
-                    <h5 class="mb-5 text-center">Sign in to continue to Admin Panel.</h5>
-                    @using (Html.BeginForm("Login", "Account", new { ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, new { @class = "form-horizontal", role = "form", @autocomplete = "off" }))
+
+                <div class="my-auto">
+                    <h2 class="brand-title text-white mb-3">
+                        <span style="color: #F79725">Dealership</span><br />
+                        <span style="color: #8BC63E">Management</span> System
+                    </h2>
+                    <p class="brand-desc">
+                        Strengthen customer relationships, track real-time sales performance, and seamlessly close every business deal all in one centralized platform.
+                    </p>
+                </div>
+
+                <div class="pt-3" style="border-top: 1px solid rgba(255,255,255,0.08); width: 100%;">
+                    <small class="text-white-50" style="font-size: 12px; letter-spacing: 0.3px;">
+                        <i class="fa-solid fa-lock me-1"></i> Secure B2C Merchant Environment
+                    </small>
+                </div>
+            </div>
+
+            <!-- Right Side: Login Form -->
+            <div class="col-md-6 col-12 form-section">
+                <div class="text-center d-md-none mb-4">
+                    <h4 class="fw-bold m-0" style="font-size: 22px;">
+                        <span style="color: #F79725">Dealership</span> <span style="color: #8BC63E">Management</span>
+                    </h4>
+                </div>
+
+                <h3 class="form-title mb-1">Welcome Back!</h3>
+                <p class="form-subtitle mb-4">Please enter your credentials to access the dashboard.</p>
+
+                <!-- Error Messages -->
+                @if (Model != null && !string.IsNullOrWhiteSpace(Model.ErrorMessage))
+                {
+                    <div class="alert alert-danger p-3 mb-4">
+                        <i class="fa-solid fa-circle-exclamation me-2"></i> @Model.ErrorMessage
+                    </div>
+                }
+
+                @using (Html.BeginForm("Login", "Account", new { ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, new { @class = "form-horizontal", role = "form", @autocomplete = "off" }))
+                {
+                    @Html.AntiForgeryToken()
+
+                    if (!ViewData.ModelState.IsValid)
                     {
-                        @Html.AntiForgeryToken()
-                        <div style="color:red; font-weight:bold">
+                        <div class="alert alert-danger p-3 mb-4">
                             @Html.Raw(Html.ValidationSummary(false).ToHtmlString())
                         </div>
-                        <div class="row">
-                            <div class="col-md-12">
-                                <div class="form-group form-group-custom mb-4">
-                                    @Html.TextBoxFor(m => m.UserName, new { @class = "form-control", @pattern = "[A-Za-z0-9 _.-]*", @title = "User name must contain only characters, numbers, underscore, hyphen, dot.", @maxLength = "100", @required = "required", @id = "username" })
-                                    @*@Html.ValidationMessageFor(model => model.UserName)*@
-                                    @*<input type="text" class="form-control" id="username" required>*@
-                                    <label for="username">User Name</label>
-                                </div>
-
-                                <div class="form-group form-group-custom mb-4">
-                                    @Html.PasswordFor(m => m.Password, new { @class = "form-control", @required = "required", @maxLength = "100", @minLength = "6", @id = "userpassword", placeholder = "Password" })
-                                    @*@Html.ValidationMessageFor(model => model.Password)*@
-                                    @*<input type="password" class="form-control" id="userpasswkord" required>*@
-                                    <label for="userpassword">Password</label>
-                                </div>
-
-                                <!--<div class="row">
-                                    <div class="col-md-6">
-                                        <div class="custom-control custom-checkbox">-->
-                                @*@Html.CheckBoxFor(m => m.RememberMe, new { @id = "customControlInline" })
-                                    @Html.LabelFor(m => m.RememberMe, new { @class = "custom-control-label", @for = "customControlInline" })*@
-                                <!--<input type="checkbox" class="custom-control-input" id="customControlInline">
-                                            <input type="checkbox" name="RememberMe" id="chkRememberMe" hidden>
-                                            <label class="custom-control-label" for="customControlInline">Remember me</label>
-                                        </div>
-                                    </div>
-                                </div>-->
-                                <div class="mt-4">
-                                    <button class="btn btn-success btn-block waves-effect waves-light" type="submit">Log In</button>
-                                </div>
-                            </div>
-                        </div>
                     }
-                </div>
+
+                    <!-- Username Field -->
+                    <div class="input-group-custom">
+                        @Html.TextBoxFor(m => m.UserName, new
+                        {
+                            @class = "form-control",
+                            @pattern = "[A-Za-z0-9 _.-]*",
+                            @title = "User name must contain only characters, numbers, underscore, hyphen, dot.",
+                            @maxLength = "100",
+                            @required = "required",
+                            @id = "username",
+                            @placeholder = "Username / User ID"
+                        })
+                        <i class="fa-solid fa-user field-icon"></i>
+                    </div>
+
+                    <!-- Password Field -->
+                    <div class="input-group-custom">
+                        @Html.PasswordFor(m => m.Password, new
+                        {
+                            @class = "form-control",
+                            @required = "required",
+                            @maxLength = "100",
+                            @minLength = "6",
+                            @id = "userpassword",
+                            @placeholder = "Password"
+                        })
+                        <i class="fa-solid fa-lock field-icon"></i>
+                        <i class="fa-solid fa-eye password-toggle" id="togglePassword"></i>
+                    </div>
+
+                    <!-- Remember Me -->
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" id="customControlInline" style="cursor:pointer;">
+                            <input type="checkbox" name="RememberMe" id="chkRememberMe" hidden>
+                            <label class="form-check-label text-muted" for="customControlInline" style="cursor:pointer; user-select: none; font-size: 13px;">Remember me</label>
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="d-grid">
+                        <button class="btn btn-login w-100" type="submit" style="font-size: 16px;">
+                            Sign In <i class="fa-solid fa-arrow-right ms-2" style="font-size: 14px;"></i>
+                        </button>
+                    </div>
+                }
             </div>
         </div>
     </div>
 </div>
 
 @section Scripts {
-
     @Scripts.Render("~/bundles/jqueryval")
 
     <script type="text/javascript">
-
         $(document).ready(function () {
-            $(document).on('click', '#customControlInline', function () {
-                if ($(this).is(":checked")) {
-                    $('#chkRememberMe').prop('checked', true);
-                } else {
-                    $('#chkRememberMe').val('checked', false);
-                }
-
-
+            // Remember Me Logic
+            $(document).on('change', '#customControlInline', function () {
+                $('#chkRememberMe').prop('checked', this.checked);
             });
 
-            //$(document).on('change', '#customControlInline', function () {
-            //    if ($(this).is(":checked")) {
-            //        $('#chkRememberMe').val(true);
-            //    } else {
-            //        $('#chkRememberMe').val(false);
-            //    }
-            //});
-
-
-            //$('#vehicleChkBox').change(function () {
-            //    cb = $(this);
-            //    cb.val(cb.prop('checked'));
-            //});
-
+            // Password Show/Hide Toggle
+            $('#togglePassword').click(function () {
+                const passwordInput = $('#userpassword');
+                const type = passwordInput.attr('type') === 'password' ? 'text' : 'password';
+                passwordInput.attr('type', type);
+                $(this).toggleClass('fa-eye fa-eye-slash');
+            });
         });
     </script>
-
-
-
 }
